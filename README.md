@@ -6,13 +6,13 @@
 
 **[Try it live → kluter.github.io/SiliconAperture](https://kluter.github.io/SiliconAperture/)**
 
-<!-- TODO: add demo screenshot → ![SiliconAperture](assets/demo_screen.png) -->
+< TODO: add demo screenshot → ![SiliconAperture](assets/demo_screen.png) >
 
 ---
 
 ## Background
 
-In 2012, on drone campaigns with fixed-wing platforms and a DSLR on a timer, images had to be calibrated the hard way — **inner orientation** (focal length, principal point, distortion) and **outer orientation** (position and attitude in space) — before you could project any pixel back onto the ground and recover real-world distances. Ground control points laid out by hand, old-school remote sensing.
+In 2012, on drone campaigns with fixed-wing platforms and a DSLR on a timer, images had to be calibrated the hard way: **Inner orientation** (focal length, principal point, distortion) and **outer orientation** (position and attitude in space). Before you could project any pixel back onto the ground and recover real-world distances. Ground control points laid out by hand, old-school remote sensing.
 
 `SiliconAperture` distills that same principle down to its simplest useful form: one photo, one known distance, one measurement.
 
@@ -121,6 +121,6 @@ To run fully offline, download both libraries locally and replace the CDN links 
 
 ## Related
 
-<img src="assets/logo_tracepoint.svg" alt="" width="14" height="14" style="vertical-align:middle;"> **[TracePoint](https://github.com/kluter/TracePoint)** — geolocate a photo by intersecting lines of sight.
+<img src="assets/logo_tracepoint.svg" alt="" width="14" height="14" style="vertical-align:middle;"> **[TracePoint](https://github.com/kluter/TracePoint)** - Geolocate a photo by intersecting lines of sight.
 
-<img src="assets/logo_shadowfinder.svg" alt="" width="14" height="14" style="vertical-align:middle;"> **[ShadowFinder Web](https://github.com/kluter/ShadowFinder-Web)** — geolocate a photo by the length of a shadow.
+<img src="assets/logo_shadowfinder.svg" alt="" width="14" height="14" style="vertical-align:middle;"> **[ShadowFinder Web](https://github.com/kluter/ShadowFinder-Web)** - Geolocate a photo by the length of a shadow.
