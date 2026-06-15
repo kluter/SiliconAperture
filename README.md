@@ -4,7 +4,7 @@
 
 `SiliconAperture` applies the pinhole camera model to a photograph: mark two points on an object, provide the distance to it and your camera's sensor dimensions, and the tool returns the object's physical size. No uploads. No server. Everything runs locally in your browser.
 
-<!-- **[Try it live → kluter.github.io/SiliconAperture](https://kluter.github.io/SiliconAperture/)** -->
+**[Try it live → kluter.github.io/SiliconAperture](https://kluter.github.io/SiliconAperture/)**
 
 <!-- TODO: add demo screenshot → ![SiliconAperture](assets/demo_screen.png) -->
 
