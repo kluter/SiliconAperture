@@ -40,6 +40,14 @@ Accurate results require the object to be **perpendicular to the camera axis**. 
 
 ---
 
+## Contributing
+
+> The camera database covers 200+ devices, almost all scraped from the internet. Next to none have been independently confirmed — and the few that were needed manual adjustment. Approximate values are marked with `// approx` in the source.
+>
+> If you shoot with a device in the list and can verify or correct its sensor dimensions or focal length against real EXIF data, a PR or issue is very welcome. Same if your camera is missing entirely.
+
+---
+
 ## How to use
 
 1. **Drop a photo** onto the left panel (or click to browse).
@@ -67,16 +75,6 @@ The formula assumes a standard pinhole camera. Real lenses introduce distortion,
 - **Sensor dimensions.** The database draws from manufacturer specs, DXOMark, and imaging-resource.com. Values marked approximate may differ from the production unit. For precision work, verify against the camera's service documentation.
 - **EXIF focal length.** This is the physical focal length at the time of capture. Zoom lenses report their actual position. Cropped or binned images may carry the full-sensor focal length against a resized pixel grid — verify the image dimensions match the sensor's native resolution.
 - **Distance uncertainty.** The result scales linearly with `D`. A 5% distance error produces a 5% size error.
-
----
-
-## Contributing
-
-The camera database covers 200+ devices, almost all scraped from the internet. Next to none have been independently confirmed, and the few that were needed manual adjustment. 
-Approximate values are marked with `// approx`.
-
-If you shoot with a device in the list and can verify or correct its sensor dimensions or focal length against real EXIF data, a PR or issue is very welcome. 
-Same if your camera is missing entirely.
 
 ---
 
