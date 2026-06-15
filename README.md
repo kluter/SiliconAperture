@@ -121,4 +121,6 @@ To run fully offline, download both libraries locally and replace the CDN links 
 
 ## Related
 
-You may also like <img src="assets/logo_tracepoint.svg" alt="" width="16" height="16" style="vertical-align:middle;"> **[TracePoint](https://github.com/kluter/TracePoint)**, which finds where a photo was taken by intersecting geometric lines of sight, and <img src="assets/logo_shadowfinder.svg" alt="" width="16" height="16" style="vertical-align:middle;"> **[ShadowFinder Web](https://github.com/kluter/ShadowFinder-Web)**, which maps every place on Earth where a given shadow could fall.
+<img src="assets/logo_tracepoint.svg" alt="" width="14" height="14" style="vertical-align:middle;"> **[TracePoint](https://github.com/kluter/TracePoint)** — geolocate a photo by intersecting lines of sight.
+
+<img src="assets/logo_shadowfinder.svg" alt="" width="14" height="14" style="vertical-align:middle;"> **[ShadowFinder Web](https://github.com/kluter/ShadowFinder-Web)** — geolocate a photo by the length of a shadow.
