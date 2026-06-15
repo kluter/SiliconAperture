@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SiliconAperture</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="icon" type="image/png" href="assets/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="shortcut icon" href="assets/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="assets/site.webmanifest">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══ LEFT: IMAGE PANEL ═══ -->
+  <div id="image-panel">
+    <div class="panel-header">
+      <div class="brand">
+          <svg class="brand-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs><clipPath id="brand-hex-clip"><polygon points="10,73 10,27 50,4 90,27 90,73 50,96"/></clipPath></defs>
+            <polygon points="10,73 10,27 50,4 90,27 90,73 50,96" fill="#130608"/>
+            <g clip-path="url(#brand-hex-clip)">
+              <polygon points="50,62 27,100 73,100" fill="#e63946"/>
+              <polygon points="50,62 5,-10 95,-10" fill="#e63946"/>
+            </g>
+            <polygon points="10,73 10,27 50,4 90,27 90,73 50,96" fill="none" stroke="#e63946" stroke-width="5"/>
+          </svg><span><span class="brand-accent">Silicon</span>Aperture</span></div>
+      <div class="toolbar">
+        <button id="btn-reset-marks" disabled>Reset marks</button>
+        <button id="btn-new-image">New image</button>
+      </div>
+    </div>
+
+    <div id="step-bar">
+      <div class="step-chain">
+        <div class="step-node active" id="step-photo">
+          <span class="step-icon" data-n="1"></span>
+          <span class="step-label">Drop image here</span>
+        </div>
+        <span class="step-connector">—</span>
+        <div class="step-node" id="step-sensor">
+          <span class="step-icon" data-n="2"></span>
+          <span class="step-label">Enter sensor parameters</span>
+        </div>
+        <span class="step-connector">—</span>
+        <div class="step-node" id="step-mark">
+          <span class="step-icon" data-n="3"></span>
+          <span class="step-label">Mark measurement on photo</span>
+        </div>
+        <span class="step-connector">—</span>
+        <div class="step-node" id="step-dist">
+          <span class="step-icon" data-n="4"></span>
+          <span class="step-label">Mark distance on map</span>
+        </div>
+      </div>
+      <span id="pixel-readout" class="step-val"></span>
+    </div>
+
+    <div id="image-container">
+      <canvas id="image-canvas"></canvas>
+      <div id="drop-overlay">
+        <div class="drop-inner">
+          <div class="drop-icon">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs><clipPath id="sa-hex-clip"><polygon points="10,73 10,27 50,4 90,27 90,73 50,96"/></clipPath></defs>
+            <polygon points="10,73 10,27 50,4 90,27 90,73 50,96" fill="#130608"/>
+            <g clip-path="url(#sa-hex-clip)">
+              <polygon points="50,62 27,100 73,100" fill="#e63946"/>
+              <polygon points="50,62 5,-10 95,-10" fill="#e63946"/>
+            </g>
+            <polygon points="10,73 10,27 50,4 90,27 90,73 50,96" fill="none" stroke="#e63946" stroke-width="5"/>
+          </svg>
+        </div>
+          <div class="drop-msg">Drop a photo here<br><span>or click to browse</span></div>
+        </div>
+      </div>
+      <input type="file" id="file-input" accept="image/*">
+      <div class="zoom-hint">scroll to zoom · drag to pan · click twice to mark object extent</div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT: CONTROLS PANEL ═══ -->
+  <div id="controls-panel">
+    <div class="panel-header">
+      <div class="panel-title">Image Mensuration</div>
+      <button id="btn-help" class="icon-btn" title="How to use">?</button>
+    </div>
+
+    <!-- EXIF strip — always visible, prominent -->
+    <div id="exif-bar">
+      <div class="exif-cell">
+        <div class="exif-lbl">Camera</div>
+        <div class="exif-val" id="exif-camera-val">—</div>
+      </div>
+      <div class="exif-cell">
+        <div class="exif-lbl">Focal length</div>
+        <div class="exif-val" id="exif-focal-val">—</div>
+        <div class="exif-sub" id="exif-focal-eq"></div>
+      </div>
+      <div class="exif-cell">
+        <div class="exif-lbl">Image size</div>
+        <div class="exif-val" id="exif-size-val">—</div>
+      </div>
+      <div class="exif-cell">
+        <div class="exif-lbl">GPS</div>
+        <div class="exif-val" id="exif-gps-val">—</div>
+      </div>
+    </div>
+
+    <!-- Camera obscura / similar-triangles diagram -->
+    <div id="diagram-wrap">
+      <svg id="diagram-svg" viewBox="0 0 530 132" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Sensor (left — inner orientation, short side) -->
+        <line id="seg-sensor"   class="seg"         x1="52"  y1="16"  x2="52"  y2="104"/>
+        <!-- Pixel span marker on sensor -->
+        <line id="seg-pixels"   class="seg px-mark" x1="52"  y1="30"  x2="52"  y2="90"/>
+        <!-- Focal length (short) -->
+        <line id="seg-focal"    class="seg dashed"  x1="52"  y1="60"  x2="165" y2="60"/>
+        <!-- Rays: sensor to pinhole -->
+        <line id="ray-tl"       class="seg ray"     x1="52"  y1="16"  x2="165" y2="60"/>
+        <line id="ray-bl"       class="seg ray"     x1="52"  y1="104" x2="165" y2="60"/>
+        <!-- Pinhole -->
+        <circle id="seg-pinhole" class="seg dot"    cx="165" cy="60"  r="5"/>
+        <!-- Rays: pinhole to object -->
+        <line id="ray-tr"       class="seg ray"     x1="165" y1="60"  x2="465" y2="16"/>
+        <line id="ray-br"       class="seg ray"     x1="165" y1="60"  x2="465" y2="104"/>
+        <!-- Distance (long) -->
+        <line id="seg-distance" class="seg dashed"  x1="165" y1="60"  x2="465" y2="60"/>
+        <!-- Object (right — real world, long side) -->
+        <line id="seg-object"   class="seg"         x1="465" y1="16"  x2="465" y2="104"/>
+        <!-- Labels -->
+        <text id="diag-lbl-sensor" x="52"  y="120" class="diag-lbl" text-anchor="middle">sensor</text>
+        <text id="diag-lbl-px"     x="70"  y="74"  class="diag-lbl" text-anchor="start">px</text>
+        <text id="diag-lbl-f"      x="108" y="52"  class="diag-lbl" text-anchor="middle">f</text>
+        <text id="diag-lbl-d"      x="315" y="52"  class="diag-lbl" text-anchor="middle">D</text>
+        <text id="diag-lbl-object" x="465" y="120" class="diag-lbl" text-anchor="middle">object</text>
+        <!-- Real-size label (appears when result computed) -->
+        <text id="diag-lbl-result" x="465" y="10" class="diag-lbl diag-result" text-anchor="middle" style="display:none">size</text>
+      </svg>
+    </div>
+
+    <!-- Inputs -->
+    <div id="inputs-section">
+
+      <div class="input-group">
+        <label class="field-label">Sensor</label>
+        <button id="camera-trigger" type="button">— select camera / phone —</button>
+        <div class="input-row">
+          <div class="labeled-input">
+            <input type="number" id="sensor-w-input" placeholder="0.00" min="0.1" step="0.01" autocomplete="off">
+            <span class="unit-tag">mm W</span>
+          </div>
+          <div class="labeled-input">
+            <input type="number" id="sensor-h-input" placeholder="0.00" min="0.1" step="0.01" autocomplete="off">
+            <span class="unit-tag">mm H</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="field-label">Focal length
+          <span class="field-source" id="fl-source"></span>
+        </label>
+        <div class="input-row">
+          <div class="labeled-input" style="flex:1">
+            <input type="number" id="focal-length-input" placeholder="0.00" min="0.1" step="0.01" style="width:100%" autocomplete="off">
+            <span class="unit-tag">mm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="field-label">Object span
+          <span class="field-source" id="span-source">click two points on photo</span>
+        </label>
+        <div class="input-row">
+          <div class="labeled-input" style="flex:1">
+            <input type="number" id="pixel-span-input" placeholder="—" min="1" step="1" readonly style="width:100%">
+            <span class="unit-tag">px</span>
+          </div>
+          <button id="btn-clear-marks" class="clear-btn" disabled title="Clear marks">✕</button>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="field-label">Distance</label>
+        <div class="input-row">
+          <div class="labeled-input" style="flex:1">
+            <input type="number" id="distance-input" placeholder="0.0" min="0.01" step="0.1" style="width:100%" autocomplete="off">
+            <span class="unit-tag">m</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Result -->
+    <div id="result-bar">
+      <div class="result-label">Real-world size</div>
+      <div class="result-display">
+        <span id="result-value">—</span>
+        <span id="result-unit" class="result-unit">m</span>
+      </div>
+      <div id="result-eq"></div>
+    </div>
+
+    <!-- Map — always visible -->
+    <div id="map-section">
+      <div id="map-header">
+        <span class="map-dist-label">Distance</span>
+        <span id="map-dist-val">camera position → object position</span>
+        <div id="map-tile-btns">
+          <button class="tile-btn active-tile" data-tile="esri">Satellite</button>
+          <button class="tile-btn" data-tile="osm">OSM</button>
+          <button class="tile-btn" data-tile="carto">Dark</button>
+        </div>
+        <button id="btn-map-reset-pts" class="icon-btn" title="Reset measurement points">↺</button>
+      </div>
+      <div id="map-container"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Help overlay -->
+<div id="help-card" style="display:none">
+  <div class="help-inner">
+    <div class="help-header">
+      <span>How to use <span class="brand-accent">Silicon</span>Aperture</span>
+      <button id="btn-help-close" class="icon-btn">✕</button>
+    </div>
+    <ol class="help-steps">
+      <li>Drop a photo onto the left panel.</li>
+      <li>If the image contains EXIF metadata, camera model, sensor and focal length are detected automatically. Otherwise select your camera from the dropdown or enter sensor dimensions and focal length manually.</li>
+      <li>Click two points on the photo to mark the object's extent. The pixel span fills in.</li>
+      <li>Enter the distance to the object in meters, or click two points on the satellite map to measure it.</li>
+      <li>The real-world size appears as soon as all four inputs are valid.</li>
+    </ol>
+    <div class="help-formulas">
+      <div class="help-formula" style="text-align:center">
+        <code>size = √( (D·tan(Δx/W·sw/f))² + (D·tan(Δy/H·sh/f))² )</code>
+      </div>
+    </div>
+    <table class="help-legend">
+      <tr><td>D</td><td>distance to object</td><td>f</td><td>focal length</td></tr>
+      <tr><td>Δx, Δy</td><td>pixel span per axis</td><td>W, H</td><td>image width / height</td></tr>
+      <tr><td>sw, sh</td><td>sensor width / height</td><td></td><td></td></tr>
+    </table>
+    <p class="help-formula-note">Each axis is solved independently with its matching sensor dimension, then the two real-world components are combined with Pythagoras. Works for marks at any angle.<br><br>Accurate results require the object to be <strong>perpendicular to the camera axis</strong>. If the surface is angled, the apparent extent seen by the lens no longer maps linearly to the true physical size, and the result will be inaccurate.</p>
+    <div class="help-shortcuts">
+      <kbd>R</kbd><span>Reset marks</span>
+      <kbd>N</kbd><span>New image</span>
+      <kbd>Esc</kbd><span>Close help</span>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.min.js"></script>
+<script src="js/camera-db.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>
