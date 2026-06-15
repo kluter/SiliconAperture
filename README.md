@@ -117,6 +117,8 @@ The only outbound requests are map tiles from public tile servers (Esri, OpenStr
 
 To run fully offline, download both libraries locally and replace the CDN links in `index.html`.
 
+This tool was built with AI assistance. The code is plain, unminified JavaScript - read it directly in `js/script.js`.
+
 ---
 
 ## Related
