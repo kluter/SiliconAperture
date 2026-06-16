@@ -303,15 +303,15 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 }
 
 #diagram-svg .seg {
-  stroke: #1e1e1e;
+  stroke: #333;
   stroke-width: 2;
   stroke-linecap: round;
   fill: none;
   transition: stroke 0.4s ease, opacity 0.4s ease;
 }
 #diagram-svg .seg.dashed   { stroke-dasharray: 5 4; }
-#diagram-svg .seg.ray      { stroke: #161616; stroke-width: 1; }
-#diagram-svg .seg.dot      { fill: #1e1e1e; stroke: none; transition: fill 0.4s ease; }
+#diagram-svg .seg.ray      { stroke: #2a2a2a; stroke-width: 1; }
+#diagram-svg .seg.dot      { fill: #333; stroke: none; transition: fill 0.4s ease; }
 #diagram-svg .seg.px-mark  { stroke-width: 5; opacity: 0.35; }
 
 #diagram-svg .seg.lit                { stroke: #e63946; opacity: 1; }
