@@ -19,6 +19,26 @@ const toastCounts = new Map();
 const TOAST_DURATION = 5500;
 const TOAST_MAX_STACK = 3;
 
+function updateSensorSourceBadges() {
+  const active = new Set();
+  ['sensor-w-input', 'sensor-h-input', 'focal-length-input'].forEach(id => {
+    const cl = document.getElementById(id).classList;
+    if (cl.contains('source-exif'))   active.add('exif');
+    if (cl.contains('source-db'))     active.add('db');
+    if (cl.contains('source-manual')) active.add('custom');
+  });
+  ['exif', 'db', 'custom'].forEach(t => {
+    document.getElementById('src-' + t).classList.toggle('active', active.has(t));
+  });
+}
+
+function setInputSource(id, type) {
+  const el = document.getElementById(id);
+  el.classList.remove('source-exif', 'source-db', 'source-manual');
+  if (type) el.classList.add('source-' + type);
+  updateSensorSourceBadges();
+}
+
 function showToast(msg, type = 'error', duration = TOAST_DURATION) {
   const count = toastCounts.get(msg) || 0;
   if (count >= TOAST_MAX_STACK) return;
@@ -150,7 +170,7 @@ async function readExif(file) {
       focalLength = t.FocalLength;
       setExifCell('exif-focal-val', t.FocalLength.toFixed(1) + ' mm');
       document.getElementById('focal-length-input').value = t.FocalLength.toFixed(2);
-      document.getElementById('fl-source').textContent = '(EXIF)';
+      setInputSource('focal-length-input', 'exif');
     }
     if (t.FocalLengthIn35mmFormat) {
       const eqEl = document.getElementById('exif-focal-eq');
@@ -361,7 +381,6 @@ function computePixelSpan() {
   pixelSpan = Math.hypot(pixelDx, pixelDy);
   document.getElementById('pixel-span-input').value = Math.round(pixelSpan);
   document.getElementById('span-source').textContent = 'from canvas';
-  document.getElementById('btn-clear-marks').disabled = false;
   document.getElementById('btn-reset-marks').disabled = false;
   compute();
   updateDiagram();
@@ -415,18 +434,22 @@ function selectCamera(idx) {
   if (cam.sensor_w === null) {
     document.getElementById('sensor-w-input').value = '';
     document.getElementById('sensor-h-input').value = '';
+    setInputSource('sensor-w-input', '');
+    setInputSource('sensor-h-input', '');
     document.getElementById('sensor-w-input').focus();
     sensorW = null; sensorH = null;
   } else {
     document.getElementById('sensor-w-input').value = cam.sensor_w;
     document.getElementById('sensor-h-input').value = cam.sensor_h ?? '';
+    setInputSource('sensor-w-input', 'db');
+    setInputSource('sensor-h-input', 'db');
     sensorW = cam.sensor_w;
     sensorH = cam.sensor_h ?? null;
   }
 
-  if (cam.focal_length !== null && !exifHasFocalLength) {
+  if (cam.focal_length !== null) {
     document.getElementById('focal-length-input').value = cam.focal_length;
-    document.getElementById('fl-source').textContent = '(from DB)';
+    setInputSource('focal-length-input', 'db');
     focalLength = cam.focal_length;
   }
 
@@ -530,16 +553,18 @@ function populateCameraDropdown() {
 
 document.getElementById('sensor-w-input').addEventListener('input', function () {
   sensorW = parseFloat(this.value) || null;
+  setInputSource('sensor-w-input', sensorW ? 'manual' : '');
   jumpToCustom();
   compute(); updateDiagram();
 });
 document.getElementById('sensor-h-input').addEventListener('input', function () {
   sensorH = parseFloat(this.value) || null;
+  setInputSource('sensor-h-input', sensorH ? 'manual' : '');
   jumpToCustom();
 });
 document.getElementById('focal-length-input').addEventListener('input', function () {
   focalLength = parseFloat(this.value) || null;
-  if (!exifHasFocalLength) document.getElementById('fl-source').textContent = '';
+  setInputSource('focal-length-input', focalLength ? 'manual' : '');
   compute(); updateDiagram();
 });
 document.getElementById('distance-input').addEventListener('input', function () {
@@ -637,7 +662,6 @@ function resetMarks() {
   markA = null; markB = null; pixelSpan = null; pixelDx = null; pixelDy = null;
   document.getElementById('pixel-span-input').value = '';
   document.getElementById('span-source').textContent = 'click two points on photo';
-  document.getElementById('btn-clear-marks').disabled = true;
   document.getElementById('btn-reset-marks').disabled = true;
   drawCanvas();
   updateStepBar();
@@ -663,9 +687,11 @@ function newImage() {
   });
 
   document.getElementById('focal-length-input').value = '';
-  document.getElementById('fl-source').textContent    = '';
+  setInputSource('focal-length-input', '');
   document.getElementById('exif-focal-eq').textContent = '';
   document.getElementById('sensor-w-input').value     = '';
+  setInputSource('sensor-w-input', '');
+  setInputSource('sensor-h-input', '');
   document.getElementById('sensor-h-input').value     = '';
   clearCameraSelection();
   document.getElementById('distance-input').value     = '';
@@ -678,7 +704,6 @@ function newImage() {
 }
 
 document.getElementById('btn-reset-marks').addEventListener('click', resetMarks);
-document.getElementById('btn-clear-marks').addEventListener('click', resetMarks);
 document.getElementById('btn-new-image').addEventListener('click', newImage);
 
 /* ─── MAP INIT / INTERACTION ─────────────────────────────────── */
@@ -764,6 +789,77 @@ function goToGPS() {
     () => {}
   );
 }
+
+function parseSingleCoord(s) {
+  s = s.trim();
+  const leadM = s.match(/^([NSEW])\s*/i);
+  if (leadM) s = s.slice(leadM[0].length);
+  const leadDir = leadM ? leadM[1].toUpperCase() : '';
+
+  // DMS: 52°32'43.8"N  or  52° 32' 43.8 N
+  const dms = s.match(/^(\d+)\s*[°d]\s*(\d+)\s*['’ʼ]\s*(\d+(?:[.,]\d+)?)\s*[""”]?\s*([NSEW]?)$/i);
+  if (dms) {
+    const dir = leadDir + dms[4].toUpperCase();
+    let v = parseInt(dms[1], 10) + parseInt(dms[2], 10) / 60 + parseFloat(dms[3].replace(',', '.')) / 3600;
+    return /[SW]/.test(dir) ? -v : v;
+  }
+  // DM: 52°32.567'N
+  const dm = s.match(/^(\d+)\s*[°d]\s*(\d+(?:[.,]\d+)?)\s*['’ʼ]?\s*([NSEW]?)$/i);
+  if (dm) {
+    const dir = leadDir + dm[3].toUpperCase();
+    let v = parseInt(dm[1], 10) + parseFloat(dm[2].replace(',', '.')) / 60;
+    return /[SW]/.test(dir) ? -v : v;
+  }
+  // Plain decimal with optional trailing direction
+  const trailM = s.match(/([NSEW])\s*$/i);
+  const dir = leadDir + (trailM ? trailM[1].toUpperCase() : '');
+  const v = parseFloat(s.replace(',', '.'));
+  if (!isFinite(v)) return NaN;
+  return /[SW]/.test(dir) ? -Math.abs(v) : v;
+}
+
+function parseCoordInput(raw) {
+  raw = raw.trim();
+  // DMS path: extract two tokens that contain °
+  if (/°/.test(raw)) {
+    const tokens = raw.match(/[NSEW]?\s*\d+\s*°[^°]*/gi) || [];
+    if (tokens.length >= 2) {
+      const lat = parseSingleCoord(tokens[0]);
+      const lng = parseSingleCoord(tokens[1]);
+      if (isFinite(lat) && isFinite(lng)) return { lat, lng };
+    }
+  }
+  // Decimal fallback: split on whitespace/comma
+  const parts = raw.split(/[\s,]+/).filter(Boolean);
+  if (parts.length >= 2) {
+    const lat = parseFloat(parts[0]);
+    const lng = parseFloat(parts[1]);
+    if (isFinite(lat) && isFinite(lng)) return { lat, lng };
+  }
+  return null;
+}
+
+document.getElementById('coord-input').addEventListener('keydown', function (e) {
+  if (e.key !== 'Enter') return;
+  const parsed = parseCoordInput(this.value);
+  if (!parsed) { showToast('Enter coordinates as: 52.520, 13.405 or 52°32\'43.8"N 13°13\'11.6"E'); return; }
+  const { lat, lng } = parsed;
+  if (!isFinite(lat) || !isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    showToast('Coordinates out of range.');
+    return;
+  }
+  const latlng = L.latLng(lat, lng);
+  if (mapPtA) resetMapPoints();
+  const marker = L.circleMarker(latlng, {
+    radius: 6, color: '#e63946', fillColor: '#e63946', fillOpacity: 1, weight: 2
+  }).addTo(map);
+  mapMarkers.push(marker);
+  mapPtA = latlng;
+  map.setView(latlng, Math.max(map.getZoom(), 14));
+  document.getElementById('map-dist-val').textContent = "now click the object's position";
+  showToast('Point A placed — now click the object\'s position.', 'success', 2500);
+  this.value = '';
+});
 
 document.getElementById('btn-map-reset-pts').addEventListener('click', () => {
   resetMapPoints();

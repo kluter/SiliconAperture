@@ -145,52 +145,51 @@
     <!-- Inputs -->
     <div id="inputs-section">
 
+      <!-- Sensor world -->
       <div class="input-group">
-        <label class="field-label">Sensor</label>
+        <label class="field-label">Sensor
+          <span id="src-exif"   class="src-badge">EXIF</span>
+          <span id="src-db"     class="src-badge">DB</span>
+          <span id="src-custom" class="src-badge">CUSTOM</span>
+        </label>
         <button id="camera-trigger" type="button">— select camera / phone —</button>
         <div class="input-row">
-          <div class="labeled-input">
-            <input type="number" id="sensor-w-input" placeholder="0.00" min="0.1" step="0.01" autocomplete="off">
+          <div class="labeled-input" style="flex:1">
+            <input type="number" id="sensor-w-input" placeholder="0.00" min="0.1" step="0.01" style="width:100%" autocomplete="off">
             <span class="unit-tag">mm W</span>
           </div>
-          <div class="labeled-input">
-            <input type="number" id="sensor-h-input" placeholder="0.00" min="0.1" step="0.01" autocomplete="off">
+          <div class="labeled-input" style="flex:1">
+            <input type="number" id="sensor-h-input" placeholder="0.00" min="0.1" step="0.01" style="width:100%" autocomplete="off">
             <span class="unit-tag">mm H</span>
           </div>
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label class="field-label">Focal length
-          <span class="field-source" id="fl-source"></span>
-        </label>
-        <div class="input-row">
           <div class="labeled-input" style="flex:1">
             <input type="number" id="focal-length-input" placeholder="0.00" min="0.1" step="0.01" style="width:100%" autocomplete="off">
-            <span class="unit-tag">mm</span>
+            <span class="unit-tag">mm f</span>
           </div>
         </div>
       </div>
 
-      <div class="input-group">
-        <label class="field-label">Object span
-          <span class="field-source" id="span-source">click two points on photo</span>
-        </label>
-        <div class="input-row">
-          <div class="labeled-input" style="flex:1">
-            <input type="number" id="pixel-span-input" placeholder="—" min="1" step="1" readonly style="width:100%">
-            <span class="unit-tag">px</span>
+      <!-- Object world -->
+      <div style="display:flex; gap:10px; border-top:1px solid #1e1e1e; padding-top:10px; margin-top:2px;">
+        <div class="input-group" style="flex:1">
+          <label class="field-label">Object span
+            <span class="field-source" id="span-source">click two points on photo</span>
+          </label>
+          <div class="input-row">
+            <div class="labeled-input" style="flex:1">
+              <input type="number" id="pixel-span-input" placeholder="—" min="1" step="1" readonly style="width:100%">
+              <span class="unit-tag">px</span>
+            </div>
           </div>
-          <button id="btn-clear-marks" class="clear-btn" disabled title="Clear marks">✕</button>
         </div>
-      </div>
 
-      <div class="input-group">
-        <label class="field-label">Distance</label>
-        <div class="input-row">
-          <div class="labeled-input" style="flex:1">
-            <input type="number" id="distance-input" placeholder="0.0" min="0.01" step="0.1" style="width:100%" autocomplete="off">
-            <span class="unit-tag">m</span>
+        <div class="input-group" style="flex:1">
+          <label class="field-label">Distance</label>
+          <div class="input-row">
+            <div class="labeled-input" style="flex:1">
+              <input type="number" id="distance-input" placeholder="0.0" min="0.01" step="0.1" style="width:100%" autocomplete="off">
+              <span class="unit-tag">m</span>
+            </div>
           </div>
         </div>
       </div>
@@ -218,6 +217,9 @@
           <button class="tile-btn" data-tile="carto">Dark</button>
         </div>
         <button id="btn-map-reset-pts" class="icon-btn" title="Reset measurement points">↺</button>
+      </div>
+      <div id="map-coord-row">
+        <input type="text" id="coord-input" placeholder="paste lat, lng to place a point" autocomplete="off" spellcheck="false">
       </div>
       <div id="map-container"></div>
     </div>

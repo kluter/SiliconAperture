@@ -40,6 +40,9 @@ input, select {
 input:focus, select:focus { border-color: #e63946; }
 input[readonly] { color: #666; cursor: default; background: #111; }
 input::placeholder { color: #383838; }
+input.source-exif   { color: #e63946; }
+input.source-db     { color: #c47f2a; }
+input.source-manual { color: #5b8def; }
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; appearance: textfield; }
@@ -127,7 +130,7 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #1a1a1a;
+  border-bottom: 1px solid #2a2a2a;
   background: #0d0d0d;
   flex-shrink: 0;
 }
@@ -247,6 +250,7 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 
 /* ─── EXIF BAR ──────────────────────────────────────────────── */
 #exif-bar {
+  height: 38px;
   display: flex;
   border-bottom: 1px solid #2a2a2a;
   background: #0d0d0d;
@@ -256,7 +260,10 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 .exif-cell {
   flex: 1;
   min-width: 0;
-  padding: 8px 10px;
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   border-right: 1px solid #1a1a1a;
 }
 .exif-cell:last-child { border-right: none; }
@@ -331,13 +338,11 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 
 /* ─── INPUTS SECTION ────────────────────────────────────────── */
 #inputs-section {
-  flex: 1;
-  min-height: 0;
+  flex-shrink: 0;
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
   gap: 11px;
-  overflow-y: auto;
 }
 
 .input-group {
@@ -364,6 +369,21 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
   text-transform: none;
   letter-spacing: 0;
 }
+.field-source.source-db     { color: #c47f2a; }
+.field-source.source-manual { color: #5b8def; }
+
+.src-badge {
+  font-size: 9px;
+  font-weight: 400;
+  color: #2e2e2e;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-left: 3px;
+  transition: color 0.25s;
+}
+#src-exif.active   { color: #e63946; }
+#src-db.active     { color: #c47f2a; }
+#src-custom.active { color: #5b8def; }
 
 .input-row {
   display: flex;
@@ -477,20 +497,9 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 .cam-model:hover { background: #1a1a1a; color: #ccc; }
 .cam-model.selected { color: #e63946; }
 
-.clear-btn {
-  flex-shrink: 0;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  font-size: 11px;
-  color: #3a3a3a;
-  border-color: #2a2a2a;
-}
-.clear-btn:hover:not(:disabled) { color: #e63946; border-color: #e63946; background: #1a0a0b; }
-
 /* ─── RESULT BAR ────────────────────────────────────────────── */
 #result-bar {
-  padding: 12px 16px;
+  padding: 5px 16px;
   border-top: 1px solid #2a2a2a;
   background: #0a0a0a;
   text-align: center;
@@ -501,7 +510,7 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
   color: #666;
   text-transform: uppercase;
   letter-spacing: 0.7px;
-  margin-bottom: 3px;
+  margin-bottom: 1px;
   user-select: none;
 }
 .result-display {
@@ -511,7 +520,7 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
   gap: 5px;
 }
 #result-value {
-  font-size: 38px;
+  font-size: 30px;
   font-weight: 700;
   color: #444;
   letter-spacing: -1.5px;
@@ -532,7 +541,7 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 #result-eq {
   font-size: 9px;
   color: #555;
-  margin-top: 5px;
+  margin-top: 3px;
   font-variant-numeric: tabular-nums;
   min-height: 12px;
   font-family: monospace;
@@ -565,6 +574,28 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 #map-tile-btns { display: flex; gap: 3px; }
 .tile-btn { font-size: 9px; padding: 2px 7px; height: 20px; }
 .tile-btn.active-tile { border-color: #e63946; color: #e63946; background: #1a0a0b; }
+
+#map-coord-row {
+  height: 26px;
+  padding: 0 8px 0 14px;
+  display: flex;
+  align-items: center;
+  background: #0a0a0a;
+  border-bottom: 1px solid #1a1a1a;
+  flex-shrink: 0;
+}
+#coord-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  font-size: 11px;
+  color: #888;
+  padding: 0;
+  width: 100%;
+}
+#coord-input:focus { border-color: transparent; color: #ccc; }
+#coord-input::placeholder { color: #555; }
 
 #map-container { flex: 1; min-height: 0; background: #1a1a1a; }
 
