@@ -6,7 +6,7 @@
 
 **[Try it live → kluter.github.io/SiliconAperture](https://kluter.github.io/SiliconAperture/)**
 
-< TODO: add demo screenshot → ![SiliconAperture](assets/demo_screen.png) >
+![SiliconAperture](assets/SiliconAperture_Demo.gif)
 
 ---
 
