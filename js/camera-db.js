@@ -11,14 +11,20 @@
 const CAMERA_DB = [
 
   // ── APPLE ────────────────────────────────────────────────────────────────
-  { brand:"Apple", label:"iPhone 16 Pro Max",          sensor_w:9.80,  sensor_h:7.35,  focal_length:6.53, focal_length_eq:24 }, // 1/1.12"
-  { brand:"Apple", label:"iPhone 16 Pro",              sensor_w:7.02,  sensor_h:5.27,  focal_length:4.68, focal_length_eq:24 }, // 1/1.28"
-  { brand:"Apple", label:"iPhone 16 / 16 Plus",        sensor_w:5.57,  sensor_h:4.18,  focal_length:4.02, focal_length_eq:26 }, // 1/1.56" approx
-  { brand:"Apple", label:"iPhone 15 Pro Max",          sensor_w:9.80,  sensor_h:7.35,  focal_length:6.53, focal_length_eq:24 },
-  { brand:"Apple", label:"iPhone 15 Pro",              sensor_w:7.02,  sensor_h:5.27,  focal_length:4.68, focal_length_eq:24 },
-  { brand:"Apple", label:"iPhone 15 / 15 Plus",        sensor_w:5.57,  sensor_h:4.18,  focal_length:4.02, focal_length_eq:26 },
-  { brand:"Apple", label:"iPhone 14 Pro Max",          sensor_w:7.02,  sensor_h:5.27,  focal_length:4.68, focal_length_eq:24 },
-  { brand:"Apple", label:"iPhone 14 Pro",              sensor_w:7.02,  sensor_h:5.27,  focal_length:4.68, focal_length_eq:24 },
+  { brand:"Apple", label:"iPhone 17 Pro Max",            sensor_w:10.00, sensor_h:7.50,  focal_length:6.67, focal_length_eq:24 }, // 1/1.28", 48MP, f/1.8; GSMarena confirmed
+  { brand:"Apple", label:"iPhone 17 Pro",                sensor_w:10.00, sensor_h:7.50,  focal_length:6.67, focal_length_eq:24 }, // 1/1.28", 48MP, f/1.8; GSMarena confirmed
+  { brand:"Apple", label:"iPhone Air",                   sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26 }, // 1/1.56", 48MP, f/1.6; GSMarena confirmed
+  { brand:"Apple", label:"iPhone 17",                    sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26 }, // 1/1.56", 48MP, f/1.6; GSMarena confirmed
+  { brand:"Apple", label:"iPhone 17e",                   sensor_w:5.60,  sensor_h:4.20,  focal_length:4.20, focal_length_eq:26 }, // 1/2.55"; focal_length confirmed from EXIF
+  { brand:"Apple", label:"iPhone 16 Pro Max",          sensor_w:10.00, sensor_h:7.50,  focal_length:6.67, focal_length_eq:24 }, // 1/1.28"; GSMarena confirmed
+  { brand:"Apple", label:"iPhone 16 Pro",              sensor_w:10.00, sensor_h:7.50,  focal_length:6.67, focal_length_eq:24 }, // 1/1.28"; GSMarena confirmed
+  { brand:"Apple", label:"iPhone 16 / 16 Plus",        sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26 }, // 1/1.56"; GSMarena confirmed
+  { brand:"Apple", label:"iPhone 16e",                   sensor_w:5.60,  sensor_h:4.20,  focal_length:4.20, focal_length_eq:26 }, // 1/2.55"; GSMarena confirmed; same sensor as 17e
+  { brand:"Apple", label:"iPhone 15 Pro Max",          sensor_w:10.00, sensor_h:7.50,  focal_length:6.67, focal_length_eq:24 }, // 1/1.28"; same sensor as 16 Pro Max
+  { brand:"Apple", label:"iPhone 15 Pro",              sensor_w:10.00, sensor_h:7.50,  focal_length:6.67, focal_length_eq:24 }, // 1/1.28"; same sensor as 16 Pro
+  { brand:"Apple", label:"iPhone 15 / 15 Plus",        sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26 }, // 1/1.56"; same sensor as 16
+  { brand:"Apple", label:"iPhone 14 Pro Max",          sensor_w:10.00, sensor_h:7.50,  focal_length:6.67, focal_length_eq:24 }, // 1/1.28"; first 48MP Pro; same sensor family
+  { brand:"Apple", label:"iPhone 14 Pro",              sensor_w:10.00, sensor_h:7.50,  focal_length:6.67, focal_length_eq:24 }, // 1/1.28"; same sensor as 14 Pro Max
   { brand:"Apple", label:"iPhone 14 / 14 Plus",        sensor_w:5.57,  sensor_h:4.18,  focal_length:4.02, focal_length_eq:26 },
   { brand:"Apple", label:"iPhone 13 Pro / Pro Max",    sensor_w:5.76,  sensor_h:4.32,  focal_length:4.16, focal_length_eq:26 },
   { brand:"Apple", label:"iPhone 13 / 13 mini",        sensor_w:5.09,  sensor_h:3.82,  focal_length:3.68, focal_length_eq:26 },
@@ -39,16 +45,30 @@ const CAMERA_DB = [
   { brand:"Apple", label:"iPhone 6 / 6 Plus (2014)",  sensor_w:4.80,  sensor_h:3.60,  focal_length:3.87, focal_length_eq:29 },
 
   // ── SAMSUNG ──────────────────────────────────────────────────────────────
-  { brand:"Samsung", label:"Galaxy S25 Ultra",         sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23 },
-  { brand:"Samsung", label:"Galaxy S25 / S25+",        sensor_w:5.76,  sensor_h:4.32,  focal_length:3.84, focal_length_eq:24 },
+  { brand:"Samsung", label:"Galaxy S26 Ultra",          sensor_w:9.85,  sensor_h:7.38,  focal_length:6.29, focal_length_eq:23 }, // 1/1.3", 200MP, f/1.4 approx
+  { brand:"Samsung", label:"Galaxy S26 / S26+",         sensor_w:8.21,  sensor_h:6.15,  focal_length:5.47, focal_length_eq:24 }, // 1/1.56", 50MP, f/1.8 approx
+  { brand:"Samsung", label:"Galaxy S25 Ultra",         sensor_w:9.80,  sensor_h:7.35,  focal_length:6.53, focal_length_eq:24 }, // 1/1.3", 200MP, f/1.7
+  { brand:"Samsung", label:"Galaxy S25 / S25+",        sensor_w:8.21,  sensor_h:6.15,  focal_length:5.47, focal_length_eq:24 }, // 1/1.56", 50MP, f/1.8; GSMarena confirmed
+  { brand:"Samsung", label:"Galaxy S25 Edge",           sensor_w:9.85,  sensor_h:7.38,  focal_length:6.57, focal_length_eq:24 }, // 1/1.3", 200MP, f/1.7 approx
+  { brand:"Samsung", label:"Galaxy S25 FE",            sensor_w:8.15,  sensor_h:6.12,  focal_length:5.43, focal_length_eq:24 }, // 1/1.57", 50MP, f/1.8 approx
   { brand:"Samsung", label:"Galaxy S24 Ultra",         sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23 },
-  { brand:"Samsung", label:"Galaxy S24 / S24+",        sensor_w:5.76,  sensor_h:4.32,  focal_length:3.84, focal_length_eq:24 },
+  { brand:"Samsung", label:"Galaxy S24 / S24+",        sensor_w:8.21,  sensor_h:6.15,  focal_length:5.47, focal_length_eq:24 }, // 1/1.56", 50MP; same GN9 sensor as S25
   { brand:"Samsung", label:"Galaxy S23 Ultra",         sensor_w:8.38,  sensor_h:6.29,  focal_length:5.35, focal_length_eq:23 }, // 1/1.14" approx
   { brand:"Samsung", label:"Galaxy S23 / S23+",        sensor_w:5.76,  sensor_h:4.32,  focal_length:3.84, focal_length_eq:24 },
   { brand:"Samsung", label:"Galaxy S22 Ultra",         sensor_w:7.81,  sensor_h:5.86,  focal_length:4.99, focal_length_eq:23 },
   { brand:"Samsung", label:"Galaxy S22 / S22+",        sensor_w:5.57,  sensor_h:4.18,  focal_length:3.71, focal_length_eq:24 },
   { brand:"Samsung", label:"Galaxy Z Fold 6 (main)",   sensor_w:7.02,  sensor_h:5.27,  focal_length:4.68, focal_length_eq:24 },
+  { brand:"Samsung", label:"Galaxy Z Fold7 (main)",     sensor_w:9.85,  sensor_h:7.38,  focal_length:6.57, focal_length_eq:24 }, // 1/1.3", 200MP, f/1.7 approx
+  { brand:"Samsung", label:"Galaxy Z TriFold (main)",   sensor_w:9.85,  sensor_h:7.38,  focal_length:6.57, focal_length_eq:24 }, // 1/1.3", 200MP, f/1.7 approx
+  { brand:"Samsung", label:"Galaxy Z Flip7",            sensor_w:8.15,  sensor_h:6.12,  focal_length:5.21, focal_length_eq:23 }, // 1/1.57", 50MP, f/1.8
+  { brand:"Samsung", label:"Galaxy Z Flip7 FE",         sensor_w:8.15,  sensor_h:6.12,  focal_length:5.21, focal_length_eq:23 }, // 1/1.57", 50MP, f/1.8
   { brand:"Samsung", label:"Galaxy A55 / A54",         sensor_w:5.57,  sensor_h:4.18,  focal_length:4.02, focal_length_eq:26 },
+  { brand:"Samsung", label:"Galaxy A57 5G",             sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26 }, // 1/1.56", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy A56",               sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26 }, // 1/1.56", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy A37 5G",             sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26 }, // 1/1.56", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy A36",               sensor_w:6.53,  sensor_h:4.90,  focal_length:4.72, focal_length_eq:26 }, // 1/1.96", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy M36 5G",             sensor_w:6.53,  sensor_h:4.90,  focal_length:4.72, focal_length_eq:26 }, // 1/1.96", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy F36 5G",             sensor_w:6.53,  sensor_h:4.90,  focal_length:4.72, focal_length_eq:26 }, // 1/1.96", 50MP, f/1.8; focal_eq approx
   { brand:"Samsung", label:"Galaxy S21 Ultra (2021)",  sensor_w:9.60,  sensor_h:7.20,  focal_length:6.40, focal_length_eq:24 }, // Samsung HM3 108MP, 1/1.33" approx
   { brand:"Samsung", label:"Galaxy S21 / S21+ (2021)", sensor_w:5.21,  sensor_h:3.91,  focal_length:3.76, focal_length_eq:26 }, // Sony IMX555, 1/1.76" approx
   { brand:"Samsung", label:"Galaxy S20 Ultra (2020)",  sensor_w:9.60,  sensor_h:7.20,  focal_length:6.40, focal_length_eq:24 }, // Samsung HMX 108MP, 1/1.33" approx
@@ -56,26 +76,50 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy S10 / S10+ (2019)", sensor_w:5.64,  sensor_h:4.23,  focal_length:4.07, focal_length_eq:26 }, // 12MP, 1/2.55"
   { brand:"Samsung", label:"Galaxy S9 / S9+ (2018)",   sensor_w:5.64,  sensor_h:4.23,  focal_length:4.07, focal_length_eq:26 }, // 12MP dual-aperture, 1/2.55"
   { brand:"Samsung", label:"Galaxy S8 / S8+ (2017)",   sensor_w:5.64,  sensor_h:4.23,  focal_length:4.07, focal_length_eq:26 }, // 12MP, 1/2.55"
+  { brand:"Samsung", label:"Galaxy A26",                sensor_w:4.64,  sensor_h:3.48,  focal_length:3.48, focal_length_eq:27 }, // 1/2.76", 50MP, f/1.8, 27mm; GSMarena confirmed
+  { brand:"Samsung", label:"Galaxy A16",                sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26 }, // 1/2.76", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy M16",                sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26 }, // 1/2.76", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy A06 5G",             sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26 }, // 1/2.75", 50MP, f/1.8, 26mm; GSMarena confirmed
+  { brand:"Samsung", label:"Galaxy A27 5G",             sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26 }, // 1/2.76", 50MP, 0.64µm, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy A17",                sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26 }, // 1/2.76", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy A17 5G",             sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26 }, // 1/2.76", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy A07",                sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26 }, // 1/2.76", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy M17 5G",             sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26 }, // 1/2.76", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy F07",                sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26 }, // 1/2.76", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy M07",                sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26 }, // 1/2.76", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy F17 5G",             sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26 }, // 1/2.76", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy F16",                sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26 }, // 1/2.76", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy XCover7 Pro",        sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26 }, // 1/2.76", 50MP, f/1.8; focal_eq approx
+  { brand:"Samsung", label:"Galaxy Tab S11 Ultra",      sensor_w:3.77,  sensor_h:2.82,  focal_length:2.72, focal_length_eq:26 }, // tablet; 1/3.4", 13MP, f/2.0
+  { brand:"Samsung", label:"Galaxy Tab S11",            sensor_w:3.77,  sensor_h:2.82,  focal_length:2.72, focal_length_eq:26 }, // tablet; 1/3.4", 13MP, f/2.0
 
   // ── GOOGLE ───────────────────────────────────────────────────────────────
-  // Samsung GN1 sensor family (50 MP, 1/1.31", 1.2 µm): sensor_w confirmed via EXIF on Pixel 7 → 9.78 mm
-  { brand:"Google", label:"Pixel 10 Pro XL / 10 Pro",  sensor_w:7.02,  sensor_h:5.27,  focal_length:4.68, focal_length_eq:24 }, // approx, unconfirmed
-  { brand:"Google", label:"Pixel 10",                  sensor_w:6.40,  sensor_h:4.80,  focal_length:4.44, focal_length_eq:25 }, // 48MP, 1/2.0", 0.8µm; sensor_w confirmed via pixel math and field measurement
-  { brand:"Google", label:"Pixel 9 Pro / 9 Pro XL",    sensor_w:7.02,  sensor_h:5.27,  focal_length:4.68, focal_length_eq:24 }, // larger sensor, approx
-  { brand:"Google", label:"Pixel 9 / 9 Pro Fold",      sensor_w:9.78,  sensor_h:7.34,  focal_length:6.52, focal_length_eq:24 },
-  { brand:"Google", label:"Pixel 8 Pro",               sensor_w:9.78,  sensor_h:7.34,  focal_length:6.52, focal_length_eq:24 },
-  { brand:"Google", label:"Pixel 8 / 8a",              sensor_w:9.78,  sensor_h:7.34,  focal_length:6.52, focal_length_eq:24 },
-  { brand:"Google", label:"Pixel 7 Pro",               sensor_w:9.78,  sensor_h:7.34,  focal_length:6.52, focal_length_eq:24 },
-  { brand:"Google", label:"Pixel 7 / 7a",              sensor_w:9.78,  sensor_h:7.34,  focal_length:6.81, focal_length_eq:25 }, // EXIF-confirmed
-  { brand:"Google", label:"Pixel 6 Pro",               sensor_w:9.78,  sensor_h:7.34,  focal_length:6.52, focal_length_eq:24 },
-  { brand:"Google", label:"Pixel 6 / 6a",              sensor_w:9.78,  sensor_h:7.34,  focal_length:6.52, focal_length_eq:24 }, // 6a uses different sensor, approx
+  // GN1/GN9 sensor family (50 MP, 1/1.31", 1.2 µm, 25mm): EXIF confirmed on Pixel 7 → 9.78 mm; Pixel 9+ pixel math → 9.80 mm
+  { brand:"Google", label:"Pixel 10 Pro XL / 10 Pro",  sensor_w:9.80,  sensor_h:7.35,  focal_length:6.81, focal_length_eq:25 }, // 1/1.31", 50MP, f/1.7; GSMarena confirmed
+  { brand:"Google", label:"Pixel 10",                  sensor_w:6.40,  sensor_h:4.80,  focal_length:4.44, focal_length_eq:25 }, // 1/2.0", 48MP, f/1.7; GSMarena confirmed
+  { brand:"Google", label:"Pixel 10a",                 sensor_w:6.40,  sensor_h:4.80,  focal_length:4.44, focal_length_eq:25 }, // 1/2.0", 48MP, f/1.7; GSMarena confirmed
+  { brand:"Google", label:"Pixel 9 Pro / 9 Pro XL",    sensor_w:9.80,  sensor_h:7.35,  focal_length:6.81, focal_length_eq:25 }, // 1/1.31", 50MP, f/1.7; GSMarena confirmed
+  { brand:"Google", label:"Pixel 9",                   sensor_w:9.80,  sensor_h:7.35,  focal_length:6.81, focal_length_eq:25 }, // 1/1.31", 50MP, f/1.7; GSMarena confirmed
+  { brand:"Google", label:"Pixel 9 Pro Fold",          sensor_w:6.40,  sensor_h:4.80,  focal_length:4.44, focal_length_eq:25 }, // 1/2.0", 48MP, f/1.7; GSMarena confirmed
+  { brand:"Google", label:"Pixel 9a",                  sensor_w:6.40,  sensor_h:4.80,  focal_length:4.44, focal_length_eq:25 }, // 1/2.0", 48MP, f/1.7; GSMarena confirmed
+  { brand:"Google", label:"Pixel 8 Pro",               sensor_w:9.80,  sensor_h:7.35,  focal_length:6.81, focal_length_eq:25 }, // 1/1.31", 50MP, f/1.7; GSMarena confirmed
+  { brand:"Google", label:"Pixel 8",                   sensor_w:9.80,  sensor_h:7.35,  focal_length:6.81, focal_length_eq:25 }, // 1/1.31", 50MP, f/1.7; GSMarena confirmed
+  { brand:"Google", label:"Pixel 8a",                  sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26 }, // 1/1.73", 64MP, f/1.9; GSMarena confirmed
+  { brand:"Google", label:"Pixel Fold (2023)",         sensor_w:6.40,  sensor_h:4.80,  focal_length:4.44, focal_length_eq:25 }, // 1/2.0", 48MP, f/1.7; GSMarena confirmed; same sensor as Pixel 9 Pro Fold
+  { brand:"Google", label:"Pixel Tablet (2023)",       sensor_w:3.66,  sensor_h:2.74,  focal_length:2.44, focal_length_eq:24 }, // 1/4.0", 8MP, f/2.0; GSMarena confirmed; sensor_w from pixel math
+  { brand:"Google", label:"Pixel 7 Pro",               sensor_w:9.78,  sensor_h:7.34,  focal_length:6.81, focal_length_eq:25 }, // 1/1.31", 50MP, f/1.9; GSMarena confirmed
+  { brand:"Google", label:"Pixel 7",                   sensor_w:9.78,  sensor_h:7.34,  focal_length:6.81, focal_length_eq:25 }, // 1/1.31", 50MP; EXIF-confirmed
+  { brand:"Google", label:"Pixel 7a",                  sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26 }, // 1/1.73", 64MP, f/1.9; GSMarena confirmed; same sensor as Pixel 8a
+  { brand:"Google", label:"Pixel 6 Pro",               sensor_w:9.78,  sensor_h:7.34,  focal_length:6.81, focal_length_eq:25 }, // 1/1.31", 50MP, f/1.9; GSMarena confirmed
+  { brand:"Google", label:"Pixel 6",                   sensor_w:9.78,  sensor_h:7.34,  focal_length:6.81, focal_length_eq:25 }, // 1/1.31", GN1; same sensor family as 6 Pro
+  { brand:"Google", label:"Pixel 6a",                  sensor_w:5.64,  sensor_h:4.23,  focal_length:4.23, focal_length_eq:27 }, // 1/2.55", 12.2MP, f/1.7; GSMarena confirmed; same sensor as Pixel 5 family
   { brand:"Google", label:"Pixel 5a (2021)",           sensor_w:5.64,  sensor_h:4.23,  focal_length:4.23, focal_length_eq:27 }, // Sony IMX363, 1/2.55"
   { brand:"Google", label:"Pixel 5 (2020)",            sensor_w:5.64,  sensor_h:4.23,  focal_length:4.23, focal_length_eq:27 }, // Sony IMX363, 1/2.55"
   { brand:"Google", label:"Pixel 4a / 4a 5G (2020)",  sensor_w:5.64,  sensor_h:4.23,  focal_length:4.23, focal_length_eq:27 }, // Sony IMX363, 1/2.55"
-  { brand:"Google", label:"Pixel 4 / 4 XL (2019)",    sensor_w:5.64,  sensor_h:4.23,  focal_length:4.40, focal_length_eq:28 }, // Sony IMX363, 28mm eq
+  { brand:"Google", label:"Pixel 4 / 4 XL (2019)",    sensor_w:5.64,  sensor_h:4.23,  focal_length:4.23, focal_length_eq:27 }, // Sony IMX363, 1/2.55"; GSMarena confirmed 27mm
   { brand:"Google", label:"Pixel 3a / 3a XL (2019)",  sensor_w:5.64,  sensor_h:4.23,  focal_length:4.40, focal_length_eq:28 }, // Sony IMX363
   { brand:"Google", label:"Pixel 3 / 3 XL (2018)",    sensor_w:5.64,  sensor_h:4.23,  focal_length:4.40, focal_length_eq:28 }, // Sony IMX363
-  { brand:"Google", label:"Pixel 2 / 2 XL (2017)",    sensor_w:5.64,  sensor_h:4.23,  focal_length:4.40, focal_length_eq:28 }, // Sony IMX362 approx
+  { brand:"Google", label:"Pixel 2 / 2 XL (2017)",    sensor_w:5.64,  sensor_h:4.23,  focal_length:4.23, focal_length_eq:27 }, // Sony IMX362, 1/2.55"; GSMarena confirmed 27mm
   { brand:"Google", label:"Pixel / Pixel XL (2016)",   sensor_w:6.23,  sensor_h:4.67,  focal_length:4.67, focal_length_eq:27 }, // Sony IMX378, 1/2.3"
 
   // ── ONEPLUS ──────────────────────────────────────────────────────────────
