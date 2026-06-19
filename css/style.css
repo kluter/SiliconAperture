@@ -445,6 +445,24 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 }
 #camera-panel.open { display: block; }
 
+#cam-filter {
+  position: sticky;
+  top: 0;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 12px;
+  background: #141414;
+  border: none;
+  border-bottom: 1px solid #2a2a2a;
+  color: #ccc;
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+  z-index: 1;
+}
+#cam-filter::placeholder { color: #444; }
+
 .cam-custom {
   padding: 7px 12px;
   font-size: 11px;
@@ -493,9 +511,22 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
   color: #888;
   cursor: pointer;
   user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
 .cam-model:hover { background: #1a1a1a; color: #ccc; }
 .cam-model.selected { color: #e63946; }
+
+.cam-conf {
+  font-size: 9px;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+.cam-conf--ok      { color: #5a8f57; }
+.cam-conf--inferred,
+.cam-conf--unknown  { color: #444; }
 
 /* ─── RESULT BAR ────────────────────────────────────────────── */
 #result-bar {

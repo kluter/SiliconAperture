@@ -42,8 +42,16 @@ Accurate results require the object to be **perpendicular to the camera axis**. 
 
 ## Contributing
 
-> The camera database covers 200+ devices, almost all scraped from the internet. Next to none have been independently confirmed — and the few that were needed manual adjustment. Approximate values are marked with `// approx` in the source.
->
+The camera database covers 200+ devices. Each entry carries a confidence marker:
+
+| Marker | Dropdown label | Meaning |
+|--------|---------------|---------|
+| `[✓]` | **confirmed** | Verified from a GSMarena spec page (sensor format + focal length equivalent). `[✓] focal_eq ~` means the sensor was confirmed but the focal equivalent is approximate. |
+| `[~]` | **unconfirmed** | Sensor family or optical format is known but not directly verified against a spec page. |
+| `[?]` | **missing data** | No source data; values are estimates. |
+
+ILC camera bodies (`focal_length: null`) carry no marker — their sensor dimensions are published industry standards and the dropdown shows no label.
+
 > If you shoot with a device in the list and can verify or correct its sensor dimensions or focal length against real EXIF data, a PR or issue is very welcome. Same if your camera is missing entirely.
 
 ---

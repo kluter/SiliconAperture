@@ -465,6 +465,45 @@ function populateCameraDropdown() {
   panel.id = 'camera-panel';
   document.body.appendChild(panel);
 
+  // Filter input (sticky at top)
+  const filterInput = document.createElement('input');
+  filterInput.type = 'text';
+  filterInput.id = 'cam-filter';
+  filterInput.placeholder = 'Filter cameras…';
+  filterInput.autocomplete = 'off';
+  filterInput.spellcheck = false;
+  panel.appendChild(filterInput);
+
+  function applyFilter(q) {
+    q = q.toLowerCase().trim();
+    panel.querySelectorAll('.cam-brand').forEach(brandEl => {
+      let visible = 0;
+      brandEl.querySelectorAll('.cam-model').forEach(modelEl => {
+        const show = !q || modelEl.querySelector('span').textContent.toLowerCase().includes(q);
+        modelEl.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      brandEl.style.display = visible ? '' : 'none';
+      if (q && visible) brandEl.classList.add('open');
+      else if (!q) brandEl.classList.remove('open');
+    });
+    panel.querySelectorAll('.cam-category-hdr').forEach(hdr => {
+      let next = hdr.nextElementSibling;
+      let anyVisible = false;
+      while (next && !next.classList.contains('cam-category-hdr')) {
+        if (next.classList.contains('cam-brand') && next.style.display !== 'none') anyVisible = true;
+        next = next.nextElementSibling;
+      }
+      hdr.style.display = anyVisible ? '' : 'none';
+    });
+  }
+
+  filterInput.addEventListener('input', () => applyFilter(filterInput.value));
+  filterInput.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { filterInput.value = ''; applyFilter(''); }
+  });
+  filterInput.addEventListener('click', e => e.stopPropagation());
+
   // Custom entry at top
   if (CUSTOM_IDX >= 0) {
     const el = document.createElement('div');
@@ -510,14 +549,36 @@ function populateCameraDropdown() {
       arrowSpan.textContent = '›';
       brandRow.appendChild(nameSpan);
       brandRow.appendChild(arrowSpan);
-      brandRow.addEventListener('click', () => brandEl.classList.toggle('open'));
+      brandRow.addEventListener('click', () => {
+        const wasOpen = brandEl.classList.contains('open');
+        brandEl.classList.toggle('open');
+        if (!wasOpen) {
+          requestAnimationFrame(() => {
+            panel.scrollTop = brandEl.offsetTop - filterInput.offsetHeight;
+          });
+        }
+      });
 
       const modelsEl = document.createElement('div');
       modelsEl.className = 'cam-models';
       entries.forEach(({ cam, i }) => {
         const modelEl = document.createElement('div');
         modelEl.className = 'cam-model';
-        modelEl.textContent = cam.label;
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = cam.label;
+        const badge = document.createElement('span');
+        if (cam.confidence === '✓') {
+          badge.className = 'cam-conf cam-conf--ok';
+          badge.textContent = 'confirmed';
+        } else if (cam.confidence === '~') {
+          badge.className = 'cam-conf cam-conf--inferred';
+          badge.textContent = 'unconfirmed';
+        } else if (cam.confidence === '?') {
+          badge.className = 'cam-conf cam-conf--unknown';
+          badge.textContent = 'missing data';
+        }
+        modelEl.appendChild(nameSpan);
+        if (badge.className) modelEl.appendChild(badge);
         modelEl.dataset.idx = i;
         modelEl.addEventListener('click', () => { selectCamera(i); closeCameraPanel(); });
         modelsEl.appendChild(modelEl);
@@ -540,9 +601,10 @@ function populateCameraDropdown() {
       panel.style.left  = r.left + 'px';
       panel.style.width = r.width + 'px';
       panel.classList.add('open');
-      // Scroll the selected item into view
-      const sel = panel.querySelector('[data-idx].selected');
-      if (sel) sel.scrollIntoView({ block: 'nearest' });
+      panel.scrollTop = 0;
+      filterInput.value = '';
+      applyFilter('');
+      filterInput.focus();
     }
   });
 
