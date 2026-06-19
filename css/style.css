@@ -526,7 +526,7 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 }
 .cam-conf--ok      { color: #5a8f57; }
 .cam-conf--inferred,
-.cam-conf--unknown  { color: #444; }
+.cam-conf--unknown  { color: #666; }
 
 /* ─── RESULT BAR ────────────────────────────────────────────── */
 #result-bar {
