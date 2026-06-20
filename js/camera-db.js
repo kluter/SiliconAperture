@@ -47,6 +47,10 @@ const CAMERA_DB = [
   { brand:"Apple", label:"iPhone SE (1st gen, 2016)",  sensor_w:4.88,  sensor_h:3.66,  focal_length:3.93, focal_length_eq:29, confidence:"✓" }, // [✓] 1/3.0" 1.22µm; 29mm
   { brand:"Apple", label:"iPhone 6s / 6s Plus (2015)", sensor_w:4.88,  sensor_h:3.66,  focal_length:3.93, focal_length_eq:29, confidence:"✓" }, // [✓] 1/3.0" 1.22µm; 29mm
   { brand:"Apple", label:"iPhone 6 / 6 Plus (2014)",  sensor_w:4.90,  sensor_h:3.68,  focal_length:3.95, focal_length_eq:29, confidence:"✓" }, // [✓] 1/3.0" 1.5µm; 29mm
+  { brand:"Apple", label:"iPhone 5s (2013)",            sensor_w:4.90,  sensor_h:3.68,  focal_length:3.95, focal_length_eq:29, confidence:"✓" }, // [✓] 1/3.0" 1.5µm; 29mm
+  { brand:"Apple", label:"iPhone 5 / 5c (2012)",        sensor_w:4.57,  sensor_h:3.43,  focal_length:4.19, focal_length_eq:33, confidence:"✓" }, // [✓] 1/3.2" 1.4µm; 33mm
+  { brand:"Apple", label:"iPhone 4S (2011)",            sensor_w:4.57,  sensor_h:3.43,  focal_length:4.44, focal_length_eq:35, confidence:"✓" }, // [✓] 1/3.2" 1.4µm; 35mm
+  { brand:"Apple", label:"iPhone 4 (2010)",             sensor_w:4.54,  sensor_h:3.42,  focal_length:4.41, focal_length_eq:35, confidence:"~" }, // [~] 1/3.2"; 35mm
 
   // ── SAMSUNG ──────────────────────────────────────────────────────────────
   { brand:"Samsung", label:"Galaxy S26 Ultra",          sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23, confidence:"✓" }, // [✓] 1/1.3" 0.6µm; 23mm
@@ -144,23 +148,14 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy S21 FE (2022)",     sensor_w:7.20,  sensor_h:5.40,  focal_length:5.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.76" 1.8µm; 26mm
   { brand:"Samsung", label:"Galaxy S21+ (2021)",       sensor_w:7.20,  sensor_h:5.40,  focal_length:5.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.76" 1.8µm; 26mm
   { brand:"Samsung", label:"Galaxy S21 (2021)",        sensor_w:7.20,  sensor_h:5.40,  focal_length:5.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.76" 1.8µm; 26mm
-  { brand:"Samsung", label:"Galaxy Note20 Ultra 5G",   sensor_w:9.62,  sensor_h:7.22,  focal_length:6.95, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.33" 0.8µm; 26mm
   { brand:"Samsung", label:"Galaxy Note20 Ultra",      sensor_w:9.62,  sensor_h:7.22,  focal_length:6.95, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.33" 0.8µm; 26mm
-  { brand:"Samsung", label:"Galaxy Note20 5G",         sensor_w:7.20,  sensor_h:5.40,  focal_length:5.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.76" 1.8µm; 26mm
   { brand:"Samsung", label:"Galaxy Note20",            sensor_w:7.20,  sensor_h:5.40,  focal_length:5.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.76" 1.8µm; 26mm
-  { brand:"Samsung", label:"Galaxy S20 Ultra 5G",      sensor_w:9.62,  sensor_h:7.22,  focal_length:6.95, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.33" 0.8µm; 26mm
   { brand:"Samsung", label:"Galaxy S20 Ultra",         sensor_w:9.62,  sensor_h:7.22,  focal_length:6.95, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.33" 0.8µm; 26mm
   { brand:"Samsung", label:"Galaxy S20 FE (2022)",     sensor_w:7.20,  sensor_h:5.40,  focal_length:5.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.76" 1.8µm; 26mm
   { brand:"Samsung", label:"Galaxy S20 FE 5G (2020)", sensor_w:7.20,  sensor_h:5.40,  focal_length:5.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.76" 1.8µm; 26mm
-  { brand:"Samsung", label:"Galaxy S20 FE (2020)",    sensor_w:7.20,  sensor_h:5.40,  focal_length:5.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.76" 1.8µm; 26mm
-  { brand:"Samsung", label:"Galaxy S20+ 5G",           sensor_w:7.20,  sensor_h:5.40,  focal_length:5.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.76" 1.8µm; 26mm
   { brand:"Samsung", label:"Galaxy S20+",              sensor_w:7.20,  sensor_h:5.40,  focal_length:5.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.76" 1.8µm; 26mm
-  { brand:"Samsung", label:"Galaxy S20 5G UW",          sensor_w:7.20,  sensor_h:5.40,  focal_length:5.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.76" 1.8µm; 26mm
-  { brand:"Samsung", label:"Galaxy S20 5G",            sensor_w:7.20,  sensor_h:5.40,  focal_length:5.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.76" 1.8µm; 26mm
   { brand:"Samsung", label:"Galaxy S20",               sensor_w:7.20,  sensor_h:5.40,  focal_length:5.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.76" 1.8µm; 26mm
-  { brand:"Samsung", label:"Galaxy Note10+ 5G",        sensor_w:5.60,  sensor_h:4.20,  focal_length:4.20, focal_length_eq:27, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 27mm
   { brand:"Samsung", label:"Galaxy Note10+",           sensor_w:5.60,  sensor_h:4.20,  focal_length:4.20, focal_length_eq:27, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 27mm
-  { brand:"Samsung", label:"Galaxy Note10 5G",         sensor_w:5.60,  sensor_h:4.20,  focal_length:4.20, focal_length_eq:27, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 27mm
   { brand:"Samsung", label:"Galaxy Note10",            sensor_w:5.60,  sensor_h:4.20,  focal_length:4.20, focal_length_eq:27, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 27mm
   { brand:"Samsung", label:"Galaxy Note10 Lite",       sensor_w:5.60,  sensor_h:4.20,  focal_length:4.20, focal_length_eq:27, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 27mm
   { brand:"Samsung", label:"Galaxy S10 5G",            sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
@@ -289,11 +284,8 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy J7 Pro",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP 27mm, no format on main cam
   { brand:"Samsung", label:"Galaxy J5 (2017)",         sensor_w:4.13,  sensor_h:3.10,  focal_length:3.10, focal_length_eq:27, confidence:"✓" }, // [✓] 1/3.1" 1.12µm; 27mm
   { brand:"Samsung", label:"Galaxy J3 (2017)",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
-  { brand:"Samsung", label:"Galaxy Folder2",           sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
-  { brand:"Samsung", label:"Samsung Z4",               sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 5MP, no format
   { brand:"Samsung", label:"Galaxy C5 Pro",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 16MP, no format (1/3.06" is front cam)
   { brand:"Samsung", label:"Galaxy XCover 4",          sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
-  { brand:"Samsung", label:"Galaxy J1 mini prime",     sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 5MP, no format
   { brand:"Samsung", label:"Galaxy J3 Emerge",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 5MP, no format
   { brand:"Samsung", label:"Galaxy C7 Pro",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 16MP, no format (1/3.06" is front cam)
   { brand:"Samsung", label:"Galaxy A7 (2017)",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 16MP, no format (1/3.06" is front cam)
@@ -307,16 +299,12 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy On7 (2016)",        sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
   { brand:"Samsung", label:"Galaxy J5 Prime",          sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
   { brand:"Samsung", label:"Galaxy J7 Prime",          sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
-  { brand:"Samsung", label:"Samsung Z2",               sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 5MP, no format
-  { brand:"Samsung", label:"Galaxy Note7 (USA)",       sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
   { brand:"Samsung", label:"Galaxy Note7",             sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
   { brand:"Samsung", label:"Galaxy On7 Pro",           sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
   { brand:"Samsung", label:"Galaxy On5 Pro",           sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
-  { brand:"Samsung", label:"Galaxy Tab J",             sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
   { brand:"Samsung", label:"Galaxy J Max",             sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
   { brand:"Samsung", label:"Galaxy J2 Pro (2016)",     sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
   { brand:"Samsung", label:"Galaxy J2 (2016)",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
-  { brand:"Samsung", label:"Samsung Z3 Corporate",     sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
   { brand:"Samsung", label:"Galaxy XCover 3 G389F",   sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 5MP, no format
   { brand:"Samsung", label:"Galaxy S7 active",         sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
   { brand:"Samsung", label:"Galaxy J3 Pro",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
@@ -325,11 +313,8 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy A9 Pro (2016)",     sensor_w:4.57,  sensor_h:3.43,  focal_length:3.30, focal_length_eq:26, confidence:"?" }, // [?] 1/2.8" confirmed; focal_eq unknown
   { brand:"Samsung", label:"Galaxy J7 (2016)",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
   { brand:"Samsung", label:"Galaxy J5 (2016)",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
-  { brand:"Samsung", label:"Galaxy S7 edge (USA)",     sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
   { brand:"Samsung", label:"Galaxy S7 edge",           sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
-  { brand:"Samsung", label:"Galaxy S7 (USA)",          sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
   { brand:"Samsung", label:"Galaxy S7",                sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
-  { brand:"Samsung", label:"Galaxy J1 Nxt",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 5MP, no format
   { brand:"Samsung", label:"Galaxy J1 (2016)",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 5MP, no format
   { brand:"Samsung", label:"Galaxy A9 (2016)",         sensor_w:4.13,  sensor_h:3.10,  focal_length:3.21, focal_length_eq:28, confidence:"✓" }, // [✓] 1/3.1" 1.12µm; 28mm
   { brand:"Samsung", label:"Galaxy A7 (2016)",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
@@ -339,32 +324,20 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy J3 (2016)",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
   { brand:"Samsung", label:"Galaxy On7",               sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
   { brand:"Samsung", label:"Galaxy On5",               sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
-  { brand:"Samsung", label:"Samsung Z3",               sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
-  { brand:"Samsung", label:"Galaxy J1 Ace",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 5MP, no format
-  { brand:"Samsung", label:"Galaxy Note5 (USA)",       sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 28mm
-  { brand:"Samsung", label:"Galaxy Note5 Duos",        sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 28mm
   { brand:"Samsung", label:"Galaxy Note5",             sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 28mm
-  { brand:"Samsung", label:"Galaxy S6 edge+ (USA)",    sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 28mm
-  { brand:"Samsung", label:"Galaxy S6 edge+ Duos",     sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 28mm
+  { brand:"Samsung", label:"Galaxy S6 edge+",          sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 28mm
   { brand:"Samsung", label:"Galaxy S5 Neo",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 16MP, no format
   { brand:"Samsung", label:"Galaxy S4 mini I9195I",    sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
-  { brand:"Samsung", label:"Galaxy Folder",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
   { brand:"Samsung", label:"Galaxy A8 Duos",           sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 16MP 31mm, no format
   { brand:"Samsung", label:"Galaxy A8 (2015)",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 16MP 31mm, no format
-  { brand:"Samsung", label:"Galaxy V Plus",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 3.15MP, no format
   { brand:"Samsung", label:"Galaxy J7 Nxt",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
   { brand:"Samsung", label:"Galaxy J7",                sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
   { brand:"Samsung", label:"Galaxy J5",                sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
   { brand:"Samsung", label:"Galaxy S6 active",         sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 28mm
   { brand:"Samsung", label:"Galaxy XCover 3",          sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 5MP, no format
-  { brand:"Samsung", label:"Galaxy S6 edge (USA)",     sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 28mm
-  { brand:"Samsung", label:"Galaxy S6 (USA)",          sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 28mm
   { brand:"Samsung", label:"Galaxy S6 edge",           sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 28mm
-  { brand:"Samsung", label:"Galaxy S6 Duos",           sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 28mm
   { brand:"Samsung", label:"Galaxy S6",                sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 28mm
-  { brand:"Samsung", label:"Galaxy J1 4G",             sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 5MP, no format
   { brand:"Samsung", label:"Galaxy J1",                sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 5MP, no format
-  { brand:"Samsung", label:"Samsung Z1",               sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 3.15MP, no format
   { brand:"Samsung", label:"Galaxy A7 Duos",           sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
   { brand:"Samsung", label:"Galaxy A7 (2015)",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
   { brand:"Samsung", label:"Galaxy Grand Max",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
@@ -376,13 +349,8 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy A3 Duos",           sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
   { brand:"Samsung", label:"Galaxy A3 (2014)",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
   { brand:"Samsung", label:"Galaxy S5 Plus",           sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"?" }, // [?] 1/2.6" confirmed; focal_eq unknown
-  { brand:"Samsung", label:"Galaxy Pocket 2",          sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 2MP, no format
-  { brand:"Samsung", label:"Galaxy V",                 sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 3.15MP, no format
-  { brand:"Samsung", label:"Galaxy Grand Prime Duos TV", sensor_w:4.64, sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
   { brand:"Samsung", label:"Galaxy Grand Prime",        sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
   { brand:"Samsung", label:"Galaxy Note Edge",          sensor_w:4.92,  sensor_h:3.69,  focal_length:4.23, focal_length_eq:31, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 31mm
-  { brand:"Samsung", label:"Galaxy Note4 Duos",         sensor_w:4.92,  sensor_h:3.69,  focal_length:4.23, focal_length_eq:31, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 31mm
-  { brand:"Samsung", label:"Galaxy Note4 (USA)",        sensor_w:4.92,  sensor_h:3.69,  focal_length:4.23, focal_length_eq:31, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 31mm
   { brand:"Samsung", label:"Galaxy Note4",              sensor_w:4.92,  sensor_h:3.69,  focal_length:4.23, focal_length_eq:31, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 31mm
   { brand:"Samsung", label:"Galaxy S5 LTE-A G901F",    sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"?" }, // [?] 1/2.6" confirmed; focal_eq unknown
   { brand:"Samsung", label:"Galaxy S5 mini Duos",      sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
@@ -390,9 +358,6 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy S5 Sport",          sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"?" }, // [?] 1/2.6" confirmed; focal_eq unknown
   { brand:"Samsung", label:"Galaxy S5 LTE-A G906S",   sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"?" }, // [?] 1/2.6" confirmed; focal_eq unknown
   { brand:"Samsung", label:"Galaxy S5 Active",         sensor_w:4.92,  sensor_h:3.69,  focal_length:4.23, focal_length_eq:31, confidence:"~" }, // [~] S5-family 1/2.6" inferred; 31mm listed
-  { brand:"Samsung", label:"Galaxy S5 Duos",           sensor_w:4.92,  sensor_h:3.69,  focal_length:4.23, focal_length_eq:31, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 31mm
-  { brand:"Samsung", label:"Galaxy S5 (octa-core)",    sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"?" }, // [?] 1/2.6" confirmed; focal_eq unknown
-  { brand:"Samsung", label:"Galaxy S5 (USA)",          sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"?" }, // [?] 1/2.6" confirmed; focal_eq unknown
   { brand:"Samsung", label:"Galaxy S5",                sensor_w:4.92,  sensor_h:3.69,  focal_length:4.23, focal_length_eq:31, confidence:"✓" }, // [✓] 1/2.6" 1.12µm; 31mm
   { brand:"Samsung", label:"Galaxy Note3 Neo Duos",    sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
   { brand:"Samsung", label:"Galaxy Note3 Neo",          sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 8MP, no format
@@ -406,6 +371,9 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy S4 Duos (I9502)",   sensor_w:4.13,  sensor_h:3.10,  focal_length:3.56, focal_length_eq:31, confidence:"✓" }, // [✓] 1/3.1" 1.14µm; 31mm
   { brand:"Samsung", label:"Galaxy S4 CDMA",           sensor_w:4.13,  sensor_h:3.10,  focal_length:3.56, focal_length_eq:31, confidence:"✓" }, // [✓] 1/3.1" 1.14µm; 31mm
   { brand:"Samsung", label:"Galaxy A20s",              sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?] 13MP, no format
+  { brand:"Samsung", label:"Galaxy S3 (2012)",           sensor_w:4.54,  sensor_h:3.42,  focal_length:4.41, focal_length_eq:35, confidence:"~" }, // [~] 1/3.2"; 35mm
+  { brand:"Samsung", label:"Galaxy S2 (2011)",           sensor_w:4.54,  sensor_h:3.42,  focal_length:3.66, focal_length_eq:29, confidence:"~" }, // [~] 1/3.2"; 29mm
+  { brand:"Samsung", label:"Galaxy S (2010)",            sensor_w:4.54,  sensor_h:3.42,  focal_length:4.41, focal_length_eq:35, confidence:"~" }, // [~] 1/3.2"; 35mm
 
   // ── GOOGLE ───────────────────────────────────────────────────────────────
   // GN1/GN9 sensor family (50 MP, 1/1.31", 1.2 µm, 25mm): EXIF confirmed on Pixel 7 → 9.78 mm; Pixel 9+ pixel math → 9.80 mm
@@ -434,6 +402,8 @@ const CAMERA_DB = [
   { brand:"Google", label:"Pixel 3 / 3 XL (2018)",    sensor_w:5.64,  sensor_h:4.23,  focal_length:4.40, focal_length_eq:28, confidence:"~" }, // [~] IMX363; 28mm
   { brand:"Google", label:"Pixel 2 / 2 XL (2017)",    sensor_w:5.64,  sensor_h:4.23,  focal_length:4.23, focal_length_eq:27, confidence:"✓" }, // [✓] 1/2.55"; 27mm
   { brand:"Google", label:"Pixel / Pixel XL (2016)",   sensor_w:6.23,  sensor_h:4.67,  focal_length:4.67, focal_length_eq:27, confidence:"~" }, // [~] IMX378 1/2.3"; 27mm
+  { brand:"Google",  label:"Nexus 6P (2015)",            sensor_w:6.23,  sensor_h:4.67,  focal_length:4.67, focal_length_eq:27, confidence:"~" }, // [~] IMX377 1/2.3"; 27mm
+  { brand:"Google",  label:"Nexus 5X (2015)",            sensor_w:6.23,  sensor_h:4.67,  focal_length:4.67, focal_length_eq:27, confidence:"~" }, // [~] IMX377 1/2.3"; 27mm
 
   // ── ONEPLUS ──────────────────────────────────────────────────────────────
   { brand:"OnePlus", label:"OnePlus 13 (main)",         sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23, confidence:"~" }, // [~] 1/1.12"; 23mm
@@ -451,6 +421,23 @@ const CAMERA_DB = [
   { brand:"OnePlus", label:"OnePlus 2 (2015)",          sensor_w:4.54,  sensor_h:3.42,  focal_length:3.41, focal_length_eq:27, confidence:"~" }, // [~] IMX214; 27mm
   { brand:"OnePlus", label:"OnePlus 1 (2014)",          sensor_w:4.54,  sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] IMX214; 28mm
 
+  // ── HTC ──────────────────────────────────────────────────────────────────
+  { brand:"HTC",     label:"One M9 (2015)",              sensor_w:5.54,  sensor_h:4.16,  focal_length:4.31, focal_length_eq:28, confidence:"~" }, // [~] 1/2.6"; 28mm
+  { brand:"HTC",     label:"One M8 (2014)",              sensor_w:5.29,  sensor_h:3.97,  focal_length:3.82, focal_length_eq:26, confidence:"~" }, // [~] 2.0µm; 26mm
+  { brand:"HTC",     label:"One M7 (2013)",              sensor_w:5.29,  sensor_h:3.97,  focal_length:3.82, focal_length_eq:26, confidence:"~" }, // [~] 2.0µm; 26mm
+  { brand:"HTC",     label:"One X (2012)",               sensor_w:4.54,  sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] 1/3.2"; 28mm
+  { brand:"HTC",     label:"Sensation (2011)",           sensor_w:5.54,  sensor_h:4.16,  focal_length:4.31, focal_length_eq:28, confidence:"~" }, // [~] 28mm
+  { brand:"HTC",     label:"Desire HD (2010)",           sensor_w:4.54,  sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] 1/3.2"; 28mm
+  { brand:"HTC",     label:"Desire (2010)",              sensor_w:4.54,  sensor_h:3.42,  focal_length:4.41, focal_length_eq:35, confidence:"~" }, // [~] 1/3.2"; 35mm
+
+  // ── NOKIA ────────────────────────────────────────────────────────────────
+  { brand:"Nokia",   label:"Nokia 8 / 8.1 (2017/2018)",  sensor_w:5.54,  sensor_h:4.16,  focal_length:4.00, focal_length_eq:26, confidence:"~" }, // [~] 1/2.6"; 26mm
+  { brand:"Nokia",   label:"Nokia 6.1 (2018)",            sensor_w:4.59,  sensor_h:3.44,  focal_length:3.57, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.8" EXIF; 28mm
+  { brand:"Nokia",   label:"Lumia 1020 (2013)",           sensor_w:7.44,  sensor_h:5.58,  focal_length:5.38, focal_length_eq:26, confidence:"~" }, // [~] 1/1.5"; 26mm
+  { brand:"Nokia",   label:"Lumia 930 (2014)",            sensor_w:5.76,  sensor_h:4.32,  focal_length:4.16, focal_length_eq:26, confidence:"~" }, // [~] 26mm
+  { brand:"Nokia",   label:"Lumia 920 (2012)",            sensor_w:4.80,  sensor_h:3.60,  focal_length:3.73, focal_length_eq:28, confidence:"~" }, // [~] 1/3"; 28mm
+  { brand:"Nokia",   label:"N8 (2010)",                   sensor_w:7.00,  sensor_h:5.25,  focal_length:5.44, focal_length_eq:28, confidence:"~" }, // [~] 1/1.83"; 28mm
+
   // ── XIAOMI ───────────────────────────────────────────────────────────────
   { brand:"Xiaomi", label:"Xiaomi 15 Ultra (main)",     sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23, confidence:"~" }, // [~] 1/1.31"; 23mm
   { brand:"Xiaomi", label:"Xiaomi 15 (main)",           sensor_w:7.02,  sensor_h:5.27,  focal_length:4.68, focal_length_eq:24, confidence:"?" }, // [?]
@@ -465,6 +452,9 @@ const CAMERA_DB = [
   { brand:"Xiaomi", label:"Mi 9 (2019)",               sensor_w:6.40,  sensor_h:4.80,  focal_length:4.80, focal_length_eq:27, confidence:"~" }, // [~] IMX586 1/2"; 27mm
   { brand:"Xiaomi", label:"Mi 8 (2018)",               sensor_w:5.64,  sensor_h:4.23,  focal_length:4.07, focal_length_eq:26, confidence:"~" }, // [~] IMX363 1/2.55"; 26mm
   { brand:"Xiaomi", label:"Mi 6 (2017)",               sensor_w:4.80,  sensor_h:3.60,  focal_length:3.60, focal_length_eq:27, confidence:"~" }, // [~] IMX386 1/3"; 27mm
+  { brand:"Xiaomi",  label:"Mi 5 (2016)",                sensor_w:4.80,  sensor_h:3.60,  focal_length:3.73, focal_length_eq:28, confidence:"~" }, // [~] IMX298; 28mm
+  { brand:"Xiaomi",  label:"Mi 4 (2014)",                sensor_w:4.80,  sensor_h:3.60,  focal_length:3.73, focal_length_eq:28, confidence:"~" }, // [~] IMX214; 28mm
+  { brand:"Xiaomi",  label:"Mi 3 (2013)",                sensor_w:4.54,  sensor_h:3.42,  focal_length:4.41, focal_length_eq:35, confidence:"~" }, // [~] 35mm
 
   // ── HUAWEI ───────────────────────────────────────────────────────────────
   { brand:"Huawei", label:"Mate 80 Pro Max Wind",       sensor_w:4.64,  sensor_h:3.48,  focal_length:3.09, focal_length_eq:24, confidence:"?" }, // [?] 50MP f/1.4-4.0, 24mm; no sensor format
@@ -743,6 +733,16 @@ const CAMERA_DB = [
   // RX0 II: published physical fl = 7.7 mm; effective imaging width = 7.7 × 36/24 = 11.55 mm (not full 1" width)
   { brand:"Sony", label:"RX0 II (1\")",                  sensor_w:11.55, sensor_h:8.66,  focal_length:7.7,  focal_length_eq:24 },
 
+  // ── SONY XPERIA (smartphones) ────────────────────────────────────────────
+  { brand:"Sony",    label:"Xperia 1 V / 5 V (2023)",    sensor_w:9.49,  sensor_h:7.12,  focal_length:6.33, focal_length_eq:24, confidence:"~" }, // [~] 1/1.35"; 24mm
+  { brand:"Sony",    label:"Xperia 1 III / 5 III (2021)", sensor_w:7.60,  sensor_h:5.70,  focal_length:5.07, focal_length_eq:24, confidence:"~" }, // [~] 1/1.7"; 24mm
+  { brand:"Sony",    label:"Xperia XZ2 / XZ3 (2018)",    sensor_w:6.13,  sensor_h:4.60,  focal_length:4.26, focal_length_eq:25, confidence:"~" }, // [~] 1/2.3"; 25mm
+  { brand:"Sony",    label:"Xperia XZ / XZ1 (2016/2017)", sensor_w:6.13,  sensor_h:4.60,  focal_length:4.09, focal_length_eq:24, confidence:"~" }, // [~] 1/2.3"; 24mm
+  { brand:"Sony",    label:"Xperia Z5 / Z3+ (2015)",     sensor_w:6.13,  sensor_h:4.60,  focal_length:4.09, focal_length_eq:24, confidence:"~" }, // [~] 1/2.3"; 24mm
+  { brand:"Sony",    label:"Xperia Z2 / Z3 (2014)",      sensor_w:6.13,  sensor_h:4.60,  focal_length:4.76, focal_length_eq:28, confidence:"~" }, // [~] 1/2.3"; 28mm
+  { brand:"Sony",    label:"Xperia Z1 (2013)",           sensor_w:6.13,  sensor_h:4.60,  focal_length:4.60, focal_length_eq:27, confidence:"~" }, // [~] 1/2.3"; 27mm
+  { brand:"Sony",    label:"Xperia Z / Arc S (2012)",    sensor_w:4.54,  sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] 1/3.2"; 28mm
+
   // ── CANON ────────────────────────────────────────────────────────────────
   { brand:"Canon", label:"EOS R5 / R5 C (full frame)",   sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
   { brand:"Canon", label:"EOS R6 Mark II (full frame)",   sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
@@ -802,59 +802,6 @@ const CAMERA_DB = [
   { brand:"Hasselblad", label:"907X / CFV 100C (medium format)", sensor_w:43.8, sensor_h:32.9, focal_length:null, focal_length_eq:null },
   { brand:"Phase One",  label:"IQ4 150MP (645 medium format)", sensor_w:53.4, sensor_h:40.0, focal_length:null, focal_length_eq:null },
   { brand:"Phase One",  label:"IQ4 100MP (645 medium format)", sensor_w:53.4, sensor_h:40.0, focal_length:null, focal_length_eq:null },
-
-  // ── LEGACY / ARCHIVE ─────────────────────────────────────────────────────
-
-  // Apple — pre-2014
-  { brand:"Apple", label:"iPhone 5s (2013)",            sensor_w:4.90,  sensor_h:3.68,  focal_length:3.95, focal_length_eq:29, confidence:"✓" }, // [✓] 1/3.0" 1.5µm; 29mm
-  { brand:"Apple", label:"iPhone 5 / 5c (2012)",        sensor_w:4.57,  sensor_h:3.43,  focal_length:4.19, focal_length_eq:33, confidence:"✓" }, // [✓] 1/3.2" 1.4µm; 33mm
-  { brand:"Apple", label:"iPhone 4S (2011)",            sensor_w:4.57,  sensor_h:3.43,  focal_length:4.44, focal_length_eq:35, confidence:"✓" }, // [✓] 1/3.2" 1.4µm; 35mm
-  { brand:"Apple", label:"iPhone 4 (2010)",             sensor_w:4.54,  sensor_h:3.42,  focal_length:4.41, focal_length_eq:35, confidence:"~" }, // [~] 1/3.2"; 35mm
-
-  // Samsung — pre-2017 flagships
-  { brand:"Samsung", label:"Galaxy S7 / S7 Edge (2016)", sensor_w:5.54, sensor_h:4.16,  focal_length:4.00, focal_length_eq:26, confidence:"~" }, // [~] 1/2.6"; 26mm
-  { brand:"Samsung", label:"Galaxy S6 / S6 Edge (2015)", sensor_w:5.54, sensor_h:4.16,  focal_length:4.31, focal_length_eq:28, confidence:"~" }, // [~] 1/2.6"; 28mm
-  { brand:"Samsung", label:"Galaxy S5 (2014)",           sensor_w:5.54, sensor_h:4.16,  focal_length:4.77, focal_length_eq:31, confidence:"~" }, // [~] 1/2.6"; 31mm
-  { brand:"Samsung", label:"Galaxy S4 (2013)",           sensor_w:4.88, sensor_h:3.66,  focal_length:4.20, focal_length_eq:31, confidence:"~" }, // [~] 1/3.1" 1.14µm; 31mm
-  { brand:"Samsung", label:"Galaxy S3 (2012)",           sensor_w:4.54, sensor_h:3.42,  focal_length:4.41, focal_length_eq:35, confidence:"~" }, // [~] 1/3.2"; 35mm
-  { brand:"Samsung", label:"Galaxy S2 (2011)",           sensor_w:4.54, sensor_h:3.42,  focal_length:3.66, focal_length_eq:29, confidence:"~" }, // [~] 1/3.2"; 29mm
-  { brand:"Samsung", label:"Galaxy S (2010)",            sensor_w:4.54, sensor_h:3.42,  focal_length:4.41, focal_length_eq:35, confidence:"~" }, // [~] 1/3.2"; 35mm
-
-  // Google Nexus
-  { brand:"Google",  label:"Nexus 6P (2015)",            sensor_w:6.23, sensor_h:4.67,  focal_length:4.67, focal_length_eq:27, confidence:"~" }, // [~] IMX377 1/2.3"; 27mm
-  { brand:"Google",  label:"Nexus 5X (2015)",            sensor_w:6.23, sensor_h:4.67,  focal_length:4.67, focal_length_eq:27, confidence:"~" }, // [~] IMX377 1/2.3"; 27mm
-
-  // HTC
-  { brand:"HTC",     label:"One M9 (2015)",              sensor_w:5.54, sensor_h:4.16,  focal_length:4.31, focal_length_eq:28, confidence:"~" }, // [~] 1/2.6"; 28mm
-  { brand:"HTC",     label:"One M8 (2014)",              sensor_w:5.29, sensor_h:3.97,  focal_length:3.82, focal_length_eq:26, confidence:"~" }, // [~] 2.0µm; 26mm
-  { brand:"HTC",     label:"One M7 (2013)",              sensor_w:5.29, sensor_h:3.97,  focal_length:3.82, focal_length_eq:26, confidence:"~" }, // [~] 2.0µm; 26mm
-  { brand:"HTC",     label:"One X (2012)",               sensor_w:4.54, sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] 1/3.2"; 28mm
-  { brand:"HTC",     label:"Sensation (2011)",           sensor_w:5.54, sensor_h:4.16,  focal_length:4.31, focal_length_eq:28, confidence:"~" }, // [~] 28mm
-  { brand:"HTC",     label:"Desire HD (2010)",           sensor_w:4.54, sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] 1/3.2"; 28mm
-  { brand:"HTC",     label:"Desire (2010)",              sensor_w:4.54, sensor_h:3.42,  focal_length:4.41, focal_length_eq:35, confidence:"~" }, // [~] 1/3.2"; 35mm
-
-  // Nokia / Lumia
-  { brand:"Nokia",   label:"Nokia 8 / 8.1 (2017/2018)",  sensor_w:5.54, sensor_h:4.16,  focal_length:4.00, focal_length_eq:26, confidence:"~" }, // [~] 1/2.6"; 26mm
-  { brand:"Nokia",   label:"Nokia 6.1 (2018)",            sensor_w:4.59, sensor_h:3.44,  focal_length:3.57, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.8" EXIF; 28mm
-  { brand:"Nokia",   label:"Lumia 1020 (2013)",           sensor_w:7.44, sensor_h:5.58,  focal_length:5.38, focal_length_eq:26, confidence:"~" }, // [~] 1/1.5"; 26mm
-  { brand:"Nokia",   label:"Lumia 930 (2014)",            sensor_w:5.76, sensor_h:4.32,  focal_length:4.16, focal_length_eq:26, confidence:"~" }, // [~] 26mm
-  { brand:"Nokia",   label:"Lumia 920 (2012)",            sensor_w:4.80, sensor_h:3.60,  focal_length:3.73, focal_length_eq:28, confidence:"~" }, // [~] 1/3"; 28mm
-  { brand:"Nokia",   label:"N8 (2010)",                   sensor_w:7.00, sensor_h:5.25,  focal_length:5.44, focal_length_eq:28, confidence:"~" }, // [~] 1/1.83"; 28mm
-
-  // Sony Xperia
-  { brand:"Sony",    label:"Xperia 1 V / 5 V (2023)",    sensor_w:9.49, sensor_h:7.12,  focal_length:6.33, focal_length_eq:24, confidence:"~" }, // [~] 1/1.35"; 24mm
-  { brand:"Sony",    label:"Xperia 1 III / 5 III (2021)", sensor_w:7.60, sensor_h:5.70,  focal_length:5.07, focal_length_eq:24, confidence:"~" }, // [~] 1/1.7"; 24mm
-  { brand:"Sony",    label:"Xperia XZ2 / XZ3 (2018)",    sensor_w:6.13, sensor_h:4.60,  focal_length:4.26, focal_length_eq:25, confidence:"~" }, // [~] 1/2.3"; 25mm
-  { brand:"Sony",    label:"Xperia XZ / XZ1 (2016/2017)", sensor_w:6.13, sensor_h:4.60,  focal_length:4.09, focal_length_eq:24, confidence:"~" }, // [~] 1/2.3"; 24mm
-  { brand:"Sony",    label:"Xperia Z5 / Z3+ (2015)",     sensor_w:6.13, sensor_h:4.60,  focal_length:4.09, focal_length_eq:24, confidence:"~" }, // [~] 1/2.3"; 24mm
-  { brand:"Sony",    label:"Xperia Z2 / Z3 (2014)",      sensor_w:6.13, sensor_h:4.60,  focal_length:4.76, focal_length_eq:28, confidence:"~" }, // [~] 1/2.3"; 28mm
-  { brand:"Sony",    label:"Xperia Z1 (2013)",           sensor_w:6.13, sensor_h:4.60,  focal_length:4.60, focal_length_eq:27, confidence:"~" }, // [~] 1/2.3"; 27mm
-  { brand:"Sony",    label:"Xperia Z / Arc S (2012)",    sensor_w:4.54, sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] 1/3.2"; 28mm
-
-  // Xiaomi — pre-2017
-  { brand:"Xiaomi",  label:"Mi 5 (2016)",                sensor_w:4.80, sensor_h:3.60,  focal_length:3.73, focal_length_eq:28, confidence:"~" }, // [~] IMX298; 28mm
-  { brand:"Xiaomi",  label:"Mi 4 (2014)",                sensor_w:4.80, sensor_h:3.60,  focal_length:3.73, focal_length_eq:28, confidence:"~" }, // [~] IMX214; 28mm
-  { brand:"Xiaomi",  label:"Mi 3 (2013)",                sensor_w:4.54, sensor_h:3.42,  focal_length:4.41, focal_length_eq:35, confidence:"~" }, // [~] 35mm
 
   // ── CUSTOM ───────────────────────────────────────────────────────────────
   { brand:"—", label:"Custom sensor dimensions …", sensor_w:null, sensor_h:null, focal_length:null, focal_length_eq:null },
