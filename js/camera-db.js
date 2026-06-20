@@ -403,7 +403,7 @@ const CAMERA_DB = [
   { brand:"Google", label:"Pixel 2 / 2 XL (2017)",    sensor_w:5.64,  sensor_h:4.23,  focal_length:4.23, focal_length_eq:27, confidence:"✓" }, // [✓] 1/2.55"; 27mm
   { brand:"Google", label:"Pixel / Pixel XL (2016)",   sensor_w:6.23,  sensor_h:4.67,  focal_length:4.67, focal_length_eq:27, confidence:"~" }, // [~] IMX378 1/2.3"; 27mm
   { brand:"Google",  label:"Nexus 6P (2015)",            sensor_w:6.23,  sensor_h:4.67,  focal_length:4.67, focal_length_eq:27, confidence:"~" }, // [~] IMX377 1/2.3"; 27mm
-  { brand:"Google",  label:"Nexus 5X (2015)",            sensor_w:6.23,  sensor_h:4.67,  focal_length:4.67, focal_length_eq:27, confidence:"~" }, // [~] IMX377 1/2.3"; 27mm
+  { brand:"Google",  label:"Nexus 5X (2015)",            sensor_w:6.25,  sensor_h:4.69,  focal_length:4.51, focal_length_eq:26, confidence:"✓" }, // [✓] 12.3MP 1/2.3" 1.55µm pixel math; 26mm
 
   // ── ONEPLUS ──────────────────────────────────────────────────────────────
   { brand:"OnePlus", label:"OnePlus 13 (main)",         sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23, confidence:"~" }, // [~] 1/1.12"; 23mm
@@ -422,7 +422,12 @@ const CAMERA_DB = [
   { brand:"OnePlus", label:"OnePlus 1 (2014)",          sensor_w:4.54,  sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] IMX214; 28mm
 
   // ── HTC ──────────────────────────────────────────────────────────────────
+  { brand:"HTC",     label:"U11 / U11+ / U12+ (2017–2018)", sensor_w:5.60, sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"~" }, // [~] 12MP 1/2.55" 1.4µm; focal_eq ~26mm
+  { brand:"HTC",     label:"10 (2016) / U Ultra (2017)",  sensor_w:6.20,  sensor_h:4.65,  focal_length:4.48, focal_length_eq:26, confidence:"✓" }, // [✓] 12MP 1/2.3" 1.55µm pixel math; 26mm
+  { brand:"HTC",     label:"Butterfly 3 (2015)",           sensor_w:4.64,  sensor_h:3.48,  focal_length:3.61, focal_length_eq:28, confidence:"~" }, // [~] 20.2MP 28mm confirmed; no sensor format
+  { brand:"HTC",     label:"One M9+ (2015)",             sensor_w:6.20,  sensor_h:4.65,  focal_length:4.82, focal_length_eq:28, confidence:"✓" }, // [✓] 20MP 1/2.4" 1.2µm pixel math; 28mm
   { brand:"HTC",     label:"One M9 (2015)",              sensor_w:5.54,  sensor_h:4.16,  focal_length:4.31, focal_length_eq:28, confidence:"~" }, // [~] 1/2.6"; 28mm
+  { brand:"HTC",     label:"One M8s (2015)",             sensor_w:4.64,  sensor_h:3.48,  focal_length:3.61, focal_length_eq:28, confidence:"~" }, // [~] 13MP 28mm confirmed; no sensor format
   { brand:"HTC",     label:"One M8 (2014)",              sensor_w:5.29,  sensor_h:3.97,  focal_length:3.82, focal_length_eq:26, confidence:"~" }, // [~] 2.0µm; 26mm
   { brand:"HTC",     label:"One M7 (2013)",              sensor_w:5.29,  sensor_h:3.97,  focal_length:3.82, focal_length_eq:26, confidence:"~" }, // [~] 2.0µm; 26mm
   { brand:"HTC",     label:"One X (2012)",               sensor_w:4.54,  sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] 1/3.2"; 28mm
@@ -431,6 +436,9 @@ const CAMERA_DB = [
   { brand:"HTC",     label:"Desire (2010)",              sensor_w:4.54,  sensor_h:3.42,  focal_length:4.41, focal_length_eq:35, confidence:"~" }, // [~] 1/3.2"; 35mm
 
   // ── NOKIA ────────────────────────────────────────────────────────────────
+  { brand:"Nokia",   label:"Nokia 7.2 (2019)",            sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"~" }, // [~] 48MP 1/2.0" 0.8µm pixel math; focal_eq ~
+  { brand:"Nokia",   label:"Nokia 6.2 (2019)",            sensor_w:4.62,  sensor_h:3.47,  focal_length:3.47, focal_length_eq:27, confidence:"~" }, // [~] 16MP 1.0µm pixel math; 27mm confirmed
+  { brand:"Nokia",   label:"Nokia 7 Plus (2018)",         sensor_w:5.60,  sensor_h:4.20,  focal_length:3.89, focal_length_eq:25, confidence:"✓" }, // [✓] 12MP 1/2.55" 1.4µm; 25mm Zeiss
   { brand:"Nokia",   label:"Nokia 8 / 8.1 (2017/2018)",  sensor_w:5.54,  sensor_h:4.16,  focal_length:4.00, focal_length_eq:26, confidence:"~" }, // [~] 1/2.6"; 26mm
   { brand:"Nokia",   label:"Nokia 6.1 (2018)",            sensor_w:4.59,  sensor_h:3.44,  focal_length:3.57, focal_length_eq:28, confidence:"✓" }, // [✓] 1/2.8" EXIF; 28mm
   { brand:"Nokia",   label:"Lumia 1020 (2013)",           sensor_w:7.44,  sensor_h:5.58,  focal_length:5.38, focal_length_eq:26, confidence:"~" }, // [~] 1/1.5"; 26mm
@@ -703,6 +711,35 @@ const CAMERA_DB = [
   { brand:"Huawei", label:"nova plus",                 sensor_w:4.86,  sensor_h:3.64,  focal_length:3.64, focal_length_eq:26, confidence:"?" }, // [?] 16MP 1/2.8"; no focal mm listed
   { brand:"Huawei", label:"nova",                      sensor_w:4.41,  sensor_h:3.31,  focal_length:3.31, focal_length_eq:27, confidence:"?" }, // [?] 12MP 1/2.9"; no focal mm listed
   { brand:"Huawei", label:"G9 Plus",                   sensor_w:4.86,  sensor_h:3.64,  focal_length:3.64, focal_length_eq:26, confidence:"?" }, // [?] 16MP 1/2.8"; no focal mm listed
+  { brand:"Huawei", label:"P9 / P9 Plus",             sensor_w:5.00,  sensor_h:3.75,  focal_length:3.75, focal_length_eq:27, confidence:"✓" }, // [✓] 1/2.9" 1.25µm pixel math; 27mm
+  { brand:"Huawei", label:"P9 lite",                  sensor_w:4.13,  sensor_h:3.10,  focal_length:3.10, focal_length_eq:27, confidence:"~" }, // [~] 1/3.1" 1.12µm; focal_eq ~
+  { brand:"Huawei", label:"Mate 8",                   sensor_w:4.57,  sensor_h:3.43,  focal_length:3.43, focal_length_eq:27, confidence:"✓" }, // [✓] 16MP 1/2.8"; 27mm
+  { brand:"Huawei", label:"Mate S",                   sensor_w:4.92,  sensor_h:3.69,  focal_length:3.82, focal_length_eq:28, confidence:"✓" }, // [✓] 13MP 1/2.6"; 28mm
+  { brand:"Huawei", label:"P8",                       sensor_w:4.13,  sensor_h:3.10,  focal_length:3.21, focal_length_eq:28, confidence:"✓" }, // [✓] 13MP 1/3.1" 1.12µm; 28mm
+  { brand:"Huawei", label:"P8max",                    sensor_w:4.64,  sensor_h:3.48,  focal_length:3.48, focal_length_eq:27, confidence:"?" }, // [?] 13MP; no sensor format
+  { brand:"Huawei", label:"P8 lite (2015)",           sensor_w:4.64,  sensor_h:3.48,  focal_length:3.48, focal_length_eq:27, confidence:"~" }, // [~] 13MP 27mm confirmed; no sensor format
+  { brand:"Huawei", label:"Ascend Mate7",             sensor_w:4.64,  sensor_h:3.48,  focal_length:3.61, focal_length_eq:28, confidence:"~" }, // [~] 13MP 28mm confirmed; no sensor format
+
+  // ── LG ───────────────────────────────────────────────────────────────────
+  { brand:"LG",     label:"V60 ThinQ 5G / V60 ThinQ 5G UW (2020)", sensor_w:7.40, sensor_h:5.55, focal_length:5.55, focal_length_eq:27, confidence:"✓" }, // [✓] 64MP 1/1.72" 0.8µm pixel math; 27mm
+  { brand:"LG",     label:"Velvet 5G / Velvet 5G UW (2020)", sensor_w:6.40, sensor_h:4.80, focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 48MP 1/2.0" 0.8µm pixel math; 26mm
+  { brand:"LG",     label:"Wing 5G (2020)",             sensor_w:7.40,  sensor_h:5.55,  focal_length:5.14, focal_length_eq:25, confidence:"✓" }, // [✓] 64MP 1/1.72" 0.8µm pixel math; 25mm
+  { brand:"LG",     label:"G6 / V30 / V30S ThinQ / G7 ThinQ / V35 ThinQ (2017–2018)", sensor_w:4.13, sensor_h:3.10, focal_length:3.44, focal_length_eq:30, confidence:"✓" }, // [✓] 1/3.1"; 30mm
+  { brand:"LG",     label:"V40 ThinQ / G8 ThinQ / G8S ThinQ / G8X ThinQ / V50S ThinQ 5G (2018–2019)", sensor_w:5.60, sensor_h:4.20, focal_length:4.20, focal_length_eq:27, confidence:"✓" }, // [✓] 12MP 1/2.55" 1.4µm pixel math; 27mm
+  { brand:"LG",     label:"G5 (2016)",                    sensor_w:4.92,  sensor_h:3.69,  focal_length:3.56, focal_length_eq:26, confidence:"✓" }, // [✓] 16MP 1/2.6"; 26mm
+  { brand:"LG",     label:"G5 SE / V20 (2016)",           sensor_w:4.92,  sensor_h:3.69,  focal_length:3.96, focal_length_eq:29, confidence:"✓" }, // [✓] 16MP 1/2.6"; 29mm
+  { brand:"LG",     label:"G4 / G4 Dual (2015)",         sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"✓" }, // [✓] 16MP 1/2.6" 1.12µm; 28mm
+  { brand:"LG",     label:"V10 (2015)",                   sensor_w:4.92,  sensor_h:3.69,  focal_length:3.83, focal_length_eq:28, confidence:"~" }, // [~] 16MP 1/2.6"; focal_eq ~28mm (G4 same sensor)
+  { brand:"LG",     label:"G2 / G3 (2013–2014)",          sensor_w:4.13,  sensor_h:3.10,  focal_length:3.33, focal_length_eq:29, confidence:"✓" }, // [✓] 13MP 1/3.1" 1.12µm; 29mm
+
+  // ── MOTOROLA ─────────────────────────────────────────────────────────────
+  { brand:"Motorola", label:"Signature / Razr Fold (2026)",              sensor_w:9.96,  sensor_h:7.47,  focal_length:6.36, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.28" 1.22µm pixel math; 23mm
+  { brand:"Motorola", label:"Edge 50 Ultra / Moto X50 Ultra (2024)",     sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.3" 1.2µm pixel math; 23mm
+  { brand:"Motorola", label:"Razr 50 Ultra / Razr+ 2024 / Razr+ 2025",   sensor_w:6.53,  sensor_h:4.90,  focal_length:4.35, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.95" 0.8µm pixel math; 24mm
+  { brand:"Motorola", label:"Razr 60 Ultra (2025) / Edge 60 Pro (2025) / Edge 70 Pro+ (2026)", sensor_w:8.17, sensor_h:6.13, focal_length:5.45, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm pixel math; 24mm
+  { brand:"Motorola", label:"Edge 30 Ultra / Moto X30 Pro (2022)",          sensor_w:10.45, sensor_h:7.84, focal_length:6.68, focal_length_eq:23, confidence:"~" }, // [~] 200MP 1/1.22" 0.64µm pixel math; focal_eq ~23mm
+  { brand:"Motorola", label:"Edge+ 5G UW (2022) / Edge 30 Pro / X40 / Razr 2022 / Edge 40 Pro / Edge+ (2023) / ThinkPhone (2022–2023)", sensor_w:8.17, sensor_h:6.13, focal_length:5.45, focal_length_eq:24, confidence:"~" }, // [~] 50MP 1/1.55" 1.0µm pixel math; focal_eq ~24mm
+  { brand:"Motorola", label:"Razr 40 Ultra / Razr+ 2023 (2023)",            sensor_w:5.60,  sensor_h:4.20, focal_length:4.04, focal_length_eq:26, confidence:"~" }, // [~] 12MP 1/2.55" 1.4µm; focal_eq ~26mm (HTC 10 same sensor 26mm)
 
   // ── DJI (DRONES) ─────────────────────────────────────────────────────────
   { brand:"DJI", label:"Inspire 3 / Zenmuse X9-8K (full frame)", sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
@@ -734,11 +771,16 @@ const CAMERA_DB = [
   { brand:"Sony", label:"RX0 II (1\")",                  sensor_w:11.55, sensor_h:8.66,  focal_length:7.7,  focal_length_eq:24 },
 
   // ── SONY XPERIA (smartphones) ────────────────────────────────────────────
-  { brand:"Sony",    label:"Xperia 1 V / 5 V (2023)",    sensor_w:9.49,  sensor_h:7.12,  focal_length:6.33, focal_length_eq:24, confidence:"~" }, // [~] 1/1.35"; 24mm
-  { brand:"Sony",    label:"Xperia 1 III / 5 III (2021)", sensor_w:7.60,  sensor_h:5.70,  focal_length:5.07, focal_length_eq:24, confidence:"~" }, // [~] 1/1.7"; 24mm
-  { brand:"Sony",    label:"Xperia XZ2 / XZ3 (2018)",    sensor_w:6.13,  sensor_h:4.60,  focal_length:4.26, focal_length_eq:25, confidence:"~" }, // [~] 1/2.3"; 25mm
-  { brand:"Sony",    label:"Xperia XZ / XZ1 (2016/2017)", sensor_w:6.13,  sensor_h:4.60,  focal_length:4.09, focal_length_eq:24, confidence:"~" }, // [~] 1/2.3"; 24mm
-  { brand:"Sony",    label:"Xperia Z5 / Z3+ (2015)",     sensor_w:6.13,  sensor_h:4.60,  focal_length:4.09, focal_length_eq:24, confidence:"~" }, // [~] 1/2.3"; 24mm
+  { brand:"Sony",    label:"Xperia 1 V / 5 V / 1 VI / 1 VII / 1 VIII (2023–2026)", sensor_w:8.96, sensor_h:6.72, focal_length:5.97, focal_length_eq:24, confidence:"✓" }, // [✓] 48MP 1/1.35" 1.12µm pixel math; 24mm Zeiss
+  { brand:"Sony",    label:"Xperia Pro-I (2021)",            sensor_w:9.60,  sensor_h:7.20,  focal_length:6.40, focal_length_eq:24, confidence:"✓" }, // [✓] 12MP 1.0"-type 2.4µm pixel math; 24mm Zeiss
+  { brand:"Sony",    label:"Xperia 1 II / 5 II / 1 III / 5 III / 1 IV / 5 IV (2020–2022)", sensor_w:7.60, sensor_h:5.70, focal_length:5.07, focal_length_eq:24, confidence:"✓" }, // [✓] 12MP 1/1.7" 1.8µm; 24mm Zeiss
+  { brand:"Sony",    label:"Xperia 10 III (2021)",       sensor_w:4.57,  sensor_h:3.43,  focal_length:3.43, focal_length_eq:27, confidence:"✓" }, // [✓] 12MP 1/2.8"; 27mm
+  { brand:"Sony",    label:"Xperia 10 II (2020)",        sensor_w:4.57,  sensor_h:3.43,  focal_length:3.30, focal_length_eq:26, confidence:"✓" }, // [✓] 12MP 1/2.8"; 26mm
+  { brand:"Sony",    label:"Xperia 1 / 5 (2019)",        sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 12MP 1/2.55" 1.4µm; 26mm Zeiss
+  { brand:"Sony",    label:"Xperia XZ2 / XZ2 Compact / XZ2 Premium / XZ3 (2018)", sensor_w:6.13, sensor_h:4.60, focal_length:4.26, focal_length_eq:25, confidence:"✓" }, // [✓] 19MP 1/2.3" 1.22µm pixel math; 25mm
+  { brand:"Sony",    label:"Xperia XZs / XZ Premium / XZ1 / XZ1 Compact (2017)", sensor_w:6.13, sensor_h:4.60, focal_length:4.26, focal_length_eq:25, confidence:"✓" }, // [✓] 19MP 1/2.3"; 25mm
+  { brand:"Sony",    label:"Xperia X / X Compact / X Performance / XZ (2016)", sensor_w:6.13, sensor_h:4.60, focal_length:4.09, focal_length_eq:24, confidence:"✓" }, // [✓] 23MP 1/2.3"; 24mm
+  { brand:"Sony",    label:"Xperia Z3+ / Z5 / Z5 Compact / Z5 Premium (2015)", sensor_w:6.13, sensor_h:4.60, focal_length:4.09, focal_length_eq:24, confidence:"✓" }, // [✓] 23MP 1/2.3"; 24mm (Z5 confirmed; Z3+ assumed same)
   { brand:"Sony",    label:"Xperia Z2 / Z3 (2014)",      sensor_w:6.13,  sensor_h:4.60,  focal_length:4.76, focal_length_eq:28, confidence:"~" }, // [~] 1/2.3"; 28mm
   { brand:"Sony",    label:"Xperia Z1 (2013)",           sensor_w:6.13,  sensor_h:4.60,  focal_length:4.60, focal_length_eq:27, confidence:"~" }, // [~] 1/2.3"; 27mm
   { brand:"Sony",    label:"Xperia Z / Arc S (2012)",    sensor_w:4.54,  sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] 1/3.2"; 28mm
