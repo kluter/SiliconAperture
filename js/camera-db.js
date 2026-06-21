@@ -447,22 +447,38 @@ const CAMERA_DB = [
   { brand:"Nokia",   label:"N8 (2010)",                   sensor_w:7.00,  sensor_h:5.25,  focal_length:5.44, focal_length_eq:28, confidence:"~" }, // [~] 1/1.83"; 28mm
 
   // ── XIAOMI ───────────────────────────────────────────────────────────────
+  { brand:"Xiaomi", label:"17 Ultra (2026)",             sensor_w:13.2,  sensor_h:8.80,  focal_length:8.43, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1.0"-type 1.6µm; 23mm Leica
+  { brand:"Xiaomi", label:"17 Max (2026)",               sensor_w:9.14,  sensor_h:6.86,  focal_length:5.84, focal_length_eq:23, confidence:"✓" }, // [✓] 200MP 1/1.4" 0.56µm physical; 23mm Leica
+  { brand:"Xiaomi", label:"12 Pro / 17 Pro Max / 17 Pro (2022–2025)", sensor_w:9.96, sensor_h:7.47, focal_length:6.36, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.28" 1.22µm; 23mm Leica
+  { brand:"Xiaomi", label:"12 Pro (Dim.) / 12S / 12S Pro / 13T / 13T Pro (2022–2023)", sensor_w:9.96, sensor_h:7.47, focal_length:6.64, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.28" 1.22µm; 24mm Leica
+  { brand:"Xiaomi", label:"14 Pro / 14T Pro / 15 Pro / 15S Pro / 15T Pro / 17 / 17T Pro / K90 Pro Max / Poco F8 Ultra (2023–2026)", sensor_w:9.80, sensor_h:7.35, focal_length:6.26, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.31" 1.2µm; 23mm Leica
+  { brand:"Xiaomi", label:"14T / K70 Ultra / Mix Flip / Mix Flip 2 / K80 Ultra / 15T / 17T (2024–2026)", sensor_w:8.17, sensor_h:6.13, focal_length:5.22, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.55" 1.0µm; 23mm Leica
+  { brand:"Xiaomi", label:"K70 / K70 Pro / Poco F6 Pro / K80 / K80 Pro / F7 Pro / F7 Ultra / K90 Max / K90 / F8 Pro (2023–2026)", sensor_w:8.17, sensor_h:6.13, focal_length:5.45, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.55" 1.0µm; 24mm
+  { brand:"Xiaomi", label:"14 Civi / Civi 4 Pro / Civi 5 Pro (2024–2025)",  sensor_w:8.17,  sensor_h:6.13,  focal_length:5.67, focal_length_eq:25, confidence:"✓" }, // [✓] 50MP 1/1.55" 1.0µm; 25mm Leica
+  { brand:"Xiaomi", label:"12T / K50 Ultra (2022)",      sensor_w:7.68,  sensor_h:5.76,  focal_length:5.12, focal_length_eq:24, confidence:"✓" }, // [✓] 108MP 1/1.67" 0.64µm pixel math; 24mm
+  { brand:"Xiaomi", label:"Poco F6 / Turbo 3 / F7 / Turbo 4 Pro / X8 Pro Max / X8 Pro / Turbo 5 Max / Turbo 5 (2024–2026)", sensor_w:6.53, sensor_h:4.90, focal_length:4.72, focal_length_eq:26, confidence:"✓" }, // [✓] 50MP 1/1.95" 0.8µm pixel math; 26mm
+  { brand:"Xiaomi", label:"K60 / K70E / Poco X6 Pro (2022–2024)", sensor_w:6.47, sensor_h:4.85, focal_length:4.49, focal_length_eq:25, confidence:"✓" }, // [✓] 64MP 1/2.0" 0.7µm pixel math; 25mm
   { brand:"Xiaomi", label:"Xiaomi 15 Ultra (main)",     sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23, confidence:"~" }, // [~] 1/1.31"; 23mm
   { brand:"Xiaomi", label:"Xiaomi 15 (main)",           sensor_w:7.02,  sensor_h:5.27,  focal_length:4.68, focal_length_eq:24, confidence:"?" }, // [?]
   { brand:"Xiaomi", label:"Xiaomi 14 Ultra (main)",     sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23, confidence:"~" }, // [~] 1/1.31"; 23mm
   { brand:"Xiaomi", label:"Xiaomi 14 (main)",           sensor_w:7.02,  sensor_h:5.27,  focal_length:4.68, focal_length_eq:24, confidence:"?" }, // [?]
-  { brand:"Xiaomi", label:"Xiaomi 13 Ultra (2023)",    sensor_w:13.2,  sensor_h:8.80,  focal_length:8.43, focal_length_eq:23, confidence:"~" }, // [~] IMX989 1"; 23mm
-  { brand:"Xiaomi", label:"Xiaomi 13 (2023)",          sensor_w:8.60,  sensor_h:6.45,  focal_length:5.73, focal_length_eq:24, confidence:"~" }, // [~] IMX800 1/1.49"; 24mm
-  { brand:"Xiaomi", label:"Xiaomi 12 Pro (2022)",      sensor_w:7.02,  sensor_h:5.27,  focal_length:4.49, focal_length_eq:23, confidence:"~" }, // [~] GN5 1/1.28"; 23mm
-  { brand:"Xiaomi", label:"Xiaomi 12 (2022)",          sensor_w:5.57,  sensor_h:4.18,  focal_length:3.71, focal_length_eq:24, confidence:"~" }, // [~] IMX766 1/1.56"; 24mm
-  { brand:"Xiaomi", label:"Xiaomi 11 (2021)",          sensor_w:9.15,  sensor_h:6.86,  focal_length:6.61, focal_length_eq:26, confidence:"~" }, // [~] HM2 108MP 1/1.33"; 26mm
-  { brand:"Xiaomi", label:"Mi 10 Pro (2020)",          sensor_w:9.15,  sensor_h:6.86,  focal_length:6.61, focal_length_eq:26, confidence:"~" }, // [~] HMX 108MP 1/1.33"; 26mm
-  { brand:"Xiaomi", label:"Mi 9 (2019)",               sensor_w:6.40,  sensor_h:4.80,  focal_length:4.80, focal_length_eq:27, confidence:"~" }, // [~] IMX586 1/2"; 27mm
-  { brand:"Xiaomi", label:"Mi 8 (2018)",               sensor_w:5.64,  sensor_h:4.23,  focal_length:4.07, focal_length_eq:26, confidence:"~" }, // [~] IMX363 1/2.55"; 26mm
-  { brand:"Xiaomi", label:"Mi 6 (2017)",               sensor_w:4.80,  sensor_h:3.60,  focal_length:3.60, focal_length_eq:27, confidence:"~" }, // [~] IMX386 1/3"; 27mm
+  { brand:"Xiaomi", label:"12S Ultra / 13 Pro / 13 Ultra (2022–2023)", sensor_w:13.2, sensor_h:8.80, focal_length:8.43, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1.0"-type 1.6µm; 23mm Leica
+  { brand:"Xiaomi", label:"Civi 3 / K60 Ultra / Mix Fold 3 / Mix Fold 4 / 13 (2022–2024)", sensor_w:8.59, sensor_h:6.44, focal_length:5.49, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.49" 1.0µm; 23mm Leica
+  { brand:"Xiaomi", label:"Mi 11 Pro / Mi 11 Ultra (2021)", sensor_w:11.43, sensor_h:8.57,  focal_length:7.62, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.12" 1.4µm pixel math; 24mm
+  { brand:"Xiaomi", label:"Mix 4 (2021)",                  sensor_w:9.60,  sensor_h:7.20,  focal_length:6.40, focal_length_eq:24, confidence:"✓" }, // [✓] 108MP 1/1.33" 0.8µm pixel math; 24mm
+  { brand:"Xiaomi", label:"Mi 10 Ultra (2020)",            sensor_w:9.60,  sensor_h:7.20,  focal_length:6.67, focal_length_eq:25, confidence:"✓" }, // [✓] 48MP 1/1.32" 1.2µm pixel math; 25mm
+  { brand:"Xiaomi", label:"K40 Pro+ / K50 Pro / Mi 11i / Mi 11X Pro / 11T Pro (2021–2022)", sensor_w:8.40, sensor_h:6.30, focal_length:6.07, focal_length_eq:26, confidence:"✓" }, // [✓] 108MP 1/1.52" 0.7µm pixel math; 26mm
+  { brand:"Xiaomi", label:"Mi 10T / K30 Pro / K30 Pro Zoom / K40 Pro / K30S / Poco F2 Pro (2020–2021)", sensor_w:7.39, sensor_h:5.54, focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 64MP 1/1.7" 0.8µm pixel math; 26mm
+  // Xiaomi 12 Pro (2022) — consolidated into "12 Pro / 17 Pro Max / 17 Pro" entry above (1/1.28" 1.22µm 23mm)
+  { brand:"Xiaomi", label:"12 (2022)",                  sensor_w:8.17,  sensor_h:6.13,  focal_length:5.90, focal_length_eq:26, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm pixel math; 26mm
+  { brand:"Xiaomi", label:"Mi 10 / Mi 10 Pro / Mi 10T Pro / 11 (2020–2021)", sensor_w:9.60, sensor_h:7.20, focal_length:6.93, focal_length_eq:26, confidence:"✓" }, // [✓] 108MP 1/1.33" 0.8µm pixel math; 26mm (Mi 10/10 Pro focal_eq inferred from Mi 10T Pro)
+  { brand:"Xiaomi", label:"Mi 9 / Mi 9 Pro / Mi 9 Pro 5G / Mi 9 Explorer (2019)", sensor_w:6.40, sensor_h:4.80, focal_length:4.80, focal_length_eq:27, confidence:"✓" }, // [✓] 48MP 1/2.0" 0.8µm; 27mm
+  { brand:"Xiaomi", label:"Mi 9T Pro / K20 Pro / K20 Pro Premium (2019)", sensor_w:6.40, sensor_h:4.80, focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 48MP 1/2.0" 0.8µm; 26mm
+  { brand:"Xiaomi", label:"Mi 8 / Mi 8 Pro / Mi 8 Explorer / Mi Mix 3 / Mi Mix 3 5G / Poco F1 (2018–2019)", sensor_w:5.64, sensor_h:4.23, focal_length:4.07, focal_length_eq:26, confidence:"~" }, // [~] 12MP IMX363 1/2.55" 1.4µm; 26mm (focal_eq unconfirmed)
+  { brand:"Xiaomi", label:"Mi 6 / Mi Mix 2 (2017)",    sensor_w:5.00,  sensor_h:3.75,  focal_length:3.75, focal_length_eq:27, confidence:"✓" }, // [✓] 12MP 1/2.9" 1.25µm pixel math; 27mm (Mi Mix 2 same sensor, focal_eq inferred)
   { brand:"Xiaomi",  label:"Mi 5 (2016)",                sensor_w:4.80,  sensor_h:3.60,  focal_length:3.73, focal_length_eq:28, confidence:"~" }, // [~] IMX298; 28mm
   { brand:"Xiaomi",  label:"Mi 4 (2014)",                sensor_w:4.80,  sensor_h:3.60,  focal_length:3.73, focal_length_eq:28, confidence:"~" }, // [~] IMX214; 28mm
-  { brand:"Xiaomi",  label:"Mi 3 (2013)",                sensor_w:4.54,  sensor_h:3.42,  focal_length:4.41, focal_length_eq:35, confidence:"~" }, // [~] 35mm
+  { brand:"Xiaomi",  label:"Mi 3 (2013)",                sensor_w:4.54,  sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] 28mm confirmed; sensor_w estimated (no pixel size in spec)
 
   // ── HUAWEI ───────────────────────────────────────────────────────────────
   { brand:"Huawei", label:"Mate 80 Pro Max Wind",       sensor_w:4.64,  sensor_h:3.48,  focal_length:3.09, focal_length_eq:24, confidence:"?" }, // [?] 50MP f/1.4-4.0, 24mm; no sensor format
