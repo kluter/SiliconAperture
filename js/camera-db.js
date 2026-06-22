@@ -442,6 +442,23 @@ const CAMERA_DB = [
   { brand:"OnePlus", label:"OnePlus 2 (2015)",          sensor_w:4.54,  sensor_h:3.42,  focal_length:3.41, focal_length_eq:27, confidence:"~" }, // [~] IMX214; 27mm
   { brand:"OnePlus", label:"OnePlus 1 (2014)",          sensor_w:4.54,  sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] IMX214; 28mm
 
+  // ── OPPO ─────────────────────────────────────────────────────────────────
+  { brand:"Oppo", label:"Find X6 Pro / Find X7 Ultra / Find X8 Ultra (2023–2025)", sensor_w:13.06, sensor_h:9.80, focal_length:8.34, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1.0"-type (IMX989) 1.6µm pixel math; 23mm
+  { brand:"Oppo", label:"Find X9 Ultra (2026)",              sensor_w:11.43, sensor_h:8.57,  focal_length:7.30, focal_length_eq:23, confidence:"✓" }, // [✓] 200MP 1/1.12"; 23mm (no pixel size; sensor_w from format; ~0.70µm implied)
+  { brand:"Oppo", label:"Find X9 Pro (2025)",                sensor_w:9.96,  sensor_h:7.47,  focal_length:6.36, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.28" 1.22µm pixel math; 23mm
+  { brand:"Oppo", label:"Find X8 Pro / Find X9 / Find X9s Pro (2024–2026)", sensor_w:9.14, sensor_h:6.86, focal_length:5.84, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.4" 1.12µm; 23mm
+  { brand:"Oppo", label:"Find N3 (2023)",                    sensor_w:8.96,  sensor_h:6.72,  focal_length:5.97, focal_length_eq:24, confidence:"✓" }, // [✓] 48MP 1/1.43" 1.12µm pixel math; 24mm
+  { brand:"Oppo", label:"Find X2 Pro (2020)",                sensor_w:8.96,  sensor_h:6.72,  focal_length:6.22, focal_length_eq:25, confidence:"✓" }, // [✓] 48MP 1/1.43" 1.12µm pixel math; 25mm
+  { brand:"Oppo", label:"Find N2 Flip / Find X7 / Find N6 (2022–2026)", sensor_w:8.17, sensor_h:6.13, focal_length:5.22, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP-200MP 1/1.56" 23mm; N6 pixel math confirms sensor_w
+  { brand:"Oppo", label:"Find N5 (2025)",                    sensor_w:8.17,  sensor_h:6.13,  focal_length:4.77, focal_length_eq:21, confidence:"~" }, // [~] 50MP 1/1.56" 21mm; pixel size inferred; foldable
+  { brand:"Oppo", label:"Reno5 Pro+ 5G / Find X3 Neo / Reno6 Pro+ 5G / Reno6 Pro 5G (SD) / Find N / K10 Pro / Find X5 / Find N2 / Reno9 Pro+ / Reno10 Pro+ / Find X6 / Find N3 Flip / Reno11 Pro (China) / Reno12 Pro (China) / Find X8 / Find X8s / Find X8s+ / Find X9s (2020–2026)", sensor_w:8.17, sensor_h:6.13, focal_length:5.45, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm pixel math; 24mm
+  { brand:"Oppo", label:"Find X5 Pro (2022)",                sensor_w:8.17,  sensor_h:6.13,  focal_length:5.67, focal_length_eq:25, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm; 25mm
+  { brand:"Oppo", label:"Find X3 / Find X3 Pro (2021)",      sensor_w:8.17,  sensor_h:6.13,  focal_length:5.90, focal_length_eq:26, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm; 26mm
+  { brand:"Oppo", label:"Reno Ace / Reno 5G / Reno 10x zoom / Ace2 / Find X2 (2019–2020)", sensor_w:6.40, sensor_h:4.80, focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 48MP 1/2.0" 0.8µm pixel math; 26mm
+  { brand:"Oppo", label:"N3 (2014)",                          sensor_w:6.19,  sensor_h:4.64,  focal_length:4.81, focal_length_eq:28, confidence:"?" }, // [?] 16MP 1/2.3" 1.34µm pixel math; focal_eq estimated 28mm
+  { brand:"Oppo", label:"Find X / Find X Lamborghini (2018)", sensor_w:5.64,  sensor_h:4.23,  focal_length:3.60, focal_length_eq:23, confidence:"~" }, // [~] 16MP 1/2.6" 1.22µm; pixel math 5.64mm; format gives 4.92mm — conflict
+  { brand:"Oppo", label:"Find 7 / Find 7a (2014)",            sensor_w:4.27,  sensor_h:3.20,  focal_length:3.32, focal_length_eq:28, confidence:"?" }, // [?] 13MP 1/3.0" format only; focal_eq estimated 28mm
+
   // ── HTC ──────────────────────────────────────────────────────────────────
   { brand:"HTC",     label:"U11 / U11+ / U12+ (2017–2018)", sensor_w:5.60, sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"~" }, // [~] 12MP 1/2.55" 1.4µm; focal_eq ~26mm
   { brand:"HTC",     label:"10 (2016) / U Ultra (2017)",  sensor_w:6.20,  sensor_h:4.65,  focal_length:4.48, focal_length_eq:26, confidence:"✓" }, // [✓] 12MP 1/2.3" 1.55µm pixel math; 26mm
