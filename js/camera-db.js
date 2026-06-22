@@ -405,6 +405,27 @@ const CAMERA_DB = [
   { brand:"Google",  label:"Nexus 6P (2015)",            sensor_w:6.23,  sensor_h:4.67,  focal_length:4.67, focal_length_eq:27, confidence:"~" }, // [~] IMX377 1/2.3"; 27mm
   { brand:"Google",  label:"Nexus 5X (2015)",            sensor_w:6.25,  sensor_h:4.69,  focal_length:4.51, focal_length_eq:26, confidence:"✓" }, // [✓] 12.3MP 1/2.3" 1.55µm pixel math; 26mm
 
+  // ── HONOR ────────────────────────────────────────────────────────────────
+  { brand:"Honor", label:"Magic6 Pro / Magic6 RSR PD / Magic6 Ultimate / Magic7 RSR PD / Magic8 Pro / Magic8 Pro Air / Magic8 RSR PD (2024–2026)", sensor_w:9.80, sensor_h:7.35, focal_length:6.26, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.3" 1.2µm; 23mm (PD = Porsche Design)
+  { brand:"Honor", label:"Magic7 Pro (2024)",            sensor_w:9.80,  sensor_h:7.35,  focal_length:6.53, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.3" 1.2µm; 24mm
+  { brand:"Honor", label:"Magic V Flip 2 (2025)",        sensor_w:9.80,  sensor_h:7.35,  focal_length:6.81, focal_length_eq:25, confidence:"?" }, // [?] 200MP 1/1.3" 0.6µm pixel math; focal_eq estimated
+  { brand:"Honor", label:"Magic V / Magic3 Pro / Magic4 Pro / Magic V Flip / Magic V3 / Magic V5 / Magic V6 (2021–2026)", sensor_w:8.17, sensor_h:6.13, focal_length:5.22, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm; 23mm (Magic V: no sensor data in spec — inferred from Magic3 Pro/Magic4 Pro same config)
+  { brand:"Honor", label:"90 GT / 100 Pro (2023)",       sensor_w:8.17,  sensor_h:6.13,  focal_length:6.13, focal_length_eq:27, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm; 27mm (confirmed on 100 Pro; 90 GT same sensor)
+  { brand:"Honor", label:"Magic Vs2 (2023)",             sensor_w:8.17,  sensor_h:6.13,  focal_length:5.67, focal_length_eq:25, confidence:"~" }, // [~] 50MP; 25mm confirmed; sensor_w estimated (no format in spec)
+  { brand:"Honor", label:"Win / Win RT / 300 Ultra / 300 Pro / GT Pro / Magic Vs3 (2023–2025)", sensor_w:8.17, sensor_h:6.13, focal_length:5.22, focal_length_eq:23, confidence:"~" }, // [~] 50MP 1/1.56" 1.0µm; focal_eq inferred from Magic V3/V5/V6 (same sensor)
+  { brand:"Honor", label:"Magic6 Lite / Magic7 Lite / Magic8 Lite / 400 Lite (2023–2025)", sensor_w:7.68, sensor_h:5.76, focal_length:5.12, focal_length_eq:24, confidence:"~" }, // [~] 108MP 1/1.67"; focal_eq 24mm confirmed on Magic8 Lite; sensor_w from format
+  { brand:"Honor", label:"90 Pro / 500 Pro (China) / 400 Pro / 400 (2023–2025)", sensor_w:9.14, sensor_h:6.86, focal_length:6.09, focal_length_eq:24, confidence:"~" }, // [~] 200MP 1/1.4" 0.56µm; focal_eq inferred from 600 Pro (same sensor)
+  { brand:"Honor", label:"600 Pro (2026)",               sensor_w:9.14,  sensor_h:6.86,  focal_length:6.09, focal_length_eq:24, confidence:"✓" }, // [✓] 200MP 1/1.4" 0.56µm pixel math+format; 24mm
+  { brand:"Honor", label:"Magic5 Pro / Magic5 Ultimate / Magic4 Ultimate (2022–2023)", sensor_w:11.43, sensor_h:8.57, focal_length:7.30, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.12" 1.4µm pixel math+format; 23mm
+  { brand:"Honor", label:"70 Pro+ / 80 GT / Magic Vs / Magic Vs Ultimate (2022)", sensor_w:8.49, sensor_h:6.37, focal_length:6.37, focal_length_eq:27, confidence:"~" }, // [~] 54MP 1/1.49" 1.0µm pixel math; 27mm confirmed on Magic Vs/Vs Ultimate; 70 Pro+/80 GT same sensor, focal_eq inferred
+  { brand:"Honor", label:"80 Pro / 80 Pro Flat (2022–2023)", sensor_w:8.17, sensor_h:6.13, focal_length:5.45, focal_length_eq:24, confidence:"?" }, // [?] 160MP 1/1.56"; focal_eq estimated; sensor_w from format (stated 0.75µm pixel conflicts with format)
+  { brand:"Honor", label:"Magic3 Pro+ / 30 Pro+ (2020–2021)", sensor_w:9.96, sensor_h:7.47, focal_length:6.36, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.28" 1.22µm pixel math; 23mm
+  { brand:"Honor", label:"V30 / V30 Pro / View30 / View30 Pro / 30 / 30 Pro / Play4 Pro (2019–2020)", sensor_w:7.53, sensor_h:5.65, focal_length:5.65, focal_length_eq:27, confidence:"~" }, // [~] 40MP 1/1.7"; 27mm confirmed; sensor_w from format (no pixel size in spec)
+  { brand:"Honor", label:"View 20 (2018)",                   sensor_w:6.40,  sensor_h:4.80,  focal_length:4.80, focal_length_eq:27, confidence:"?" }, // [?] 48MP 1/2.0" 0.8µm pixel math+format; focal_eq estimated (no main cam focal_eq in spec)
+  { brand:"Honor", label:"V8 / Honor 9 (2016–2017)",          sensor_w:5.00,  sensor_h:3.75,  focal_length:3.75, focal_length_eq:27, confidence:"✓" }, // [✓] 12MP 1/2.9" 1.25µm pixel math; 27mm (V8 confirms sensor; Honor 9 same config)
+  { brand:"Honor", label:"Honor 8 (2016)",                   sensor_w:5.00,  sensor_h:3.75,  focal_length:4.86, focal_length_eq:35, confidence:"✓" }, // [✓] 12MP 1/2.9" 1.25µm pixel math; 35mm
+  { brand:"Honor", label:"Honor 7 (2015)",                   sensor_w:5.33,  sensor_h:4.00,  focal_length:4.00, focal_length_eq:27, confidence:"~" }, // [~] 20MP 1/2.4"; 27mm confirmed; sensor_w from format (no pixel size in spec)
+
   // ── ONEPLUS ──────────────────────────────────────────────────────────────
   { brand:"OnePlus", label:"OnePlus 13 (main)",         sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23, confidence:"~" }, // [~] 1/1.12"; 23mm
   { brand:"OnePlus", label:"OnePlus 12 (main)",         sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23, confidence:"~" }, // [~] 1/1.12"; 23mm
@@ -476,8 +497,12 @@ const CAMERA_DB = [
   { brand:"Xiaomi", label:"Mi 9T Pro / K20 Pro / K20 Pro Premium (2019)", sensor_w:6.40, sensor_h:4.80, focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 48MP 1/2.0" 0.8µm; 26mm
   { brand:"Xiaomi", label:"Mi 8 / Mi 8 Pro / Mi 8 Explorer / Mi Mix 3 / Mi Mix 3 5G / Poco F1 (2018–2019)", sensor_w:5.64, sensor_h:4.23, focal_length:4.07, focal_length_eq:26, confidence:"~" }, // [~] 12MP IMX363 1/2.55" 1.4µm; 26mm (focal_eq unconfirmed)
   { brand:"Xiaomi", label:"Mi 6 / Mi Mix 2 (2017)",    sensor_w:5.00,  sensor_h:3.75,  focal_length:3.75, focal_length_eq:27, confidence:"✓" }, // [✓] 12MP 1/2.9" 1.25µm pixel math; 27mm (Mi Mix 2 same sensor, focal_eq inferred)
-  { brand:"Xiaomi",  label:"Mi 5 (2016)",                sensor_w:4.80,  sensor_h:3.60,  focal_length:3.73, focal_length_eq:28, confidence:"~" }, // [~] IMX298; 28mm
-  { brand:"Xiaomi",  label:"Mi 4 (2014)",                sensor_w:4.80,  sensor_h:3.60,  focal_length:3.73, focal_length_eq:28, confidence:"~" }, // [~] IMX214; 28mm
+  { brand:"Xiaomi",  label:"Mi 5s (2016)",               sensor_w:6.20,  sensor_h:4.65,  focal_length:4.65, focal_length_eq:27, confidence:"?" }, // [?] 12MP 1/2.3" 1.55µm pixel math; focal_eq estimated
+  { brand:"Xiaomi",  label:"Mi Note 2 (2016)",           sensor_w:5.48,  sensor_h:4.11,  focal_length:3.96, focal_length_eq:26, confidence:"?" }, // [?] 22.5MP 1/2.6" 1.0µm pixel math; focal_eq estimated
+  { brand:"Xiaomi",  label:"Mi Mix (2016)",              sensor_w:4.62,  sensor_h:3.47,  focal_length:3.34, focal_length_eq:26, confidence:"?" }, // [?] 16MP 1/3.0" 1.0µm pixel math; focal_eq estimated
+  { brand:"Xiaomi",  label:"Mi 5s Plus (2016)",          sensor_w:4.66,  sensor_h:3.50,  focal_length:3.62, focal_length_eq:28, confidence:"?" }, // [?] dual 13MP 1/3.1" 1.12µm pixel math; focal_eq estimated
+  { brand:"Xiaomi",  label:"Mi 5 (2016)",                sensor_w:5.17,  sensor_h:3.88,  focal_length:4.02, focal_length_eq:28, confidence:"~" }, // [~] 16MP 1/2.8" 1.12µm pixel math; 28mm estimated
+  { brand:"Xiaomi",  label:"Mi 4 (2014)",                sensor_w:4.66,  sensor_h:3.50,  focal_length:3.62, focal_length_eq:28, confidence:"~" }, // [~] 13MP 1/3.1" 1.12µm pixel math; 28mm estimated
   { brand:"Xiaomi",  label:"Mi 3 (2013)",                sensor_w:4.54,  sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] 28mm confirmed; sensor_w estimated (no pixel size in spec)
 
   // ── HUAWEI ───────────────────────────────────────────────────────────────
