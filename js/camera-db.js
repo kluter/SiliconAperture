@@ -481,7 +481,7 @@ const CAMERA_DB = [
   { brand:"Realme", label:"GT 6 (2024)",                                sensor_w:9.68,  sensor_h:7.26,  focal_length:6.18, focal_length_eq:23, confidence:"?" }, // [?] 50MP 1/1.4" (pixel pitch not listed; sensor_w from format); focal_eq not listed; estimated 23mm
 
   // ── NOTHING ──────────────────────────────────────────────────────────────
-  { brand:"Nothing", label:"Phone (3) (2025)",             sensor_w:10.42, sensor_h:7.82,  focal_length:6.95, focal_length_eq:24, confidence:"~" }, // [~] 50MP 1/1.3" 24mm; pixel pitch not listed; sensor_w from format
+  { brand:"Nothing", label:"Phone (3) (2025)",             sensor_w:9.80,  sensor_h:7.35,  focal_length:6.53, focal_length_eq:24, confidence:"✓" }, // [✓] OmniVision OV50H 50MP 1/1.3" 1.2µm pixel math; 24mm
   { brand:"Nothing", label:"Phone (1) / (2) (2022–2023)",  sensor_w:8.17,  sensor_h:6.13,  focal_length:5.45, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm; 24mm
 
   // ── HTC ──────────────────────────────────────────────────────────────────
