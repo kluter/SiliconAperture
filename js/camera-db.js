@@ -484,6 +484,12 @@ const CAMERA_DB = [
   { brand:"Nothing", label:"Phone (3) (2025)",             sensor_w:9.80,  sensor_h:7.35,  focal_length:6.53, focal_length_eq:24, confidence:"✓" }, // [✓] OmniVision OV50H 50MP 1/1.3" 1.2µm pixel math; 24mm
   { brand:"Nothing", label:"Phone (1) / (2) (2022–2023)",  sensor_w:8.17,  sensor_h:6.13,  focal_length:5.45, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm; 24mm
 
+  // ── VIVO ─────────────────────────────────────────────────────────────────
+  { brand:"vivo", label:"X100 Ultra / X100 Pro / X90 Pro+ / X90 Pro (2022–2024)", sensor_w:13.06, sensor_h:9.80,  focal_length:8.34, focal_length_eq:23, confidence:"✓" }, // [✓] IMX989 1" 1.6µm pixel math; 23mm
+  { brand:"vivo", label:"X200 Pro (2024)",                                         sensor_w:9.96,  sensor_h:7.47,  focal_length:6.36, focal_length_eq:23, confidence:"✓" }, // [✓] LYT-818 1/1.28" 1.22µm pixel math; 23mm
+  { brand:"vivo", label:"X60 Pro+ / X70 Pro+ / X80 Pro (2021–2022)",              sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23, confidence:"~" }, // [~] Samsung GN1/GNV 1/1.3" 1.2µm pixel math; focal_eq ~23mm (not in spec)
+  { brand:"vivo", label:"X200 Ultra (2025)",                                       sensor_w:9.96,  sensor_h:7.47,  focal_length:9.68, focal_length_eq:35, confidence:"✓" }, // [✓] 1/1.28" 1.22µm pixel math; 35mm — main camera at standard focal length
+
   // ── HTC ──────────────────────────────────────────────────────────────────
   { brand:"HTC",     label:"U11 / U11+ / U12+ (2017–2018)", sensor_w:5.60, sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"~" }, // [~] 12MP 1/2.55" 1.4µm; focal_eq ~26mm
   { brand:"HTC",     label:"10 (2016) / U Ultra (2017)",  sensor_w:6.20,  sensor_h:4.65,  focal_length:4.48, focal_length_eq:26, confidence:"✓" }, // [✓] 12MP 1/2.3" 1.55µm pixel math; 26mm
