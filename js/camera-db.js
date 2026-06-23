@@ -23,7 +23,7 @@ const CAMERA_DB = [
   { brand:"Apple", label:"iPhone 16 Pro Max",          sensor_w:10.00, sensor_h:7.50,  focal_length:6.67, focal_length_eq:24, confidence:"✓" }, // [✓] 1/1.28"; 24mm
   { brand:"Apple", label:"iPhone 16 Pro",              sensor_w:10.00, sensor_h:7.50,  focal_length:6.67, focal_length_eq:24, confidence:"✓" }, // [✓] 1/1.28"; 24mm
   { brand:"Apple", label:"iPhone 16 / 16 Plus",        sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.56"; 26mm
-  { brand:"Apple", label:"iPhone 16e",                   sensor_w:5.60,  sensor_h:4.20,  focal_length:4.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55"; 26mm
+  { brand:"Apple", label:"iPhone 16e",                   sensor_w:5.60,  sensor_h:4.20,  focal_length:4.20, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55"; 26mm; focal_length EXIF (implies ~27mm; Apple states 26mm)
   { brand:"Apple", label:"iPhone 15 Pro Max",          sensor_w:10.00, sensor_h:7.50,  focal_length:6.67, focal_length_eq:24, confidence:"✓" }, // [✓] 1/1.28"; 24mm
   { brand:"Apple", label:"iPhone 15 Pro",              sensor_w:10.00, sensor_h:7.50,  focal_length:6.67, focal_length_eq:24, confidence:"✓" }, // [✓] 1/1.28"; 24mm
   { brand:"Apple", label:"iPhone 15 / 15 Plus",        sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.56"; 26mm
@@ -65,7 +65,7 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy S23 Ultra",         sensor_w:9.80,  sensor_h:7.35,  focal_length:6.53, focal_length_eq:24, confidence:"✓" }, // [✓] 1/1.3" 0.6µm; 24mm
   { brand:"Samsung", label:"Galaxy S23 / S23+",        sensor_w:8.21,  sensor_h:6.15,  focal_length:5.47, focal_length_eq:24, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; 24mm
   { brand:"Samsung", label:"Galaxy S23 FE",            sensor_w:8.15,  sensor_h:6.12,  focal_length:5.21, focal_length_eq:23, confidence:"✓" }, // [✓] 1/1.57" 1.0µm; 23mm
-  { brand:"Samsung", label:"Galaxy S22 Ultra",         sensor_w:7.81,  sensor_h:5.86,  focal_length:4.99, focal_length_eq:23, confidence:"?" }, // [?]
+  { brand:"Samsung", label:"Galaxy S22 Ultra",         sensor_w:9.62,  sensor_h:7.22,  focal_length:6.15, focal_length_eq:23, confidence:"~" }, // [~] 108MP 1/1.33" 0.8µm (HM3, same as S21 Ultra); 23mm
   { brand:"Samsung", label:"Galaxy S22 / S22+",        sensor_w:8.21,  sensor_h:6.15,  focal_length:5.24, focal_length_eq:23, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; 23mm
   { brand:"Samsung", label:"Galaxy Z Fold 6 (main)",   sensor_w:8.15,  sensor_h:6.12,  focal_length:5.21, focal_length_eq:23, confidence:"✓" }, // [✓] 1/1.57" 1.0µm; 23mm
   { brand:"Samsung", label:"Galaxy Z Fold4 (main)",    sensor_w:8.21,  sensor_h:6.15,  focal_length:5.24, focal_length_eq:23, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; 23mm
@@ -427,20 +427,25 @@ const CAMERA_DB = [
   { brand:"Honor", label:"Honor 7 (2015)",                   sensor_w:5.33,  sensor_h:4.00,  focal_length:4.00, focal_length_eq:27, confidence:"~" }, // [~] 20MP 1/2.4"; 27mm confirmed; sensor_w from format (no pixel size in spec)
 
   // ── ONEPLUS ──────────────────────────────────────────────────────────────
-  { brand:"OnePlus", label:"OnePlus 13 (main)",         sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23, confidence:"~" }, // [~] 1/1.12"; 23mm
-  { brand:"OnePlus", label:"OnePlus 12 (main)",         sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23, confidence:"~" }, // [~] 1/1.12"; 23mm
-  { brand:"OnePlus", label:"OnePlus 11 (2023)",         sensor_w:5.57,  sensor_h:4.18,  focal_length:3.71, focal_length_eq:24, confidence:"~" }, // [~] IMX890 1/1.56"; 24mm
+  { brand:"OnePlus", label:"OnePlus 12 / 13 (2023–2024)",             sensor_w:9.14,  sensor_h:6.86,  focal_length:5.84, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.43" 1.12µm pixel math; 23mm
+  { brand:"OnePlus", label:"Ace 6 Ultra (2026)",                       sensor_w:8.17,  sensor_h:6.13,  focal_length:5.22, focal_length_eq:23, confidence:"~" }, // [~] 50MP 1/1.55" 23mm; pixel pitch not listed; assumed 1.0µm
   { brand:"OnePlus", label:"OnePlus 10 Pro (2022)",     sensor_w:8.96,  sensor_h:6.72,  focal_length:5.72, focal_length_eq:23, confidence:"~" }, // [~] IMX789 1/1.43"; 23mm
   { brand:"OnePlus", label:"OnePlus 9 Pro (2021)",      sensor_w:8.96,  sensor_h:6.72,  focal_length:5.72, focal_length_eq:23, confidence:"~" }, // [~] IMX789 1/1.43"; 23mm
-  { brand:"OnePlus", label:"OnePlus 9 (2021)",          sensor_w:5.57,  sensor_h:4.18,  focal_length:3.56, focal_length_eq:23, confidence:"~" }, // [~] IMX766 1/1.56"; 23mm
+  { brand:"OnePlus", label:"OnePlus 9 (2021)",          sensor_w:8.96,  sensor_h:6.72,  focal_length:5.72, focal_length_eq:23, confidence:"~" }, // [~] IMX689 1/1.43" 1.12µm; 23mm
+  { brand:"OnePlus", label:"Open (2023)",                              sensor_w:8.96,  sensor_h:6.72,  focal_length:5.97, focal_length_eq:24, confidence:"✓" }, // [✓] 48MP 1/1.43" 1.12µm pixel math; 24mm
+  { brand:"OnePlus", label:"9RT / 10T / Ace Pro / 11 / Ace 2 / 11R / Ace 2 Pro / Ace 3 / Ace 3 Pro / 12R / Ace 5 / Ace 5 Pro / Ace 5 Ultra / 13R / 13s / 13T / 15 / 15R / 15T / Ace 6T (2021–2026)", sensor_w:8.17, sensor_h:6.13, focal_length:5.45, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm; 24mm
+  { brand:"OnePlus", label:"Ace 6 (2025)",                             sensor_w:8.17,  sensor_h:6.13,  focal_length:5.45, focal_length_eq:24, confidence:"~" }, // [~] 50MP 24mm; no sensor format in spec; inferred 1/1.56" 1.0µm from SD 8 Elite family
   { brand:"OnePlus", label:"OnePlus 8T / 8 (2020)",     sensor_w:6.40,  sensor_h:4.80,  focal_length:4.27, focal_length_eq:24, confidence:"~" }, // [~] IMX586 1/2"; 24mm
-  { brand:"OnePlus", label:"OnePlus 7 Pro / 7T (2019)", sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"~" }, // [~] IMX586 1/2"; 26mm
+  { brand:"OnePlus", label:"OnePlus 5 (2017)",          sensor_w:5.17,  sensor_h:3.88,  focal_length:3.45, focal_length_eq:24, confidence:"✓" }, // [✓] 16MP 1/2.8" 1.12µm pixel math; 24mm
+  { brand:"OnePlus", label:"OnePlus 8 Pro (2020)",      sensor_w:8.96,  sensor_h:6.72,  focal_length:6.22, focal_length_eq:25, confidence:"✓" }, // [✓] 48MP 1/1.43" 1.12µm pixel math; 25mm
+  { brand:"OnePlus", label:"OnePlus 6 / 6T (2018)",     sensor_w:5.64,  sensor_h:4.23,  focal_length:3.92, focal_length_eq:25, confidence:"✓" }, // [✓] IMX519 1/2.6" 1.22µm pixel math; 25mm
+  { brand:"OnePlus", label:"Ace 5 Racing (2025)",        sensor_w:6.53,  sensor_h:4.90,  focal_length:4.72, focal_length_eq:26, confidence:"✓" }, // [✓] 50MP 1/1.95" 0.8µm pixel math; 26mm
+  { brand:"OnePlus", label:"OnePlus 9R / 7 Pro / 7T (2019–2021)", sensor_w:6.40, sensor_h:4.80, focal_length:4.62, focal_length_eq:26, confidence:"~" }, // [~] IMX586 1/2" 0.8µm; 26mm (9R: 48MP ✓; 7 Pro/7T: ~)
   { brand:"OnePlus", label:"OnePlus 7 (2019)",          sensor_w:5.64,  sensor_h:4.23,  focal_length:4.07, focal_length_eq:26, confidence:"~" }, // [~] IMX519 1/2.55"; 26mm
-  { brand:"OnePlus", label:"OnePlus 6 / 6T (2018)",     sensor_w:4.80,  sensor_h:3.60,  focal_length:3.47, focal_length_eq:26, confidence:"~" }, // [~] IMX519 1/3"; 26mm
-  { brand:"OnePlus", label:"OnePlus 5 / 5T (2017)",     sensor_w:4.80,  sensor_h:3.60,  focal_length:3.47, focal_length_eq:26, confidence:"~" }, // [~] IMX398; 26mm
-  { brand:"OnePlus", label:"OnePlus 3 / 3T (2016)",     sensor_w:4.80,  sensor_h:3.60,  focal_length:3.47, focal_length_eq:26, confidence:"~" }, // [~] IMX298; 26mm
-  { brand:"OnePlus", label:"OnePlus 2 (2015)",          sensor_w:4.54,  sensor_h:3.42,  focal_length:3.41, focal_length_eq:27, confidence:"~" }, // [~] IMX214; 27mm
-  { brand:"OnePlus", label:"OnePlus 1 (2014)",          sensor_w:4.54,  sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] IMX214; 28mm
+  { brand:"OnePlus", label:"OnePlus 3 / 3T (2016)",     sensor_w:5.17,  sensor_h:3.88,  focal_length:3.73, focal_length_eq:26, confidence:"~" }, // [~] IMX298 1/2.8" 1.12µm pixel math; focal_eq ~26mm
+  { brand:"OnePlus", label:"OnePlus 5T (2017)",         sensor_w:5.17,  sensor_h:3.88,  focal_length:3.88, focal_length_eq:27, confidence:"✓" }, // [✓] 16MP 1/2.8" 1.12µm pixel math; 27mm
+  { brand:"OnePlus", label:"OnePlus 2 (2015)",          sensor_w:5.41,  sensor_h:4.06,  focal_length:4.06, focal_length_eq:27, confidence:"~" }, // [~] 13MP 1/2.6" 1.3µm pixel math; focal_eq ~27mm
+  { brand:"OnePlus", label:"OnePlus 1 (2014)",          sensor_w:4.66,  sensor_h:3.50,  focal_length:3.63, focal_length_eq:28, confidence:"~" }, // [~] 13MP 1/3.1" 1.12µm pixel math; focal_eq ~28mm
 
   // ── OPPO ─────────────────────────────────────────────────────────────────
   { brand:"Oppo", label:"Find X6 Pro / Find X7 Ultra / Find X8 Ultra (2023–2025)", sensor_w:13.06, sensor_h:9.80, focal_length:8.34, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1.0"-type (IMX989) 1.6µm pixel math; 23mm
@@ -458,6 +463,22 @@ const CAMERA_DB = [
   { brand:"Oppo", label:"N3 (2014)",                          sensor_w:6.19,  sensor_h:4.64,  focal_length:4.81, focal_length_eq:28, confidence:"?" }, // [?] 16MP 1/2.3" 1.34µm pixel math; focal_eq estimated 28mm
   { brand:"Oppo", label:"Find X / Find X Lamborghini (2018)", sensor_w:5.64,  sensor_h:4.23,  focal_length:3.60, focal_length_eq:23, confidence:"~" }, // [~] 16MP 1/2.6" 1.22µm; pixel math 5.64mm; format gives 4.92mm — conflict
   { brand:"Oppo", label:"Find 7 / Find 7a (2014)",            sensor_w:4.27,  sensor_h:3.20,  focal_length:3.32, focal_length_eq:28, confidence:"?" }, // [?] 13MP 1/3.0" format only; focal_eq estimated 28mm
+
+  // ── REALME ───────────────────────────────────────────────────────────────
+  { brand:"Realme", label:"GT 8 Pro (2025)",                            sensor_w:8.17,  sensor_h:6.13,  focal_length:4.99, focal_length_eq:22, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm; 22mm
+  { brand:"Realme", label:"GT5 Pro (2023)",                             sensor_w:9.14,  sensor_h:6.86,  focal_length:5.84, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.43" 1.12µm pixel math; 23mm
+  { brand:"Realme", label:"16 Pro+ (2026)",                             sensor_w:8.17,  sensor_h:6.13,  focal_length:5.22, focal_length_eq:23, confidence:"✓" }, // [✓] 200MP 1/1.56" 0.5µm pixel math; 23mm
+  { brand:"Realme", label:"GT 7 Pro / GT7 Pro Racing / 13 Pro+ / P3 Ultra / Neo8 / GT 7T / 15 Pro / P4 Pro (2024–2026)", sensor_w:8.17, sensor_h:6.13, focal_length:5.45, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm; 24mm
+  { brand:"Realme", label:"GT5 / GT5 240W / GT Neo 5 / GT Neo 5 240W / GT3 (2023)",  sensor_w:8.17,  sensor_h:6.13,  focal_length:5.45, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm; 24mm
+  { brand:"Realme", label:"GT2 Pro / GT2 / GT2 Explorer Master / GT Neo 3 / GT Neo 3 150W / GT Explorer Master (2021–2022)", sensor_w:8.17, sensor_h:6.13, focal_length:5.45, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm; 24mm
+  { brand:"Realme", label:"GT 7 (2025)",                                sensor_w:8.17,  sensor_h:6.13,  focal_length:5.45, focal_length_eq:24, confidence:"~" }, // [~] 50MP 1/1.56" 1.0µm; focal_eq not listed in spec; estimated 24mm from GT7T/GT7 Pro/15 Pro family
+  { brand:"Realme", label:"GT Neo5 SE (2023)",                          sensor_w:6.47,  sensor_h:4.85,  focal_length:4.49, focal_length_eq:25, confidence:"~" }, // [~] 64MP 1/2.0" 25mm; pixel pitch not listed; 0.7µm inferred (typical 64MP 1/2.0" e.g. Samsung GW3)
+  { brand:"Realme", label:"X50 Pro Player (2020)",                      sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 48MP 1/2.0" 0.8µm pixel math; 26mm
+  { brand:"Realme", label:"X7 Pro Ultra (2021)",                        sensor_w:6.47,  sensor_h:4.85,  focal_length:4.67, focal_length_eq:26, confidence:"✓" }, // [✓] 64MP 1/2.0" 0.7µm pixel math; 26mm
+  { brand:"Realme", label:"X2 Pro / X3 / X3 SuperZoom / X50 Pro 5G / GT 5G / GT Neo / GT Neo Flash / X7 Max 5G / X7 Pro / GT Neo2 (2019–2021)", sensor_w:7.39, sensor_h:5.54, focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 64MP 1/1.72–1.73" 0.8µm pixel math; 26mm
+  { brand:"Realme", label:"Neo7 SE / Neo7 Turbo / 13 Pro (2024–2025)", sensor_w:6.53,  sensor_h:4.90,  focal_length:4.72, focal_length_eq:26, confidence:"✓" }, // [✓] 50MP 1/1.95" 0.8µm pixel math; 26mm (Neo7 SE/Turbo/13 Pro all confirm 0.8µm)
+  { brand:"Realme", label:"Neo7 / GT Neo6 SE (2023–2024)",              sensor_w:6.53,  sensor_h:4.90,  focal_length:4.72, focal_length_eq:26, confidence:"~" }, // [~] 50MP 1/1.95" 26mm; pixel pitch not listed in spec; inferred 0.8µm from Neo7 SE/Turbo/13 Pro cluster
+  { brand:"Realme", label:"GT 6 (2024)",                                sensor_w:9.68,  sensor_h:7.26,  focal_length:6.18, focal_length_eq:23, confidence:"?" }, // [?] 50MP 1/1.4" (pixel pitch not listed; sensor_w from format); focal_eq not listed; estimated 23mm
 
   // ── HTC ──────────────────────────────────────────────────────────────────
   { brand:"HTC",     label:"U11 / U11+ / U12+ (2017–2018)", sensor_w:5.60, sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"~" }, // [~] 12MP 1/2.55" 1.4µm; focal_eq ~26mm
