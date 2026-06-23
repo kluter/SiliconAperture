@@ -480,6 +480,10 @@ const CAMERA_DB = [
   { brand:"Realme", label:"Neo7 / GT Neo6 SE (2023–2024)",              sensor_w:6.53,  sensor_h:4.90,  focal_length:4.72, focal_length_eq:26, confidence:"~" }, // [~] 50MP 1/1.95" 26mm; pixel pitch not listed in spec; inferred 0.8µm from Neo7 SE/Turbo/13 Pro cluster
   { brand:"Realme", label:"GT 6 (2024)",                                sensor_w:9.68,  sensor_h:7.26,  focal_length:6.18, focal_length_eq:23, confidence:"?" }, // [?] 50MP 1/1.4" (pixel pitch not listed; sensor_w from format); focal_eq not listed; estimated 23mm
 
+  // ── NOTHING ──────────────────────────────────────────────────────────────
+  { brand:"Nothing", label:"Phone (3) (2025)",             sensor_w:10.42, sensor_h:7.82,  focal_length:6.95, focal_length_eq:24, confidence:"~" }, // [~] 50MP 1/1.3" 24mm; pixel pitch not listed; sensor_w from format
+  { brand:"Nothing", label:"Phone (1) / (2) (2022–2023)",  sensor_w:8.17,  sensor_h:6.13,  focal_length:5.45, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm; 24mm
+
   // ── HTC ──────────────────────────────────────────────────────────────────
   { brand:"HTC",     label:"U11 / U11+ / U12+ (2017–2018)", sensor_w:5.60, sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"~" }, // [~] 12MP 1/2.55" 1.4µm; focal_eq ~26mm
   { brand:"HTC",     label:"10 (2016) / U Ultra (2017)",  sensor_w:6.20,  sensor_h:4.65,  focal_length:4.48, focal_length_eq:26, confidence:"✓" }, // [✓] 12MP 1/2.3" 1.55µm pixel math; 26mm
