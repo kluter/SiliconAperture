@@ -525,6 +525,10 @@ const CAMERA_DB = [
   { brand:"Nokia",   label:"Lumia 920 (2012)",            sensor_w:4.80,  sensor_h:3.60,  focal_length:3.73, focal_length_eq:28, confidence:"~" }, // [~] 1/3"; 28mm
   { brand:"Nokia",   label:"N8 (2010)",                   sensor_w:7.00,  sensor_h:5.25,  focal_length:5.44, focal_length_eq:28, confidence:"~" }, // [~] 1/1.83"; 28mm
 
+  // ── NUBIA (ZTE) ──────────────────────────────────────────────────────────
+  { brand:"nubia",  label:"Z70S Ultra (2025)",                                  sensor_w:9.80,  sensor_h:7.35,  focal_length:9.53, focal_length_eq:35, confidence:"✓" }, // [✓] 50MP 1/1.3" 1.2µm pixel math; 35mm
+  { brand:"nubia",  label:"Z60 Ultra / Z70 Ultra (2023–2024)",                  sensor_w:8.17,  sensor_h:6.13,  focal_length:7.94, focal_length_eq:35, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm pixel math; 35mm (Z60 Ultra lists 1/1.49" but 1.0µm pixel pitch gives 8.17mm)
+
   // ── XIAOMI ───────────────────────────────────────────────────────────────
   { brand:"Xiaomi", label:"17 Ultra (2026)",             sensor_w:13.2,  sensor_h:8.80,  focal_length:8.43, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1.0"-type 1.6µm; 23mm Leica
   { brand:"Xiaomi", label:"17 Max (2026)",               sensor_w:9.14,  sensor_h:6.86,  focal_length:5.84, focal_length_eq:23, confidence:"✓" }, // [✓] 200MP 1/1.4" 0.56µm physical; 23mm Leica
