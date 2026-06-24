@@ -529,6 +529,18 @@ const CAMERA_DB = [
   { brand:"nubia",  label:"Z70S Ultra (2025)",                                  sensor_w:9.80,  sensor_h:7.35,  focal_length:9.53, focal_length_eq:35, confidence:"✓" }, // [✓] 50MP 1/1.3" 1.2µm pixel math; 35mm
   { brand:"nubia",  label:"Z60 Ultra / Z70 Ultra (2023–2024)",                  sensor_w:8.17,  sensor_h:6.13,  focal_length:7.94, focal_length_eq:35, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm pixel math; 35mm (Z60 Ultra lists 1/1.49" but 1.0µm pixel pitch gives 8.17mm)
 
+  // ── ASUS ─────────────────────────────────────────────────────────────────
+  { brand:"Asus",   label:"Zenfone 9 / 10 / 11 Ultra / 12 Ultra (2022–2025)",    sensor_w:8.17,  sensor_h:6.13,  focal_length:5.45, focal_length_eq:24, confidence:"✓" }, // [✓] 50MP 1/1.56" 1.0µm pixel math; 24mm
+  { brand:"Asus",   label:"Zenfone 4 / 4 Pro (2017)",                             sensor_w:5.60,  sensor_h:4.20,  focal_length:3.89, focal_length_eq:25, confidence:"✓" }, // [✓] 12MP 1/2.55" 1.4µm pixel math; 25mm
+  { brand:"Asus",   label:"Zenfone 6 (2019)",                                     sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 48MP 1/2.0" 0.8µm pixel math; 26mm
+  { brand:"Asus",   label:"Zenfone 7 / 7 Pro / 8 / 8 Flip (2020–2021)",          sensor_w:7.39,  sensor_h:5.54,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 64MP 1/1.72" 0.8µm pixel math; 26mm
+
+  // ── SHARP (AQUOS) ────────────────────────────────────────────────────────
+  { brand:"Sharp",  label:"Aquos R7s / R8s pro (2023)",                          sensor_w:13.2,  sensor_h:9.90,  focal_length:6.97, focal_length_eq:19, confidence:"~" }, // [~] 47.2MP 1.0"-type; no pixel pitch; ~19mm ultrawide as primary
+  { brand:"Sharp",  label:"Aquos R8s / R9 / R10 / R11 (2023–2026)",              sensor_w:8.17,  sensor_h:6.13,  focal_length:5.22, focal_length_eq:23, confidence:"~" }, // [~] 50.3MP 1/1.55" ~1.0µm assumed; 23mm
+  { brand:"Sharp",  label:"Aquos R9 pro (2024)",                                  sensor_w:13.4,  sensor_h:10.05, focal_length:8.56, focal_length_eq:23, confidence:"~" }, // [~] 50.3MP 1/0.98"-type (~slightly larger than 1"); no pixel pitch; 23mm
+  { brand:"Sharp",  label:"Aquos R5G (2020)",                                     sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"~" }, // [~] 12MP 1.4µm pixel math; format not listed; 26mm
+
   // ── XIAOMI ───────────────────────────────────────────────────────────────
   { brand:"Xiaomi", label:"17 Ultra (2026)",             sensor_w:13.2,  sensor_h:8.80,  focal_length:8.43, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1.0"-type 1.6µm; 23mm Leica
   { brand:"Xiaomi", label:"17 Max (2026)",               sensor_w:9.14,  sensor_h:6.86,  focal_length:5.84, focal_length_eq:23, confidence:"✓" }, // [✓] 200MP 1/1.4" 0.56µm physical; 23mm Leica
