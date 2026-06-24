@@ -204,10 +204,14 @@ async function readExif(file) {
 
 /* ─── CAMERA AUTOCOMPLETE FROM EXIF ─────────────────────────── */
 const BRAND_MAP = {
-  apple: 'Apple', samsung: 'Samsung', google: 'Google',
-  oneplus: 'OnePlus', xiaomi: 'Xiaomi', dji: 'DJI',
-  htc: 'HTC', nokia: 'Nokia',
-  sony: 'Sony', canon: 'Canon', nikon: 'Nikon',
+  apple: 'Apple', asus: 'Asus', google: 'Google',
+  honor: 'Honor', htc: 'HTC', huawei: 'Huawei',
+  lg: 'LG', meizu: 'Meizu', motorola: 'Motorola',
+  nokia: 'Nokia', nothing: 'Nothing', nubia: 'nubia',
+  oneplus: 'OnePlus', oppo: 'Oppo', realme: 'Realme',
+  samsung: 'Samsung', sharp: 'Sharp', vivo: 'vivo',
+  xiaomi: 'Xiaomi', redmi: 'Xiaomi', poco: 'Xiaomi',
+  dji: 'DJI', sony: 'Sony', canon: 'Canon', nikon: 'Nikon',
   fujifilm: 'Fujifilm', fuji: 'Fujifilm',
   panasonic: 'Panasonic', olympus: 'OM System',
   'om digital': 'OM System', 'om system': 'OM System',
@@ -523,7 +527,7 @@ function populateCameraDropdown() {
   });
 
   const CATEGORIES = {
-    'Smartphones': ['Apple', 'Google', 'HTC', 'Nokia', 'OnePlus', 'Samsung', 'Xiaomi'],
+    'Smartphones': ['Apple', 'Asus', 'Google', 'Honor', 'HTC', 'Huawei', 'LG', 'Meizu', 'Motorola', 'Nokia', 'Nothing', 'nubia', 'OnePlus', 'Oppo', 'Realme', 'Samsung', 'Sharp', 'vivo', 'Xiaomi'],
     'Cameras':     ['Canon', 'DJI', 'Fujifilm', 'GoPro', 'Hasselblad', 'Nikon', 'OM System', 'Panasonic', 'Phase One', 'Sony'],
   };
 
