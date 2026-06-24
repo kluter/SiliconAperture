@@ -504,6 +504,16 @@ const CAMERA_DB = [
   { brand:"HTC",     label:"Desire HD (2010)",           sensor_w:4.54,  sensor_h:3.42,  focal_length:3.53, focal_length_eq:28, confidence:"~" }, // [~] 1/3.2"; 28mm
   { brand:"HTC",     label:"Desire (2010)",              sensor_w:4.54,  sensor_h:3.42,  focal_length:4.41, focal_length_eq:35, confidence:"~" }, // [~] 1/3.2"; 35mm
 
+  // ── MEIZU ────────────────────────────────────────────────────────────────
+  { brand:"Meizu",  label:"21 (2023)",                                          sensor_w:9.14,  sensor_h:6.86,  focal_length:5.59, focal_length_eq:22, confidence:"~" }, // [~] 200MP 1/1.4" ~0.56µm (Samsung HP3); 22mm
+  { brand:"Meizu",  label:"18 Pro / 18s Pro (2021)",                            sensor_w:9.80,  sensor_h:7.35,  focal_length:6.26, focal_length_eq:23, confidence:"✓" }, // [✓] 50MP 1/1.31" 1.2µm pixel math; 23mm
+  { brand:"Meizu",  label:"20 Infinity (2023)",                                 sensor_w:8.17,  sensor_h:6.13,  focal_length:5.22, focal_length_eq:23, confidence:"~" }, // [~] 50MP 1/1.56" ~1.0µm; 23mm
+  { brand:"Meizu",  label:"22 / 21 Pro (2024–2025)",                            sensor_w:9.80,  sensor_h:7.35,  focal_length:6.53, focal_length_eq:24, confidence:"~" }, // [~] 50MP 1/1.3" ~1.2µm; 21 Pro pixel pitch confirmed; 22 assumed same
+  { brand:"Meizu",  label:"20 / 20 Classic / 21 Note (2023–2024)",              sensor_w:8.17,  sensor_h:6.13,  focal_length:5.45, focal_length_eq:24, confidence:"~" }, // [~] 50MP 1/1.56" ~1.0µm; 24mm
+  { brand:"Meizu",  label:"16 / 16 Plus (2018)",                                sensor_w:6.20,  sensor_h:4.65,  focal_length:4.31, focal_length_eq:25, confidence:"~" }, // [~] 12MP 1/2.3" 1.55µm pixel math; 16 is 25mm confirmed; 16 Plus assumed same
+  { brand:"Meizu",  label:"17 Pro / 17 (2020)",                                 sensor_w:7.39,  sensor_h:5.54,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 64MP 1/1.72" 0.8µm pixel math; 26mm
+  { brand:"Meizu",  label:"Pro 6 / PRO 5 (2015–2016)",                          sensor_w:5.93,  sensor_h:4.45,  focal_length:5.11, focal_length_eq:31, confidence:"~" }, // [~] 21MP 1/2.4" ~1.12µm; PRO 5 has 1.12µm confirmed; Pro 6 pixel pitch assumed same; 31mm
+
   // ── NOKIA ────────────────────────────────────────────────────────────────
   { brand:"Nokia",   label:"Nokia 7.2 (2019)",            sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"~" }, // [~] 48MP 1/2.0" 0.8µm pixel math; focal_eq ~
   { brand:"Nokia",   label:"Nokia 6.2 (2019)",            sensor_w:4.62,  sensor_h:3.47,  focal_length:3.47, focal_length_eq:27, confidence:"~" }, // [~] 16MP 1.0µm pixel math; 27mm confirmed
