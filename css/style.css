@@ -122,6 +122,9 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
   flex-shrink: 0;
 }
 .icon-btn:hover:not(:disabled) { background: #1e1e1e; color: #ccc; border-color: #383838; }
+a.icon-btn { text-decoration: none; }
+
+.header-actions { display: flex; align-items: center; gap: 8px; }
 
 /* ─── STEP BAR ──────────────────────────────────────────────── */
 #step-bar {
