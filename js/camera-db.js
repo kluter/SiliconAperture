@@ -868,6 +868,8 @@ const CAMERA_DB = [
   { brand:"DJI", label:"Mini 3 (1/1.3\")",             sensor_w:9.15,  sensor_h:6.86,  focal_length:6.1,  focal_length_eq:24 },
   { brand:"DJI", label:"Avata 2 (1/1.3\")",            sensor_w:9.15,  sensor_h:6.86,  focal_length:3.81, focal_length_eq:15 },
   { brand:"DJI", label:"Phantom 4 Pro V2 (1\")",       sensor_w:13.2,  sensor_h:8.80,  focal_length:8.8,  focal_length_eq:24 },
+  { brand:"DJI", label:"Air 2S (1\")",                 sensor_w:13.2,  sensor_h:8.80,  focal_length:8.07, focal_length_eq:22 },
+  { brand:"DJI", label:"Mini 2 / Mini SE (1/2.3\")",   sensor_w:6.17,  sensor_h:4.55,  focal_length:4.11, focal_length_eq:24 },
   { brand:"DJI", label:"Zenmuse X7 (APS-C)",           sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
 
   // ── SONY ─────────────────────────────────────────────────────────────────
@@ -880,10 +882,23 @@ const CAMERA_DB = [
   { brand:"Sony", label:"A6400 / A6600 (APS-C)",        sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
   { brand:"Sony", label:"ZV-E10 II / ZV-E10 (APS-C)",  sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
   { brand:"Sony", label:"ZV-E1 (full frame)",           sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"A1 II (full frame)",            sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"A9 II (full frame)",            sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"A7 III (full frame)",           sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"A7R IV (full frame)",           sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"A7R III (full frame)",          sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"A7C (full frame)",              sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"FX3 (full frame, cine)",        sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"FX30 (APS-C, cine)",            sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"A6000 / A6100 (APS-C)",         sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"A99 II / A99 (full frame, SLT)",  sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"A77 II / A77 / A700 (APS-C, SLT/DSLR)", sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"a5100 / a5000 / NEX-7 / NEX-6 / NEX-5 (APS-C)", sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
   { brand:"Sony", label:"RX100 VII (1\")",               sensor_w:13.2,  sensor_h:8.80,  focal_length:8.8,  focal_length_eq:24 },
   { brand:"Sony", label:"RX10 IV (1\")",                 sensor_w:13.2,  sensor_h:8.80,  focal_length:8.8,  focal_length_eq:24 },
   // RX0 II: published physical fl = 7.7 mm; effective imaging width = 7.7 × 36/24 = 11.55 mm (not full 1" width)
   { brand:"Sony", label:"RX0 II (1\")",                  sensor_w:11.55, sensor_h:8.66,  focal_length:7.7,  focal_length_eq:24 },
+  { brand:"Sony", label:"RX1R II (full frame, 35mm)",    sensor_w:35.9,  sensor_h:23.9,  focal_length:35.0, focal_length_eq:35 },
 
   // ── SONY XPERIA (smartphones) ────────────────────────────────────────────
   { brand:"Sony",    label:"Xperia 1 V / 5 V / 1 VI / 1 VII / 1 VIII (2023–2026)", sensor_w:8.96, sensor_h:6.72, focal_length:5.97, focal_length_eq:24, confidence:"✓" }, // [✓] 48MP 1/1.35" 1.12µm pixel math; 24mm Zeiss
@@ -909,6 +924,34 @@ const CAMERA_DB = [
   { brand:"Canon", label:"EOS R10 / R50 (APS-C)",         sensor_w:22.3,  sensor_h:14.9,  focal_length:null, focal_length_eq:null },
   { brand:"Canon", label:"EOS 5D Mark IV (full frame)",   sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
   { brand:"Canon", label:"EOS 90D (APS-C)",               sensor_w:22.3,  sensor_h:14.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS R5 Mark II (full frame)",   sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS R6 (full frame)",           sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS R / EOS RP (full frame)",   sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS 6D Mark II (full frame, DSLR)",  sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS 5D Mark III (full frame, DSLR)", sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS R100 (APS-C)",              sensor_w:22.3,  sensor_h:14.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS M50 Mark II / M50 (APS-C)", sensor_w:22.3,  sensor_h:14.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS 80D (APS-C, DSLR)",         sensor_w:22.3,  sensor_h:14.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS Rebel T7 / 2000D (APS-C, DSLR)", sensor_w:22.3, sensor_h:14.9, focal_length:null, focal_length_eq:null },
+  // — older Canon DSLRs (full frame 35.9 × 23.9; APS-C 22.3 × 14.9) —
+  { brand:"Canon", label:"EOS 5D Mark II (full frame, DSLR)",     sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS 5D (full frame, DSLR)",             sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS 6D (full frame, DSLR)",             sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS 5DS / 5DS R (full frame, DSLR)",    sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS-1D X Mark III / II / 1D X (full frame, DSLR)", sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS-1Ds Mark III / II (full frame, DSLR)", sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS 7D Mark II (APS-C, DSLR)",          sensor_w:22.3, sensor_h:14.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS 7D (APS-C, DSLR)",                  sensor_w:22.3, sensor_h:14.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS 70D / 60D / 50D / 40D / 30D / 20D (APS-C, DSLR)", sensor_w:22.3, sensor_h:14.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS Rebel T8i / T7i / T6i / T5i / T4i (650D–850D) (APS-C, DSLR)", sensor_w:22.3, sensor_h:14.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS Rebel T3i / T2i / T1i (500D–600D) (APS-C, DSLR)", sensor_w:22.3, sensor_h:14.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS Rebel T6 / T5 / T3 (1100D–1300D) (APS-C, DSLR)", sensor_w:22.3, sensor_h:14.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS Rebel SL3 / SL2 / SL1 (100D / 200D / 250D) (APS-C, DSLR)", sensor_w:22.3, sensor_h:14.9, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS Rebel XSi / XS / XTi / XT (350D–450D) (APS-C, DSLR)", sensor_w:22.3, sensor_h:14.9, focal_length:null, focal_length_eq:null },
+  // Canon APS-H (1.3× crop) — active area differs per generation
+  { brand:"Canon", label:"EOS-1D Mark IV (APS-H, DSLR)",          sensor_w:27.9, sensor_h:18.6, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS-1D Mark III (APS-H, DSLR)",         sensor_w:28.1, sensor_h:18.7, focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS-1D / 1D Mark II / IIN (APS-H, DSLR)", sensor_w:28.7, sensor_h:19.1, focal_length:null, focal_length_eq:null },
   { brand:"Canon", label:"PowerShot G7X Mark III (1\")",  sensor_w:13.2,  sensor_h:8.80,  focal_length:8.8,  focal_length_eq:24 },
   { brand:"Canon", label:"PowerShot G5X Mark II (1\")",   sensor_w:13.2,  sensor_h:8.80,  focal_length:8.8,  focal_length_eq:24 },
 
@@ -920,8 +963,28 @@ const CAMERA_DB = [
   { brand:"Nikon", label:"Zfc / Z50 / Z30 (APS-C)",       sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
   { brand:"Nikon", label:"D850 (full frame, DSLR)",        sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
   { brand:"Nikon", label:"D7500 (APS-C, DSLR)",           sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"Zf (full frame)",                sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"Z6 II / Z7 (full frame)",        sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D780 / D750 (full frame, DSLR)", sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D500 (APS-C, DSLR)",             sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D5600 / D3500 (APS-C, DSLR)",    sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
+  // — older Nikon DSLRs (FX full frame 35.9 × 23.9; DX APS-C 23.5 × 15.6) —
+  { brand:"Nikon", label:"D810 / D800 (full frame, DSLR)",       sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D700 (full frame, DSLR)",              sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D610 / D600 (full frame, DSLR)",       sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"Df (full frame, DSLR)",                sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D6 / D5 / D4S / D4 (full frame, DSLR)", sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D3X / D3S / D3 (full frame, DSLR)",     sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D7200 / D7100 / D7000 (APS-C, DSLR)",  sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D300S / D300 (APS-C, DSLR)",           sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D90 (APS-C, DSLR)",                    sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D80 / D70 / D70s / D50 (APS-C, DSLR)", sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D5500 / D5300 / D5200 / D5100 / D5000 (APS-C, DSLR)", sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D3400 / D3300 / D3200 / D3100 / D3000 (APS-C, DSLR)", sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"D60 / D40 / D40x (APS-C, DSLR)",       sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
   // COOLPIX P950: published physical fl = 4.3 mm at wide end; sensor_w = 4.3 × 36/24 = 6.45 mm
   { brand:"Nikon", label:"COOLPIX P950 (1/2.3\")",         sensor_w:6.45,  sensor_h:4.84,  focal_length:4.3,  focal_length_eq:24 },
+  { brand:"Nikon", label:"COOLPIX P1000 (1/2.3\")",        sensor_w:6.45,  sensor_h:4.84,  focal_length:4.3,  focal_length_eq:24 },
 
   // ── FUJIFILM ─────────────────────────────────────────────────────────────
   { brand:"Fujifilm", label:"GFX 100S II / 100 II (medium format)", sensor_w:43.8, sensor_h:32.9, focal_length:null, focal_length_eq:null },
@@ -931,11 +994,19 @@ const CAMERA_DB = [
   { brand:"Fujifilm", label:"X-S20 / X-S10 (APS-C)",               sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
   { brand:"Fujifilm", label:"X100VI / X100V (APS-C)",               sensor_w:23.5, sensor_h:15.6, focal_length:23.0, focal_length_eq:35 },
   { brand:"Fujifilm", label:"X-E4 (APS-C)",                         sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Fujifilm", label:"X-T50 / X-T30 II / X-T30 (APS-C)",     sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Fujifilm", label:"X-T3 (APS-C)",                         sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Fujifilm", label:"X-Pro3 (APS-C)",                       sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Fujifilm", label:"X-M5 (APS-C)",                         sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
 
   // ── PANASONIC ────────────────────────────────────────────────────────────
   { brand:"Panasonic", label:"S5 II / S1 / S1R (full frame)",  sensor_w:35.6, sensor_h:23.8, focal_length:null, focal_length_eq:null },
   { brand:"Panasonic", label:"G9 II / GH6 / GH5 II (MFT)",    sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
   { brand:"Panasonic", label:"G100 / G95 (MFT)",               sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
+  { brand:"Panasonic", label:"S5 / S1H (full frame)",          sensor_w:35.6, sensor_h:23.8, focal_length:null, focal_length_eq:null },
+  { brand:"Panasonic", label:"S9 (full frame)",                sensor_w:35.6, sensor_h:23.8, focal_length:null, focal_length_eq:null },
+  { brand:"Panasonic", label:"GH7 (MFT)",                      sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
+  { brand:"Panasonic", label:"G85 / G7 (MFT)",                 sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
   // LX100 II: multi-aspect 4/3" sensor; active width at 24mm eq = fl × 36/eq = 10.9 × 36/24 = 16.35 mm
   { brand:"Panasonic", label:"LX100 II (MFT crop)",            sensor_w:16.35, sensor_h:12.26, focal_length:10.9, focal_length_eq:24 },
   // FZ1000 II: 1" sensor; fl = 25 × 13.2/36 = 9.17 mm
@@ -945,6 +1016,39 @@ const CAMERA_DB = [
   { brand:"OM System", label:"OM-1 Mark II / OM-5 (MFT)",     sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
   { brand:"OM System", label:"OM-1 (MFT)",                     sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
   { brand:"OM System", label:"E-M10 Mark IV (MFT)",            sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
+  { brand:"OM System", label:"OM-3 (MFT)",                     sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
+  { brand:"OM System", label:"E-M1 Mark III (MFT)",            sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
+  { brand:"OM System", label:"E-M5 Mark III (MFT)",            sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
+  { brand:"OM System", label:"PEN E-P7 (MFT)",                 sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
+  // Tough TG-7 / TG-6: published physical fl = 4.5 mm at wide; sensor_w = 4.5 × 36/25 = 6.48 mm
+  { brand:"OM System", label:"Tough TG-7 / TG-6 (1/2.3\")",    sensor_w:6.48, sensor_h:4.86, focal_length:4.5,  focal_length_eq:25 },
+
+  // ── LEICA ────────────────────────────────────────────────────────────────
+  { brand:"Leica", label:"M11 / M11-P / M11 Monochrom (full frame)", sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Leica", label:"M10 / M10-R (full frame)",        sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Leica", label:"SL3 / SL2 / SL2-S (full frame)",  sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Leica", label:"Q3 (full frame, 28mm)",           sensor_w:35.9, sensor_h:23.9, focal_length:28.0, focal_length_eq:28 },
+  { brand:"Leica", label:"Q3 43 (full frame, 43mm)",        sensor_w:35.9, sensor_h:23.9, focal_length:43.0, focal_length_eq:43 },
+  { brand:"Leica", label:"CL / TL2 (APS-C)",                sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+
+  // ── SIGMA ────────────────────────────────────────────────────────────────
+  { brand:"Sigma", label:"fp L / fp (full frame)",          sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+
+  // ── PENTAX ───────────────────────────────────────────────────────────────
+  { brand:"Pentax", label:"K-1 Mark II (full frame, DSLR)", sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Pentax", label:"K-3 Mark III (APS-C, DSLR)",     sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Pentax", label:"KF / K-70 (APS-C, DSLR)",        sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Pentax", label:"K-1 (full frame, DSLR)",         sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
+  { brand:"Pentax", label:"645Z / 645D (medium format)",    sensor_w:43.8, sensor_h:32.9, focal_length:null, focal_length_eq:null },
+
+  // ── RICOH ────────────────────────────────────────────────────────────────
+  // GR III / GR IIIx: APS-C fixed lens; published physical fl 18.3 / 26.1 mm (28 / 40 mm eq)
+  { brand:"Ricoh", label:"GR III / GR III HDF (APS-C, 28mm)",   sensor_w:23.5, sensor_h:15.6, focal_length:18.3, focal_length_eq:28 },
+  { brand:"Ricoh", label:"GR IIIx / GR IIIx HDF (APS-C, 40mm)", sensor_w:23.5, sensor_h:15.6, focal_length:26.1, focal_length_eq:40 },
+
+  // ── BLACKMAGIC (cinema) ──────────────────────────────────────────────────
+  { brand:"Blackmagic", label:"Pocket Cinema Camera 6K / 6K Pro / 6K G2 (Super35)", sensor_w:23.10, sensor_h:12.99, focal_length:null, focal_length_eq:null },
+  { brand:"Blackmagic", label:"Pocket Cinema Camera 4K (MFT)",  sensor_w:18.96, sensor_h:10.00, focal_length:null, focal_length_eq:null },
 
   // ── GOPRO ────────────────────────────────────────────────────────────────
   // Linear mode values — distortion-corrected; fl = eq × sensor_w / 36
@@ -957,6 +1061,7 @@ const CAMERA_DB = [
   // ── MEDIUM FORMAT ────────────────────────────────────────────────────────
   { brand:"Hasselblad", label:"X2D 100C (medium format)",    sensor_w:43.8, sensor_h:32.9, focal_length:null, focal_length_eq:null },
   { brand:"Hasselblad", label:"907X / CFV 100C (medium format)", sensor_w:43.8, sensor_h:32.9, focal_length:null, focal_length_eq:null },
+  { brand:"Hasselblad", label:"X1D II 50C (medium format)",  sensor_w:43.8, sensor_h:32.9, focal_length:null, focal_length_eq:null },
   { brand:"Phase One",  label:"IQ4 150MP (645 medium format)", sensor_w:53.4, sensor_h:40.0, focal_length:null, focal_length_eq:null },
   { brand:"Phase One",  label:"IQ4 100MP (645 medium format)", sensor_w:53.4, sensor_h:40.0, focal_length:null, focal_length_eq:null },
 

@@ -42,7 +42,7 @@ Accurate results require the object to be **perpendicular to the camera axis**. 
 
 ## Contributing
 
-The camera database covers 880+ devices across 30 brands. Each entry carries a confidence marker:
+The camera database covers 960+ devices across 34 brands. Each entry carries a confidence marker:
 
 | Marker | Dropdown label | Meaning |
 |--------|---------------|---------|

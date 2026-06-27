@@ -528,7 +528,7 @@ function populateCameraDropdown() {
 
   const CATEGORIES = {
     'Smartphones': ['Apple', 'Asus', 'Google', 'Honor', 'HTC', 'Huawei', 'LG', 'Meizu', 'Motorola', 'Nokia', 'Nothing', 'nubia', 'OnePlus', 'Oppo', 'Realme', 'Samsung', 'Sharp', 'vivo', 'Xiaomi'],
-    'Cameras':     ['Canon', 'DJI', 'Fujifilm', 'GoPro', 'Hasselblad', 'Nikon', 'OM System', 'Panasonic', 'Phase One', 'Sony'],
+    'Cameras':     ['Blackmagic', 'Canon', 'DJI', 'Fujifilm', 'GoPro', 'Hasselblad', 'Leica', 'Nikon', 'OM System', 'Panasonic', 'Pentax', 'Phase One', 'Ricoh', 'Sigma', 'Sony'],
   };
 
   Object.entries(CATEGORIES).forEach(([catName, brands]) => {
