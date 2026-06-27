@@ -50,6 +50,8 @@ The camera database covers 960+ devices across 34 brands. Each entry carries a c
 | `[~]` | **unconfirmed** | Sensor family or optical format is known but not directly verified against a spec page. |
 | `[?]` | **missing data** | No source data; values are estimates. |
 
+**How a sensor size is found:** a `[✓]` value is *calculated* from hard data, using either pixel math (`width = pixels across × pixel pitch`) or EXIF (`width = 36 × focal ÷ 35mm-equivalent focal`). A `[?]` value is *estimated* from the marketing format alone (e.g. "1/2.55-inch"), which isn't a true measurement, so it's only a ballpark.
+
 Some entries carry no marker: interchangeable-lens bodies (`focal_length: null`) and high-end fixed-lens cameras and drones (DJI, Sony RX, GoPro…), whose specs are published by the manufacturer.
 
 > If you shoot with a device in the list and can verify or correct its sensor dimensions or focal length against real EXIF data, a PR or issue is very welcome. Same if your camera is missing entirely.
