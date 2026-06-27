@@ -42,7 +42,7 @@ Accurate results require the object to be **perpendicular to the camera axis**. 
 
 ## Contributing
 
-The camera database covers 200+ devices. Each entry carries a confidence marker:
+The camera database covers 880+ devices across 30 brands. Each entry carries a confidence marker:
 
 | Marker | Dropdown label | Meaning |
 |--------|---------------|---------|
@@ -50,7 +50,7 @@ The camera database covers 200+ devices. Each entry carries a confidence marker:
 | `[~]` | **unconfirmed** | Sensor family or optical format is known but not directly verified against a spec page. |
 | `[?]` | **missing data** | No source data; values are estimates. |
 
-ILC camera bodies (`focal_length: null`) carry no marker — their sensor dimensions are published industry standards and the dropdown shows no label.
+Some entries carry no marker: interchangeable-lens bodies (`focal_length: null`) and high-end fixed-lens cameras and drones (DJI, Sony RX, GoPro…), whose specs are published by the manufacturer.
 
 > If you shoot with a device in the list and can verify or correct its sensor dimensions or focal length against real EXIF data, a PR or issue is very welcome. Same if your camera is missing entirely.
 
