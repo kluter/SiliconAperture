@@ -536,7 +536,20 @@ a.icon-btn { text-decoration: none; }
   padding: 5px 16px;
   border-top: 1px solid #2a2a2a;
   background: #0a0a0a;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+#result-main {
+  flex: 1;
+  min-width: 0;
   text-align: center;
+}
+.result-divider {
+  width: 1px;
+  align-self: stretch;
+  background: #2a2a2a;
   flex-shrink: 0;
 }
 .result-label {
@@ -580,6 +593,9 @@ a.icon-btn { text-decoration: none; }
   min-height: 12px;
   font-family: monospace;
   transition: color 0.35s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 #result-bar.has-result #result-eq { color: #888; }
 
@@ -604,10 +620,57 @@ a.icon-btn { text-decoration: none; }
 }
 .map-dist-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; }
 #map-dist-val { font-size: 13px; color: #aaa; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#map-dist-val.map-prompt-active {
+  color: #e63946;
+  animation: prompt-pulse 1.8s ease-in-out infinite;
+}
+@keyframes prompt-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
 
 #map-tile-btns { display: flex; gap: 3px; }
 .tile-btn { font-size: 9px; padding: 2px 7px; height: 20px; }
 .tile-btn.active-tile { border-color: #e63946; color: #e63946; background: #1a0a0b; }
+
+/* ─── SOLVE MODE TOGGLE (stacked, in result bar) ────────────── */
+#solve-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  width: 112px;
+}
+.solve-btn {
+  width: 94px;
+  height: 22px;
+  padding: 0;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  background: transparent;
+  border: 1px solid #2a2a2a;
+  color: #888;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.solve-btn:hover { background: #1e1e1e; color: #ccc; border-color: #383838; }
+.solve-btn.active-solve { border-color: #e63946; color: #e63946; background: #1a0a0b; }
+
+/* Awaited-control glow — mirrors the active step indicator */
+#camera-trigger.awaiting,
+#pixel-span-input.awaiting,
+#distance-input.awaiting,
+#known-size-input.awaiting {
+  border-color: #e63946;
+  animation: input-glow 1.8s ease-in-out infinite;
+}
+@keyframes input-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0); }
+  50%      { box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.22); }
+}
 
 #map-coord-row {
   height: 26px;
