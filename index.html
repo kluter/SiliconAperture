@@ -119,7 +119,7 @@
 
     <!-- Camera obscura / similar-triangles diagram -->
     <div id="diagram-wrap">
-      <svg id="diagram-svg" viewBox="0 0 530 132" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <svg id="diagram-svg" viewBox="-6.5 0 530 132" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <!-- Sensor (left — inner orientation, short side) -->
         <line id="seg-sensor"   class="seg"         x1="52"  y1="16"  x2="52"  y2="104"/>
         <!-- Pixel span marker on sensor -->
@@ -191,10 +191,14 @@
         </div>
 
         <div class="input-group" style="flex:1">
-          <label class="field-label">Distance</label>
+          <label class="field-label"><span id="dist-size-label">Distance</span></label>
           <div class="input-row">
-            <div class="labeled-input" style="flex:1">
+            <div class="labeled-input" id="distance-field" style="flex:1">
               <input type="number" id="distance-input" placeholder="0.0" min="0.01" step="0.1" style="width:100%" autocomplete="off">
+              <span class="unit-tag">m</span>
+            </div>
+            <div class="labeled-input" id="known-size-field" style="flex:1; display:none">
+              <input type="number" id="known-size-input" placeholder="0.0" min="0.01" step="0.1" style="width:100%" autocomplete="off">
               <span class="unit-tag">m</span>
             </div>
           </div>
@@ -205,12 +209,19 @@
 
     <!-- Result -->
     <div id="result-bar">
-      <div class="result-label">Real-world size</div>
-      <div class="result-display">
-        <span id="result-value">—</span>
-        <span id="result-unit" class="result-unit">m</span>
+      <div id="solve-toggle">
+        <button type="button" class="solve-btn active-solve" data-mode="size">Size</button>
+        <button type="button" class="solve-btn" data-mode="distance">Distance</button>
       </div>
-      <div id="result-eq"></div>
+      <div class="result-divider"></div>
+      <div id="result-main">
+        <div class="result-label" id="result-label">Real-world size</div>
+        <div class="result-display">
+          <span id="result-value">—</span>
+          <span id="result-unit" class="result-unit">m</span>
+        </div>
+        <div id="result-eq"></div>
+      </div>
     </div>
 
     <!-- Map — always visible -->

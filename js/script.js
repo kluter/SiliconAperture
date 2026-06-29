@@ -92,6 +92,10 @@ let pixelSpan = null;
 let pixelDx   = null;
 let pixelDy   = null;
 let distance     = null;
+let solveMode      = 'size';   // 'size' | 'distance'
+let knownSize      = null;     // distance-mode input: real-world size of the marked span (m)
+let solvedDistance = null;     // distance-mode output (m), for the map ring
+let objectRing     = null;     // distance-mode map ring (Leaflet circle)
 let exifHasFocalLength = false;
 let exifGPS      = null;
 
@@ -395,7 +399,7 @@ function updateStepBar() {
   const s1 = img !== null;
   const s2 = sensorW !== null && focalLength !== null;
   const s3 = pixelSpan !== null;
-  const s4 = distance !== null;
+  const s4 = (solveMode === 'distance' ? knownSize : distance) !== null;
 
   [
     { id: 'step-photo',  done: s1,       active: !s1 },
@@ -409,6 +413,18 @@ function updateStepBar() {
   });
 
   document.getElementById('pixel-readout').textContent = s3 ? Math.round(pixelSpan) + ' px' : '';
+
+  // Glow the control for the active step, mirroring the step indicator —
+  // guides the eye to the next action (select camera → click photo → enter value).
+  const finalId = (solveMode === 'distance') ? 'known-size-input' : 'distance-input';
+  let awaitId = null;
+  if      (s1 && !s2) awaitId = 'camera-trigger';
+  else if (s2 && !s3) awaitId = 'pixel-span-input';
+  else if (s3 && !s4) awaitId = finalId;
+  ['camera-trigger', 'pixel-span-input', 'distance-input', 'known-size-input'].forEach(id =>
+    document.getElementById(id).classList.toggle('awaiting', id === awaitId));
+
+  updateMapPromptHighlight();
 }
 
 /* ─── CUSTOM CAMERA DROPDOWN ─────────────────────────────────── */
@@ -637,39 +653,78 @@ document.getElementById('distance-input').addEventListener('input', function () 
   distance = parseFloat(this.value) || null;
   compute(); updateDiagram();
 });
+document.getElementById('known-size-input').addEventListener('input', function () {
+  knownSize = parseFloat(this.value) || null;
+  compute(); updateDiagram();
+});
+
+/* ─── SOLVE MODE (size ⇄ distance) ───────────────────────────── */
+function applyMode() {
+  const distMode = solveMode === 'distance';
+  document.querySelectorAll('.solve-btn').forEach(b =>
+    b.classList.toggle('active-solve', b.dataset.mode === solveMode));
+  document.getElementById('distance-field').style.display   = distMode ? 'none' : '';
+  document.getElementById('known-size-field').style.display = distMode ? '' : 'none';
+  document.getElementById('dist-size-label').textContent    = distMode ? 'Known size' : 'Distance';
+  document.getElementById('result-label').textContent       = distMode ? 'Distance to object' : 'Real-world size';
+  const stepLbl = document.querySelector('#step-dist .step-label');
+  if (stepLbl) stepLbl.textContent = distMode ? 'Enter known size' : 'Mark distance on map';
+  resetMapPoints();
+  setMapPrompt();
+  compute();
+  updateDiagram();
+}
+document.querySelectorAll('.solve-btn').forEach(btn => {
+  btn.addEventListener('click', () => { solveMode = btn.dataset.mode; applyMode(); });
+});
+applyMode();
 
 /* ─── COMPUTE ────────────────────────────────────────────────── */
 function compute() {
-  if (!img || sensorW === null || focalLength === null || pixelSpan === null || distance === null) {
-    clearResult(); return;
+  if (!img || sensorW === null || focalLength === null || pixelSpan === null) {
+    solvedDistance = null; clearResult(); return;
   }
-  const sh     = sensorH ?? sensorW * img.naturalHeight / img.naturalWidth;
-  const real_x = distance * Math.tan(Math.abs(pixelDx) / img.naturalWidth  * (sensorW / focalLength));
-  const real_y = distance * Math.tan(Math.abs(pixelDy) / img.naturalHeight * (sh       / focalLength));
-  const realSize = Math.hypot(real_x, real_y);
-  if (!isFinite(realSize) || realSize <= 0) { clearResult(); return; }
+  solvedDistance = null;   // set only on a valid distance-mode result below
+  const sh = sensorH ?? sensorW * img.naturalHeight / img.naturalWidth;
+  // Per-axis angular terms. real_size = distance × k, so distance = real_size / k.
+  const tx = Math.tan(Math.abs(pixelDx) / img.naturalWidth  * (sensorW / focalLength));
+  const ty = Math.tan(Math.abs(pixelDy) / img.naturalHeight * (sh       / focalLength));
+  const k  = Math.hypot(tx, ty);
 
-  if (realSize >= 1000) {
-    valEl.textContent  = (realSize / 1000).toFixed(2);
+  let value, eqStr;
+  if (solveMode === 'distance') {
+    if (knownSize === null || k <= 0) { clearResult(); return; }
+    value = solvedDistance = knownSize / k;
+    eqStr = `${knownSize} m ÷ √( tan²(Δx) + tan²(Δy) ) = ${knownSize} m ÷ ${k.toFixed(4)}`;
+  } else {
+    if (distance === null) { clearResult(); return; }
+    solvedDistance = null;
+    value = distance * k;
+    const real_x = distance * tx, real_y = distance * ty;
+    if (Math.abs(pixelDy) < 1) {
+      eqStr = `${distance} m × tan( ${Math.round(Math.abs(pixelDx))}px / ${img.naturalWidth}px × ${sensorW}mm / ${focalLength}mm )`;
+    } else if (Math.abs(pixelDx) < 1) {
+      eqStr = `${distance} m × tan( ${Math.round(Math.abs(pixelDy))}px / ${img.naturalHeight}px × ${sh.toFixed(2)}mm / ${focalLength}mm )`;
+    } else {
+      eqStr = `√( ${real_x.toFixed(3)}² + ${real_y.toFixed(3)}² ) m`;
+    }
+  }
+
+  if (!isFinite(value) || value <= 0) { solvedDistance = null; clearResult(); return; }
+
+  if (value >= 1000) {
+    valEl.textContent  = (value / 1000).toFixed(2);
     unitEl.textContent = 'km';
   } else {
-    valEl.textContent  = realSize >= 100 ? realSize.toFixed(1)
-                       : realSize >= 10  ? realSize.toFixed(2)
-                       :                   realSize.toFixed(3);
+    valEl.textContent  = value >= 100 ? value.toFixed(1)
+                       : value >= 10  ? value.toFixed(2)
+                       :                value.toFixed(3);
     unitEl.textContent = 'm';
-  }
-
-  let eqStr;
-  if (Math.abs(pixelDy) < 1) {
-    eqStr = `${distance} m × tan( ${Math.round(Math.abs(pixelDx))}px / ${img.naturalWidth}px × ${sensorW}mm / ${focalLength}mm )`;
-  } else if (Math.abs(pixelDx) < 1) {
-    eqStr = `${distance} m × tan( ${Math.round(Math.abs(pixelDy))}px / ${img.naturalHeight}px × ${sh.toFixed(2)}mm / ${focalLength}mm )`;
-  } else {
-    eqStr = `√( ${real_x.toFixed(3)}² + ${real_y.toFixed(3)}² ) m`;
   }
   document.getElementById('result-eq').textContent = eqStr;
   resultBar.classList.add('has-result');
   updateStepBar();
+  refreshObjectRing();
 }
 
 function clearResult() {
@@ -683,7 +738,7 @@ function clearResult() {
 /* ─── DIAGRAM ────────────────────────────────────────────────── */
 function updateDiagram() {
   const hasPixels = pixelSpan  !== null;
-  const hasDist   = distance   !== null;
+  const hasDist   = (solveMode === 'distance') ? solvedDistance !== null : distance !== null;
   const hasFocal  = focalLength !== null;
   const hasSensor = sensorW    !== null;
   const allSet    = hasPixels && hasDist && hasFocal && hasSensor && img;
@@ -705,7 +760,7 @@ function updateDiagram() {
   setLit('diag-lbl-object', hasPixels);
 
   const resultLbl = document.getElementById('diag-lbl-result');
-  if (resultLbl) resultLbl.style.display = allSet ? '' : 'none';
+  if (resultLbl) resultLbl.style.display = (allSet && solveMode === 'size') ? '' : 'none';
 }
 
 function setLit(id, on) {
@@ -742,7 +797,7 @@ function newImage() {
   focalLength = null; sensorW = null; sensorH = null; distance = null;
   if (gpsMarker) { gpsMarker.remove(); gpsMarker = null; }
   resetMapPoints();
-  document.getElementById('map-dist-val').textContent = 'camera position → object position';
+  setMapPrompt();
   if (map) map.setView([30, 0], 1);
 
   ['exif-camera-val', 'exif-focal-val', 'exif-size-val', 'exif-gps-val'].forEach(id => {
@@ -761,6 +816,8 @@ function newImage() {
   document.getElementById('sensor-h-input').value     = '';
   clearCameraSelection();
   document.getElementById('distance-input').value     = '';
+  document.getElementById('known-size-input').value   = '';
+  knownSize = null; solvedDistance = null;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   overlay.classList.remove('hidden');
@@ -801,12 +858,13 @@ function initMap() {
 
 // Clicking cycles: place A → place B + measure → third click resets and places new A.
 function handleMapClick(e) {
+  if (solveMode === 'distance') { placeObjectRing(e.latlng); return; }
   if (mapPtA && mapPtB) {
     resetMapPoints();
     distance = null;
     document.getElementById('distance-input').value = '';
     compute();
-    document.getElementById('map-dist-val').textContent = 'camera position → object position';
+    setMapPrompt();
   }
 
   const marker = L.circleMarker(e.latlng, {
@@ -827,6 +885,7 @@ function handleMapClick(e) {
     setDistance(d);
     document.getElementById('map-dist-val').textContent = formatMapDist(d);
   }
+  updateMapPromptHighlight();
 }
 
 function setDistance(d) {
@@ -836,15 +895,62 @@ function setDistance(d) {
   updateDiagram();
 }
 
+// Distance mode: one click places the object; the ring of radius = solved distance
+// is the set of all points the camera could be standing at.
+function placeObjectRing(latlng) {
+  if (solvedDistance === null) {
+    showToast('Solve the distance first — mark the object on the photo and enter its known size.');
+    return;
+  }
+  resetMapPoints();
+  const marker = L.circleMarker(latlng, {
+    radius: 6, color: '#e63946', fillColor: '#e63946', fillOpacity: 1, weight: 2
+  }).addTo(map);
+  mapMarkers.push(marker);
+  mapPtA = latlng;
+  objectRing = L.circle(latlng, {
+    radius: solvedDistance, color: '#e63946', weight: 2, opacity: 0.85,
+    fillColor: '#e63946', fillOpacity: 0.06, dashArray: '7 4'
+  }).addTo(map);
+  map.fitBounds(objectRing.getBounds(), { padding: [30, 30] });
+  document.getElementById('map-dist-val').textContent = `camera is on this ring · r = ${formatMapDist(solvedDistance)}`;
+  updateMapPromptHighlight();
+}
+
+// Keep the ring in sync when the solved distance changes (e.g. known size edited).
+function refreshObjectRing() {
+  if (solveMode !== 'distance' || !objectRing || mapPtA === null || solvedDistance === null) return;
+  objectRing.setRadius(solvedDistance);
+  document.getElementById('map-dist-val').textContent = `camera is on this ring · r = ${formatMapDist(solvedDistance)}`;
+}
+
 function resetMapPoints() {
   mapMarkers.forEach(m => m.remove());
   mapMarkers = [];
   if (mapLine) { mapLine.remove(); mapLine = null; }
+  if (objectRing) { objectRing.remove(); objectRing = null; }
   mapPtA = null; mapPtB = null;
 }
 
 function formatMapDist(d) {
   return d >= 1000 ? (d / 1000).toFixed(2) + ' km' : d.toFixed(1) + ' m';
+}
+
+// Mode-aware default prompt for the empty map header.
+function setMapPrompt() {
+  document.getElementById('map-dist-val').textContent = (solveMode === 'distance')
+    ? 'click the object on the map to draw the ring'
+    : 'camera position → object position';
+}
+
+// Red-pulse the map prompt when clicking the map is the pending action:
+// distance solved → click the object for the ring; or all set but distance → click two points.
+function updateMapPromptHighlight() {
+  const ready = img !== null && sensorW !== null && focalLength !== null && pixelSpan !== null;
+  const pending = (solveMode === 'distance')
+    ? (solvedDistance !== null && mapPtA === null)
+    : (ready && distance === null);
+  document.getElementById('map-dist-val').classList.toggle('map-prompt-active', pending);
 }
 
 function goToGPS() {
@@ -931,7 +1037,7 @@ document.getElementById('btn-map-reset-pts').addEventListener('click', () => {
   resetMapPoints();
   distance = null;
   document.getElementById('distance-input').value = '';
-  document.getElementById('map-dist-val').textContent = 'camera position → object position';
+  setMapPrompt();
   compute();
   updateDiagram();
   updateStepBar();
