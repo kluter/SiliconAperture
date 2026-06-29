@@ -40,6 +40,18 @@ Accurate results require the object to be **perpendicular to the camera axis**. 
 
 ---
 
+## Solve for distance
+
+The same model runs in reverse. Toggle **Solve for → Distance**, enter an object's *known* real-world size, and SiliconAperture returns how far the camera was from it:
+
+```
+D = size / √( tan(Δx / W · sw / f)² + tan(Δy / H · sh / f)² )
+```
+
+Then click that object on the map to draw a **distance ring**. Every point that far away, i.e. the set of possible camera positions.
+
+---
+
 ## Contributing
 
 The camera database covers 960+ devices across 34 brands. Each entry carries a confidence marker:
