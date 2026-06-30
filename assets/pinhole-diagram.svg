@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6.5 0 530 132" width="620" role="img" aria-label="Pinhole camera model: sensor with pixel span, focal length f, pinhole, distance D, and object">
+  <rect x="-6.5" y="0" width="530" height="132" rx="10" fill="#0d0d0d" stroke="#1e1e1e" stroke-width="1"/>
+  <!-- Sensor (left) -->
+  <line x1="52" y1="16" x2="52" y2="104" stroke="#e63946" stroke-width="2" stroke-linecap="round"/>
+  <!-- Pixel span marker on the sensor -->
+  <line x1="52" y1="30" x2="52" y2="90" stroke="#e63946" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+  <!-- Focal length -->
+  <line x1="52" y1="60" x2="165" y2="60" stroke="#e63946" stroke-width="2" stroke-dasharray="5 4"/>
+  <!-- Rays: sensor to pinhole -->
+  <line x1="52" y1="16" x2="165" y2="60" stroke="#e63946" stroke-width="1" opacity="0.25"/>
+  <line x1="52" y1="104" x2="165" y2="60" stroke="#e63946" stroke-width="1" opacity="0.25"/>
+  <!-- Pinhole -->
+  <circle cx="165" cy="60" r="5" fill="#e63946"/>
+  <!-- Rays: pinhole to object -->
+  <line x1="165" y1="60" x2="465" y2="16" stroke="#e63946" stroke-width="1" opacity="0.25"/>
+  <line x1="165" y1="60" x2="465" y2="104" stroke="#e63946" stroke-width="1" opacity="0.25"/>
+  <!-- Distance -->
+  <line x1="165" y1="60" x2="465" y2="60" stroke="#e63946" stroke-width="2" stroke-dasharray="5 4"/>
+  <!-- Object (right) -->
+  <line x1="465" y1="16" x2="465" y2="104" stroke="#e63946" stroke-width="2" stroke-linecap="round"/>
+  <!-- Labels -->
+  <g fill="#aaaaaa" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13">
+    <text x="52" y="120" text-anchor="middle">sensor</text>
+    <text x="70" y="74" text-anchor="start">px</text>
+    <text x="108" y="52" text-anchor="middle">f</text>
+    <text x="315" y="52" text-anchor="middle">D</text>
+    <text x="465" y="120" text-anchor="middle">object</text>
+  </g>
+</svg>

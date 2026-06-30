@@ -26,6 +26,10 @@ The pinhole camera model relates image pixels to real-world distances through si
 size = √( (D · tan(Δx / W · sw / f))² + (D · tan(Δy / H · sh / f))² )
 ```
 
+<table>
+<tr>
+<td valign="middle">
+
 | Symbol | Meaning |
 |--------|---------|
 | `D` | distance from camera to object |
@@ -33,6 +37,15 @@ size = √( (D · tan(Δx / W · sw / f))² + (D · tan(Δy / H · sh / f))² )
 | `W, H` | image width / height in pixels |
 | `sw, sh` | sensor width / height in mm |
 | `f` | focal length in mm |
+
+</td>
+<td valign="middle">
+
+<img src="assets/pinhole-diagram.svg" alt="Pinhole camera model: sensor with pixel span, focal length f, pinhole, distance D, and object" width="400">
+
+</td>
+</tr>
+</table>
 
 Each axis is solved independently using its matching sensor dimension, then the two real-world components are combined with Pythagoras. This means the line you draw on the photo can be at any angle — horizontal, vertical, or diagonal — and the result is always the true Euclidean length, not its projection onto one axis.
 
