@@ -62,11 +62,13 @@ Accurate results require the object to be **perpendicular to the camera axis**. 
 <tr>
 <td valign="top">
 
-The same model runs in reverse. Toggle **Solve for → Distance**, enter an object's *known* real-world size, and SiliconAperture returns how far the camera was from it:
+The same model runs in reverse. 
+
+Toggle **Solve for → Distance**, enter an object's *known* real-world size, and SiliconAperture returns how far the camera was from it:
 
 <p align="center"><code>D = size / √( tan(Δx / W · sw / f)² + tan(Δy / H · sh / f)² )</code></p>
 
-Then click that object on the map to draw a **distance ring**. Every point that far away, i.e. the set of possible camera positions.
+Then click that object on the map to draw a **distance ring**. Every point that far away, i.e. the set of possible camera positions. Cross that ring with any other clue (a known bearing, a road, the skyline) and the camera's location narrows quickly.
 
 </td>
 <td valign="top">
