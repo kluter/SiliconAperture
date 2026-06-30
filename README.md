@@ -73,7 +73,7 @@ Then click that object on the map to draw a **distance ring**. Every point that 
 </td>
 <td valign="top">
 
-<img src="assets/SiliconAperture_SolveDistance.png" alt="SiliconAperture in distance mode, with the solved distance drawn as a ring on the map" width="600">
+<img src="assets/SiliconAperture_SolveDistance.png" alt="SiliconAperture in distance mode, with the solved distance drawn as a ring on the map" width="700">
 
 </td>
 </tr>
