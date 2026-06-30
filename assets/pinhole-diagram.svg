@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6.5 0 530 132" width="620" role="img" aria-label="Pinhole camera model: sensor with pixel span, focal length f, pinhole, distance D, and object">
-  <rect x="-6.5" y="0" width="530" height="132" rx="10" fill="#0d0d0d" stroke="#1e1e1e" stroke-width="1"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6.5 -104 530 340" width="620" role="img" aria-label="Pinhole camera model: sensor with pixel span, focal length f, pinhole, distance D, and object">
+  <rect x="-6.5" y="-104" width="530" height="340" rx="10" fill="#0d0d0d" stroke="#1e1e1e" stroke-width="1"/>
   <!-- Sensor (left) -->
   <line x1="52" y1="16" x2="52" y2="104" stroke="#e63946" stroke-width="2" stroke-linecap="round"/>
   <!-- Pixel span marker on the sensor -->

@@ -22,11 +22,16 @@ In 2012, on drone campaigns with fixed-wing platforms and a DSLR on a timer, ima
 
 The pinhole camera model relates image pixels to real-world distances through similar triangles:
 
+<table>
+<tr>
+<td colspan="2">
+
 ```
 size = √( (D · tan(Δx / W · sw / f))² + (D · tan(Δy / H · sh / f))² )
 ```
 
-<table>
+</td>
+</tr>
 <tr>
 <td valign="middle">
 
