@@ -26,9 +26,7 @@ The pinhole camera model relates image pixels to real-world distances through si
 <tr>
 <td colspan="2">
 
-```
-size = √( (D · tan(Δx / W · sw / f))² + (D · tan(Δy / H · sh / f))² )
-```
+<p align="center"><code>size = √( (D · tan(Δx / W · sw / f))² + (D · tan(Δy / H · sh / f))² )</code></p>
 
 </td>
 </tr>
@@ -52,7 +50,7 @@ size = √( (D · tan(Δx / W · sw / f))² + (D · tan(Δy / H · sh / f))² )
 </tr>
 </table>
 
-Each axis is solved independently using its matching sensor dimension, then the two real-world components are combined with Pythagoras. This means the line you draw on the photo can be at any angle — horizontal, vertical, or diagonal — and the result is always the true Euclidean length, not its projection onto one axis.
+Each axis is solved independently using its matching sensor dimension, then the two real-world components are combined with Pythagoras. This means the line you draw on the photo can be at any angle (horizontal, vertical, or diagonal), and the result is always the true Euclidean length, not its projection onto one axis.
 
 Accurate results require the object to be **perpendicular to the camera axis**. If the surface is angled toward or away from the lens, the apparent extent seen by the sensor no longer maps linearly to the true physical size, and the measurement will be off.
 
@@ -60,13 +58,24 @@ Accurate results require the object to be **perpendicular to the camera axis**. 
 
 ## Solve for distance
 
+<table>
+<tr>
+<td valign="top">
+
 The same model runs in reverse. Toggle **Solve for → Distance**, enter an object's *known* real-world size, and SiliconAperture returns how far the camera was from it:
 
-```
-D = size / √( tan(Δx / W · sw / f)² + tan(Δy / H · sh / f)² )
-```
+<p align="center"><code>D = size / √( tan(Δx / W · sw / f)² + tan(Δy / H · sh / f)² )</code></p>
 
 Then click that object on the map to draw a **distance ring**. Every point that far away, i.e. the set of possible camera positions.
+
+</td>
+<td valign="top">
+
+<img src="assets/SiliconAperture_SolveDistance.png" alt="SiliconAperture in distance mode, with the solved distance drawn as a ring on the map" width="320">
+
+</td>
+</tr>
+</table>
 
 ---
 
@@ -113,7 +122,7 @@ The formula assumes a standard pinhole camera. Real lenses introduce distortion,
 
 - **Object not perpendicular to the camera axis.** A surface angled toward or away from the lens has its apparent extent foreshortened or expanded. The tool cannot detect or correct for this.
 - **Sensor dimensions.** The database draws from manufacturer specs, DXOMark, and imaging-resource.com. Values marked approximate may differ from the production unit. For precision work, verify against the camera's service documentation.
-- **EXIF focal length.** This is the physical focal length at the time of capture. Zoom lenses report their actual position. Cropped or binned images may carry the full-sensor focal length against a resized pixel grid — verify the image dimensions match the sensor's native resolution.
+- **EXIF focal length.** This is the physical focal length at the time of capture. Zoom lenses report their actual position. Cropped or binned images may carry the full-sensor focal length against a resized pixel grid. Verify the image dimensions match the sensor's native resolution.
 - **Distance uncertainty.** The result scales linearly with `D`. A 5% distance error produces a 5% size error.
 
 ---
