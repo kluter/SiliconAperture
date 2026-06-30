@@ -259,9 +259,15 @@
       <li>Enter the distance to the object in meters, or click two points on the satellite map to measure it.</li>
       <li>The real-world size appears as soon as all four inputs are valid.</li>
     </ol>
+    <p class="help-formula-note">Flip the <strong>Solve for</strong> toggle to <strong>Distance</strong> to work it the other way: enter an object's known real-world size and the tool returns the distance to it, then click the object on the satellite map to draw a ring of possible camera positions.</p>
     <div class="help-formulas">
       <div class="help-formula" style="text-align:center">
+        <div class="help-formula-label">Solve for size</div>
         <code>size = √( (D·tan(Δx/W·sw/f))² + (D·tan(Δy/H·sh/f))² )</code>
+      </div>
+      <div class="help-formula" style="text-align:center">
+        <div class="help-formula-label">Solve for distance</div>
+        <code>D = size / √( tan(Δx/W·sw/f)² + tan(Δy/H·sh/f)² )</code>
       </div>
     </div>
     <table class="help-legend">
