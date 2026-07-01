@@ -891,6 +891,9 @@ const CAMERA_DB = [
   { brand:"Sony", label:"FX3 (full frame, cine)",        sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
   { brand:"Sony", label:"FX30 (APS-C, cine)",            sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
   { brand:"Sony", label:"A6000 / A6100 (APS-C)",         sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"A7 II / A7 (full frame)",       sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"A7CR (full frame)",             sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Sony", label:"A6500 / A6300 (APS-C)",         sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
   { brand:"Sony", label:"A99 II / A99 (full frame, SLT)",  sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
   { brand:"Sony", label:"A77 II / A77 / A700 (APS-C, SLT/DSLR)", sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
   { brand:"Sony", label:"a5100 / a5000 / NEX-7 / NEX-6 / NEX-5 (APS-C)", sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
@@ -925,6 +928,7 @@ const CAMERA_DB = [
   { brand:"Canon", label:"EOS 5D Mark IV (full frame)",   sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
   { brand:"Canon", label:"EOS 90D (APS-C)",               sensor_w:22.3,  sensor_h:14.9,  focal_length:null, focal_length_eq:null },
   { brand:"Canon", label:"EOS R5 Mark II (full frame)",   sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Canon", label:"EOS R1 (full frame)",           sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
   { brand:"Canon", label:"EOS R6 (full frame)",           sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
   { brand:"Canon", label:"EOS R / EOS RP (full frame)",   sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
   { brand:"Canon", label:"EOS 6D Mark II (full frame, DSLR)",  sensor_w:35.9, sensor_h:23.9, focal_length:null, focal_length_eq:null },
@@ -964,6 +968,7 @@ const CAMERA_DB = [
   { brand:"Nikon", label:"D850 (full frame, DSLR)",        sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
   { brand:"Nikon", label:"D7500 (APS-C, DSLR)",           sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
   { brand:"Nikon", label:"Zf (full frame)",                sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
+  { brand:"Nikon", label:"Z50 II (APS-C)",                 sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
   { brand:"Nikon", label:"Z6 II / Z7 (full frame)",        sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
   { brand:"Nikon", label:"D780 / D750 (full frame, DSLR)", sensor_w:35.9,  sensor_h:23.9,  focal_length:null, focal_length_eq:null },
   { brand:"Nikon", label:"D500 (APS-C, DSLR)",             sensor_w:23.5,  sensor_h:15.6,  focal_length:null, focal_length_eq:null },
@@ -998,6 +1003,8 @@ const CAMERA_DB = [
   { brand:"Fujifilm", label:"X-T3 (APS-C)",                         sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
   { brand:"Fujifilm", label:"X-Pro3 (APS-C)",                       sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
   { brand:"Fujifilm", label:"X-M5 (APS-C)",                         sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Fujifilm", label:"X-T20 / X-T10 (APS-C)",                sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
+  { brand:"Fujifilm", label:"X-T2 / X-T1 (APS-C)",                  sensor_w:23.5, sensor_h:15.6, focal_length:null, focal_length_eq:null },
 
   // ── PANASONIC ────────────────────────────────────────────────────────────
   { brand:"Panasonic", label:"S5 II / S1 / S1R (full frame)",  sensor_w:35.6, sensor_h:23.8, focal_length:null, focal_length_eq:null },
@@ -1006,6 +1013,8 @@ const CAMERA_DB = [
   { brand:"Panasonic", label:"S5 / S1H (full frame)",          sensor_w:35.6, sensor_h:23.8, focal_length:null, focal_length_eq:null },
   { brand:"Panasonic", label:"S9 (full frame)",                sensor_w:35.6, sensor_h:23.8, focal_length:null, focal_length_eq:null },
   { brand:"Panasonic", label:"GH7 (MFT)",                      sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
+  { brand:"Panasonic", label:"GH5 / GH4 (MFT)",                sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
+  { brand:"Panasonic", label:"G9 (MFT)",                       sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
   { brand:"Panasonic", label:"G85 / G7 (MFT)",                 sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
   // LX100 II: multi-aspect 4/3" sensor; active width at 24mm eq = fl × 36/eq = 10.9 × 36/24 = 16.35 mm
   { brand:"Panasonic", label:"LX100 II (MFT crop)",            sensor_w:16.35, sensor_h:12.26, focal_length:10.9, focal_length_eq:24 },
@@ -1018,6 +1027,7 @@ const CAMERA_DB = [
   { brand:"OM System", label:"E-M10 Mark IV (MFT)",            sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
   { brand:"OM System", label:"OM-3 (MFT)",                     sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
   { brand:"OM System", label:"E-M1 Mark III (MFT)",            sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
+  { brand:"OM System", label:"E-M1 Mark II (MFT)",             sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
   { brand:"OM System", label:"E-M5 Mark III (MFT)",            sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
   { brand:"OM System", label:"PEN E-P7 (MFT)",                 sensor_w:17.3, sensor_h:13.0, focal_length:null, focal_length_eq:null },
   // Tough TG-7 / TG-6: published physical fl = 4.5 mm at wide; sensor_w = 4.5 × 36/25 = 6.48 mm
