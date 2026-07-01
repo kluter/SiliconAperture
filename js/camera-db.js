@@ -86,17 +86,17 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy Z Flip",             sensor_w:5.60,  sensor_h:4.20,  focal_length:4.20, focal_length_eq:27, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 27mm
   { brand:"Samsung", label:"Galaxy A55",               sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy A54",               sensor_w:8.21,  sensor_h:6.15,  focal_length:5.24, focal_length_eq:23, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; 23mm
-  { brand:"Samsung", label:"Galaxy A53 5G",            sensor_w:7.40,  sensor_h:5.55,  focal_length:4.93, focal_length_eq:24, confidence:"✓" }, // [✓] 64MP Sony IMX682 1/1.7" 0.8µm; 24mm (GSMarena; same cam as A52 5G)
+  { brand:"Samsung", label:"Galaxy A53 5G",            sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 64MP 1/1.7" 0.8µm; 26mm (GSMarena spec page; same cam as A52 5G)
   { brand:"Samsung", label:"Galaxy A52s 5G",           sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.7" 0.8µm pixel math; focal_eq ~
-  { brand:"Samsung", label:"Galaxy Quantum 2",         sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"~" }, // [~] 1/1.7X" 0.8µm pixel math; focal_eq ~
-  { brand:"Samsung", label:"Galaxy A52 5G",            sensor_w:7.40,  sensor_h:5.55,  focal_length:4.93, focal_length_eq:24, confidence:"✓" }, // [✓] 64MP Sony IMX682 1/1.7" 0.8µm; 24mm (GSMarena)
+  { brand:"Samsung", label:"Galaxy Quantum 2",         sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 64MP 1/1.7" 0.8µm; 26mm (GSMarena)
+  { brand:"Samsung", label:"Galaxy A52 5G",            sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 64MP 1/1.7" 0.8µm; 26mm (GSMarena spec page)
   { brand:"Samsung", label:"Galaxy A52",               sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.7" 0.8µm pixel math; focal_eq ~
   { brand:"Samsung", label:"Galaxy A51 5G",            sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.0" 0.8µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy A51 5G UW",         sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.0" 0.8µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy A51",               sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.0" 0.8µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy A57 5G",             sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy A56",               sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; focal_eq ~
-  { brand:"Samsung", label:"Galaxy A73 5G",            sensor_w:9.15,  sensor_h:6.86,  focal_length:6.61, focal_length_eq:26, confidence:"?" }, // [?] 108MP
+  { brand:"Samsung", label:"Galaxy A73 5G",            sensor_w:7.68,  sensor_h:5.76,  focal_length:5.55, focal_length_eq:26, confidence:"~" }, // [~] 108MP ISOCELL HM6 0.64µm pixel math; focal_eq ~26mm
   { brand:"Samsung", label:"Galaxy A72",               sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.7" 0.8µm pixel math; focal_eq ~
   { brand:"Samsung", label:"Galaxy A37 5G",             sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy A36",               sensor_w:6.53,  sensor_h:4.90,  focal_length:4.72, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.96" 0.8µm; focal_eq ~
@@ -107,7 +107,7 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy A41",               sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.0" 0.8µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy A31",               sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.0" 0.8µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy A32 5G",            sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.0" 0.8µm; focal_eq ~
-  { brand:"Samsung", label:"Galaxy A32",               sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"?" }, // [?] 64MP, no format
+  { brand:"Samsung", label:"Galaxy A32",               sensor_w:6.50,  sensor_h:4.87,  focal_length:4.69, focal_length_eq:26, confidence:"~" }, // [~] 64MP Samsung GW3 1/1.97" 0.7µm pixel math; focal_eq ~26mm
   { brand:"Samsung", label:"Galaxy M36 5G",             sensor_w:6.53,  sensor_h:4.90,  focal_length:4.72, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.96"; focal_eq ~
   { brand:"Samsung", label:"Galaxy M35",               sensor_w:6.53,  sensor_h:4.90,  focal_length:4.72, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.96"; focal_eq ~
   { brand:"Samsung", label:"Galaxy M34 5G",            sensor_w:6.53,  sensor_h:4.90,  focal_length:4.72, focal_length_eq:26, confidence:"?" }, // [?]
@@ -120,7 +120,7 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy F36 5G",             sensor_w:6.53,  sensor_h:4.90,  focal_length:4.72, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.96"; focal_eq ~
   { brand:"Samsung", label:"Galaxy F55",               sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy M54",               sensor_w:9.15,  sensor_h:6.86,  focal_length:6.61, focal_length_eq:26, confidence:"?" }, // [?] 108MP
-  { brand:"Samsung", label:"Galaxy M53",               sensor_w:9.15,  sensor_h:6.86,  focal_length:6.61, focal_length_eq:26, confidence:"?" }, // [?] 108MP
+  { brand:"Samsung", label:"Galaxy M53",               sensor_w:7.68,  sensor_h:5.76,  focal_length:5.55, focal_length_eq:26, confidence:"~" }, // [~] 108MP ISOCELL HM6 1/1.67" 0.64µm pixel math; focal_eq ~26mm
   { brand:"Samsung", label:"Galaxy M62",               sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.73" 0.8µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy M51",               sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.73" 0.8µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy F62",               sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.73" 0.8µm; focal_eq ~
@@ -134,7 +134,7 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy F41",               sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.72" 0.8µm pixel math; focal_eq ~
   { brand:"Samsung", label:"Galaxy M52 5G",            sensor_w:6.50,  sensor_h:4.88,  focal_length:4.69, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.97" 0.7µm; 26mm
   { brand:"Samsung", label:"Galaxy M42 5G",            sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.0" 0.8µm; focal_eq ~
-  { brand:"Samsung", label:"Galaxy F54",               sensor_w:9.15,  sensor_h:6.86,  focal_length:6.61, focal_length_eq:26, confidence:"?" }, // [?] 108MP
+  { brand:"Samsung", label:"Galaxy F54",               sensor_w:7.68,  sensor_h:5.76,  focal_length:5.55, focal_length_eq:26, confidence:"~" }, // [~] 108MP ISOCELL HM6 1/1.67" 0.64µm pixel math; focal_eq ~26mm
   { brand:"Samsung", label:"Galaxy F34",               sensor_w:6.53,  sensor_h:4.90,  focal_length:4.72, focal_length_eq:26, confidence:"?" }, // [?]
   { brand:"Samsung", label:"Galaxy F52 5G",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?]
   { brand:"Samsung", label:"Galaxy F42 5G",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?]
@@ -172,13 +172,13 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy A26",                sensor_w:4.64,  sensor_h:3.48,  focal_length:3.48, focal_length_eq:27, confidence:"✓" }, // [✓] 1/2.76"; 27mm
   { brand:"Samsung", label:"Galaxy A25",               sensor_w:4.64,  sensor_h:3.48,  focal_length:3.48, focal_length_eq:27, confidence:"✓" }, // [✓] 1/2.76"; 27mm
   { brand:"Samsung", label:"Galaxy A24 4G",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.48, focal_length_eq:27, confidence:"✓" }, // [✓] 1/2.76"; 27mm
-  { brand:"Samsung", label:"Galaxy A22 5G",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?]
+  { brand:"Samsung", label:"Galaxy A22 5G",            sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"~" }, // [~] 48MP Samsung S5KGM2 1/2.0" 0.8µm pixel math; focal_eq ~26mm
   { brand:"Samsung", label:"Galaxy A21s",              sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.0" 0.8µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy A21",               sensor_w:4.19,  sensor_h:3.14,  focal_length:3.14, focal_length_eq:27, confidence:"?" }, // [?] 1/3.06" 1.0µm; focal_eq unknown
   { brand:"Samsung", label:"Galaxy A22",               sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.0" 0.8µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy A23 5G",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.76" 0.64µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy A15",               sensor_w:4.57,  sensor_h:3.43,  focal_length:3.30, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.8" 0.64µm; 26mm
-  { brand:"Samsung", label:"Galaxy A15 5G",            sensor_w:4.57,  sensor_h:3.43,  focal_length:3.30, focal_length_eq:26, confidence:"~" }, // [~] 1/2.8"; focal_eq ~
+  { brand:"Samsung", label:"Galaxy A15 5G",            sensor_w:5.22,  sensor_h:3.92,  focal_length:3.77, focal_length_eq:26, confidence:"~" }, // [~] 50MP Hynix Hi5022Q 1/2.8" 0.64µm pixel math; focal_eq ~26mm
   { brand:"Samsung", label:"Galaxy A13 5G",            sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?]
   { brand:"Samsung", label:"Galaxy A12 Nacho",         sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?]
   { brand:"Samsung", label:"Galaxy A12 (India)",       sensor_w:4.64,  sensor_h:3.48,  focal_length:3.35, focal_length_eq:26, confidence:"?" }, // [?]
