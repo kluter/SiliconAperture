@@ -35,10 +35,10 @@ const CAMERA_DB = [
   { brand:"Apple", label:"iPhone 12 Pro Max",          sensor_w:6.80,  sensor_h:5.10,  focal_length:4.91, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.9" 1.7µm; 26mm
   { brand:"Apple", label:"iPhone 12 Pro",              sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
   { brand:"Apple", label:"iPhone 12 / 12 mini",        sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
-  { brand:"Apple", label:"iPhone SE (3rd gen, 2022)",  sensor_w:4.80,  sensor_h:3.60,  focal_length:3.73, focal_length_eq:28, confidence:"?" }, // [?]
+  { brand:"Apple", label:"iPhone SE (3rd gen, 2022)",  sensor_w:4.88,  sensor_h:3.66,  focal_length:3.80, focal_length_eq:28, confidence:"~" }, // [~] same camera as iPhone 8 / X; 1/3.0" 1.22µm; 28mm
   { brand:"Apple", label:"iPhone 11 Pro / Pro Max",    sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
   { brand:"Apple", label:"iPhone 11",                  sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
-  { brand:"Apple", label:"iPhone SE (2nd gen, 2020)",  sensor_w:4.80,  sensor_h:3.60,  focal_length:3.73, focal_length_eq:28, confidence:"~" }, // [~] inferred same camera as iPhone 8
+  { brand:"Apple", label:"iPhone SE (2nd gen, 2020)",  sensor_w:4.88,  sensor_h:3.66,  focal_length:3.80, focal_length_eq:28, confidence:"~" }, // [~] same camera as iPhone 8 / X; 1/3.0" 1.22µm; 28mm
   { brand:"Apple", label:"iPhone XS Max / XS (2018)",  sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
   { brand:"Apple", label:"iPhone XR (2018)",           sensor_w:5.60,  sensor_h:4.20,  focal_length:4.04, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 26mm
   { brand:"Apple", label:"iPhone X (2017)",            sensor_w:4.88,  sensor_h:3.66,  focal_length:3.80, focal_length_eq:28, confidence:"✓" }, // [✓] 1/3.0" 1.22µm; 28mm
@@ -65,7 +65,7 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy S23 Ultra",         sensor_w:9.80,  sensor_h:7.35,  focal_length:6.53, focal_length_eq:24, confidence:"✓" }, // [✓] 1/1.3" 0.6µm; 24mm
   { brand:"Samsung", label:"Galaxy S23 / S23+",        sensor_w:8.21,  sensor_h:6.15,  focal_length:5.47, focal_length_eq:24, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; 24mm
   { brand:"Samsung", label:"Galaxy S23 FE",            sensor_w:8.15,  sensor_h:6.12,  focal_length:5.21, focal_length_eq:23, confidence:"✓" }, // [✓] 1/1.57" 1.0µm; 23mm
-  { brand:"Samsung", label:"Galaxy S22 Ultra",         sensor_w:9.62,  sensor_h:7.22,  focal_length:6.15, focal_length_eq:23, confidence:"~" }, // [~] 108MP 1/1.33" 0.8µm (HM3, same as S21 Ultra); 23mm
+  { brand:"Samsung", label:"Galaxy S22 Ultra",         sensor_w:9.62,  sensor_h:7.22,  focal_length:6.15, focal_length_eq:23, confidence:"✓" }, // [✓] 108MP 1/1.33" 0.8µm HM3; 23mm (GSMarena)
   { brand:"Samsung", label:"Galaxy S22 / S22+",        sensor_w:8.21,  sensor_h:6.15,  focal_length:5.24, focal_length_eq:23, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; 23mm
   { brand:"Samsung", label:"Galaxy Z Fold 6 (main)",   sensor_w:8.15,  sensor_h:6.12,  focal_length:5.21, focal_length_eq:23, confidence:"✓" }, // [✓] 1/1.57" 1.0µm; 23mm
   { brand:"Samsung", label:"Galaxy Z Fold4 (main)",    sensor_w:8.21,  sensor_h:6.15,  focal_length:5.24, focal_length_eq:23, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; 23mm
@@ -86,10 +86,10 @@ const CAMERA_DB = [
   { brand:"Samsung", label:"Galaxy Z Flip",             sensor_w:5.60,  sensor_h:4.20,  focal_length:4.20, focal_length_eq:27, confidence:"✓" }, // [✓] 1/2.55" 1.4µm; 27mm
   { brand:"Samsung", label:"Galaxy A55",               sensor_w:8.21,  sensor_h:6.15,  focal_length:5.93, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy A54",               sensor_w:8.21,  sensor_h:6.15,  focal_length:5.24, focal_length_eq:23, confidence:"✓" }, // [✓] 1/1.56" 1.0µm; 23mm
-  { brand:"Samsung", label:"Galaxy A53 5G",            sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"~" }, // [~] 1/1.7X" 0.8µm pixel math; focal_eq ~
+  { brand:"Samsung", label:"Galaxy A53 5G",            sensor_w:7.40,  sensor_h:5.55,  focal_length:4.93, focal_length_eq:24, confidence:"✓" }, // [✓] 64MP Sony IMX682 1/1.7" 0.8µm; 24mm (GSMarena; same cam as A52 5G)
   { brand:"Samsung", label:"Galaxy A52s 5G",           sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.7" 0.8µm pixel math; focal_eq ~
   { brand:"Samsung", label:"Galaxy Quantum 2",         sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"~" }, // [~] 1/1.7X" 0.8µm pixel math; focal_eq ~
-  { brand:"Samsung", label:"Galaxy A52 5G",            sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"~" }, // [~] 1/1.7X" 0.8µm pixel math; focal_eq ~
+  { brand:"Samsung", label:"Galaxy A52 5G",            sensor_w:7.40,  sensor_h:5.55,  focal_length:4.93, focal_length_eq:24, confidence:"✓" }, // [✓] 64MP Sony IMX682 1/1.7" 0.8µm; 24mm (GSMarena)
   { brand:"Samsung", label:"Galaxy A52",               sensor_w:7.40,  sensor_h:5.55,  focal_length:5.34, focal_length_eq:26, confidence:"✓" }, // [✓] 1/1.7" 0.8µm pixel math; focal_eq ~
   { brand:"Samsung", label:"Galaxy A51 5G",            sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.0" 0.8µm; focal_eq ~
   { brand:"Samsung", label:"Galaxy A51 5G UW",         sensor_w:6.40,  sensor_h:4.80,  focal_length:4.62, focal_length_eq:26, confidence:"✓" }, // [✓] 1/2.0" 0.8µm; focal_eq ~
