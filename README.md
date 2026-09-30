@@ -145,7 +145,7 @@ python3 -m http.server
 
 Your photo never leaves your browser. It is drawn into a canvas and its EXIF is read in memory: no upload, no server. All EXIF text is written via `textContent`, so a file with crafted metadata cannot inject anything into the page.
 
-The only outbound requests are map tiles from public tile servers (Esri, OpenStreetMap, Carto) and two libraries loaded from CDN.
+The only outbound requests are map tiles from public tile servers (Esri, OpenStreetMap) and two libraries loaded from CDN.
 
 ```javascript
 // Every network request SiliconAperture makes:

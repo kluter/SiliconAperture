@@ -847,10 +847,17 @@ function initMap() {
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     { attribution: '© OpenStreetMap contributors', maxZoom: 19 }
   );
-  tileLayers.carto = L.tileLayer(
-    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    { attribution: '© Carto', maxZoom: 20 }
-  );
+  // Dark Gray Canvas only has tiles to z16; maxNativeZoom upscales beyond that.
+  tileLayers.dark = L.layerGroup([
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      { attribution: '© Esri', maxZoom: 20, maxNativeZoom: 16 }
+    ),
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+      { attribution: '', maxZoom: 20, maxNativeZoom: 16 }
+    )
+  ]);
 
   tileLayers[currentTile].addTo(map);
   map.on('click', handleMapClick);
