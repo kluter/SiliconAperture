@@ -209,26 +209,12 @@
 
     <div id="image-container">
       <canvas id="image-canvas" role="img" aria-label="Photo: click both ends of the object to mark it"></canvas>
+      <!-- Empty photo panel, as in TracePoint and ShadowFinder: title, Browse, or the demo -->
       <div id="drop-overlay" role="region" aria-label="Add a photo">
-        <div class="drop-inner">
-          <div class="drop-icon">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs><clipPath id="sa-hex-clip"><polygon points="10,73 10,27 50,4 90,27 90,73 50,96"/></clipPath></defs>
-            <polygon points="10,73 10,27 50,4 90,27 90,73 50,96" fill="#130608"/>
-            <g clip-path="url(#sa-hex-clip)">
-              <polygon points="50,62 27,100 73,100" fill="#e63946"/>
-              <polygon points="50,62 5,-10 95,-10" fill="#e63946"/>
-            </g>
-            <polygon points="10,73 10,27 50,4 90,27 90,73 50,96" fill="none" stroke="#e63946" stroke-width="5"/>
-          </svg>
-        </div>
-          <div class="drop-msg">Drop / Paste a photo here</div>
-          <div class="drop-actions">
-            <button type="button" class="drop-btn" id="btn-browse">Browse</button>
-            <span class="drop-or">or</span>
-            <button type="button" class="drop-btn demo-btn" id="btn-demo" title="Load a demo photo to measure">Try the demo</button>
-          </div>
-        </div>
+        <span class="drop-title">Drop / Paste image here</span>
+        <button type="button" id="btn-browse">Browse</button>
+        <span class="drop-or">or</span>
+        <button type="button" id="btn-demo" title="Load a demo photo to measure">Try the Demo</button>
       </div>
       <input type="file" id="file-input" accept="image/*" aria-label="Choose a photo">
       <!-- Photo tools, top left on the photo (as the map's buttons on the map) -->
