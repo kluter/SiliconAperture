@@ -146,6 +146,16 @@
         </div>
       </div>
     </section>
+
+    <!-- Right end of the photo half, as in ShadowFinder: the ☰ menu (autosave, demo; renderSessionMenu in script.js) -->
+    <div class="bar-end">
+      <div class="session-wrap" id="session-wrap">
+        <button type="button" class="icon-btn" id="btn-session" title="This browser: autosave · demo" aria-label="Menu" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><rect y="2" width="16" height="2" rx="1"/><rect y="7" width="16" height="2" rx="1"/><rect y="12" width="16" height="2" rx="1"/></svg>
+        </button>
+        <div class="session-menu" id="session-menu" style="display:none" role="menu"></div>
+      </div>
+    </div>
    </div>
 
    <!-- Continues the photo/map divider up through the bar -->
@@ -233,7 +243,6 @@
   <div id="pane-splitter" role="separator" aria-orientation="vertical" aria-label="Resize photo and map" tabindex="0"
        title="Drag to resize · double-click to reset to 60:40 · arrow keys when focused">
     <button type="button" id="btn-photo-collapse" class="splitter-chevron chevron-photo" aria-label="Hide photo" title="Hide photo">‹</button>
-    <button type="button" id="btn-map-collapse" class="splitter-chevron chevron-map" aria-label="Hide map" title="Hide map">›</button>
   </div>
 
   <!-- ═══ RIGHT: MAP PANEL ═══ -->

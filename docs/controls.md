@@ -16,6 +16,16 @@ Each tab is one photo with everything measured on it: marks, camera, the known v
 
 Work is saved in the browser as you go and comes back after a refresh (see [privacy.md](privacy.md)).
 
+## ☰ menu
+
+At the right end of the bar over the photo (as in ShadowFinder).
+
+| Control | Action |
+|---|---|
+| **Autosave** switch | On (default): photos and measurements are kept in this browser. Off: the saved copy is deleted and nothing is saved |
+| **Clear** | Delete the saved copy and start with one empty tab (asks first) |
+| **Demo** | Open the demo photo |
+
 ## Photo
 
 | Input | Action |
@@ -58,9 +68,9 @@ The pinhole diagram above the map is the step guide: known values in grey with t
 | Click (size mode) | Camera (dark point), then object (red point): their distance becomes `D`. A third click starts over |
 | Drag a point | Move it; the distance or the ring follows. Points sit above the photo's GPS marker |
 | Click (distance mode) | The object: draws the ring (or band) of camera positions |
-| Right-click | Copy coordinates · place the camera or the object here · open the spot in Google Maps, Bing Maps, OpenStreetMap or Google Earth |
+| Right-click | Copy coordinates · the camera stood here · the object is here · open the spot in Google Maps, Street View, Google Earth, OpenStreetMap or **TracePoint** · **Open in…** Apple Maps, Lookmap, Bing Maps, Mapillary, Yandex Maps, Baidu Maps |
 | Right-drag, `Ctrl`+drag | Rotate and tilt |
-| Coordinates field, or `Ctrl+V` anywhere | Place a point (see formats below) |
+| Coordinates field, or `Ctrl+V` anywhere | Drop a numbered pin and fly there, in either mode (see formats below). Click a pin to put the next point exactly on it; the pin list (top left) flies to a pin or removes it |
 | **Dark · Satellite · OSM** | Basemap (remembered) |
 | GPS button (top left) | Fly to where the photo was taken |
 | Globe button (top left) | Let the globe spin |
@@ -72,7 +82,7 @@ The pinhole diagram above the map is the step guide: known values in grey with t
 
 ## Divider
 
-Drag the bar between photo and map to resize (remembered). Double-click resets to 60:40; with focus, `←` / `→` (`Shift` for bigger steps). The two chevrons hide the photo or the map, and bring it back.
+Drag the bar between photo and map to resize (remembered). Double-click resets to 60:40; with focus, `←` / `→` (`Shift` for bigger steps). The chevron hides the photo for a full-width map, and brings it back.
 
 ## Keys
 

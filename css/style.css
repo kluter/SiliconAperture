@@ -81,9 +81,6 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
   overflow: hidden;
 }
 
-/* Map hidden: the photo takes the whole width */
-#workspace.map-collapsed #photo-panel { flex: 1 1 0; }
-#workspace.map-collapsed #map-panel   { display: none; }
 /* Photo hidden: the map takes the whole width (the inputs in the bar stay) */
 #workspace.photo-collapsed #photo-panel { display: none; }
 #workspace.photo-collapsed #pane-splitter { cursor: default; }
@@ -102,7 +99,6 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 #pane-splitter:hover,
 #pane-splitter.dragging,
 #pane-splitter:focus-visible { background: #1e1e1e; }
-#workspace.map-collapsed #pane-splitter { cursor: default; }
 
 .splitter-chevron {
   position: absolute;
@@ -122,13 +118,6 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
   z-index: 2;
 }
 .splitter-chevron:hover:not(:disabled) { color: #ccc; background: #1e1e1e; }
-/* Two chevrons, one per side; with a side hidden only the one that brings it back shows */
-.chevron-photo { top: calc(50% - 21px); }
-.chevron-map   { top: calc(50% + 21px); }
-#workspace.map-collapsed .chevron-photo,
-#workspace.photo-collapsed .chevron-map { display: none; }
-#workspace.map-collapsed .chevron-map,
-#workspace.photo-collapsed .chevron-photo { top: 50%; }
 
 /* While dragging, keep the map and canvas from swallowing pointer events */
 body.splitter-dragging { cursor: col-resize; user-select: none; }
@@ -512,11 +501,6 @@ a.icon-btn { text-decoration: none; }
 .bar-photo { flex: 0 1 var(--split); min-width: 560px; display: flex; }   /* no overflow clip: the EXIF card hangs below */
 .bar-split { flex: 0 0 7px; background: #0d0d0d; border-left: 1px solid #2a2a2a; border-right: 1px solid #2a2a2a; }
 .bar-map   { flex: 1 1 0; min-width: 260px; display: flex; }
-/* Map hidden: the photo half takes the room, the diagram stays at the right end */
-#app.map-collapsed .bar-photo { flex: 1 1 0; }
-#app.map-collapsed .bar-split,
-#app.map-collapsed .slot-map  { display: none; }
-#app.map-collapsed .bar-map   { flex: 0 0 auto; min-width: 0; border-left: 1px solid #1e1e1e; }
 
 .bar-slot {
   padding: var(--bar-pad-y) 16px;
@@ -1056,7 +1040,6 @@ kbd {
 .bar-photo { container: bar-photo / inline-size; }
 .bar-map   { container: bar-map / inline-size; }
 /* Map hidden: the bar's map half is just the diagram at its own width, so no container there */
-#app.map-collapsed .bar-map { container-type: normal; }
 
 @container bar-photo (max-width: 1020px) {
   .slot-optics { display: none; }
@@ -1175,3 +1158,94 @@ input.invalid,
 }
 .map-pt:active { cursor: grabbing; }
 .map-pt[data-role="camera"] { background: #111; border-color: #e63946; }
+
+/* ☰ menu at the right end of the photo half of the bar (as in ShadowFinder): autosave, demo */
+.bar-end { display: flex; align-items: flex-start; padding: var(--bar-pad-y) 10px 0 4px; }
+.session-wrap { position: relative; }
+.session-menu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 1000;
+  min-width: 240px; padding: 0 0 6px; overflow: hidden;
+  background: #151515; border: 1px solid #2a2a2a; border-radius: 6px;
+  box-shadow: 0 4px 20px #000c;
+}
+.session-menu .panel-title {
+  padding: 9px 12px 4px; border-top: 1px solid #2a2a2a;
+  font-size: 9px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: #777;
+}
+.session-menu .panel-title:first-child { border-top: none; }
+.session-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 12px; font-size: 12px; color: #aaa;
+  cursor: pointer; white-space: nowrap;
+}
+.session-item:hover { background: #222; color: #fff; }
+.session-switch {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 6px 12px; font-size: 12px; color: #aaa;
+}
+.session-switch label { cursor: pointer; }
+.session-switch label:hover { color: #fff; }
+.session-row-end { display: flex; align-items: center; gap: 10px; }
+.session-note { padding: 0 12px 7px; max-width: 240px; font-size: 11px; line-height: 1.35; color: #777; white-space: normal; }
+.btn-clear-saved { font-size: 11px; padding: 4px 10px; height: auto; }
+.btn-clear-saved:not(:disabled):hover { color: #ff5555; border-color: #ff5555; }
+/* On/off switch, as in ShadowFinder (neutral here: red is for the measurement) */
+.adjust-switch {
+  -webkit-appearance: none; appearance: none; flex-shrink: 0;
+  width: 28px; height: 16px; border-radius: 8px; margin: 0; padding: 0; border: none;
+  background: #3a3a3a; position: relative; cursor: pointer; transition: background 0.15s;
+}
+.adjust-switch::after {
+  content: ""; position: absolute; top: 2px; left: 2px;
+  width: 12px; height: 12px; border-radius: 50%; background: #bbb; transition: left 0.15s, background 0.15s;
+}
+.adjust-switch:checked { background: #666; }
+.adjust-switch:checked::after { left: 14px; background: #fff; }
+
+/* Coordinate pins and their list (as in TracePoint, its blue; still, no pulse). Pins are
+   references, not measurement points; they sit below the camera and object points. */
+.search-pin {
+  z-index: 1;
+  width: 24px; height: 24px; box-sizing: border-box;
+  border-radius: 50%;
+  background: rgba(0, 170, 255, 0.25);
+  border: 2px solid #00aaff;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 11px; font-weight: 700;
+  text-shadow: 0 0 3px #000, 0 0 2px #000;
+  cursor: pointer;
+}
+.search-list {
+  position: absolute; top: 10px; left: 50px; z-index: 5; width: 230px;
+  max-height: 220px; overflow-y: auto;
+  background: #151515; border: 1px solid #333; border-radius: 6px;
+  box-shadow: 0 4px 16px #000a;
+  opacity: 0.85; transition: opacity 0.15s;
+}
+.search-list:hover { opacity: 1; }
+.search-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 6px 6px 10px; font-size: 11px; color: #bbb;
+  cursor: pointer;
+}
+.search-row:hover { background: #222; color: #fff; }
+.search-num {
+  width: 16px; height: 16px; flex-shrink: 0; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #00aaff; color: #001520; font-size: 9px; font-weight: 700;
+}
+.search-coords { flex: 1; font-variant-numeric: tabular-nums; }
+.search-del, .search-del:hover:not(:disabled) {
+  background: none; border: none; color: #555; width: auto; height: auto;
+  padding: 0 4px; font-size: 13px; line-height: 1; cursor: pointer;
+}
+.search-del:hover:not(:disabled) { color: #ff5555; }
+.search-clear {
+  padding: 6px 10px; font-size: 10px; color: #666; text-align: right;
+  border-top: 1px solid #222; cursor: pointer;
+}
+.search-clear:hover { color: #fff; }
+/* "Open in…" and its submenu (as in TracePoint) */
+.map-ctx-more { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.map-ctx-more::after { content: "›"; color: #777; font-size: 14px; line-height: 1; }
+.map-ctx-sub { min-width: 150px; z-index: 1001; }

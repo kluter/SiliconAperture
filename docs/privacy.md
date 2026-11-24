@@ -16,7 +16,7 @@ Both libraries are bundled in `vendor/`, so the only outbound requests are map t
 
 A Content Security Policy in `index.html` allows scripts from the site itself only, and network requests to those tile servers only.
 
-The right-click menu's *Open in …* entries are plain links: nothing is sent until you click one, and then only the coordinates of the clicked spot go to that service.
+The right-click menu's *Open in …* entries (Google Maps, Street View, Google Earth, OpenStreetMap, TracePoint, and the services under *Open in…*) are plain links: nothing is sent until you click one, and then only the coordinates of the clicked spot go to that service.
 
 **Map tiles reveal the area you look at.** A tile server can infer what location you are measuring. When a photo carries GPS in its EXIF, the map flies there by itself, so the tile server sees the area where the photo was taken. Use a VPN if that matters, or strip the GPS from the photo first.
 
@@ -29,9 +29,14 @@ The right-click menu's *Open in …* entries are plain links: nothing is sent un
 | What | Where | Why |
 |---|---|---|
 | Your photos and what you measured on them, the map view and basemap | IndexedDB `siliconaperture` | Autosave: a refresh keeps the work. Closing a tab deletes its copy |
-| Photo/map split, hidden side | `localStorage` (`sa-split`, `sa-hidden-side`) | Layout preferences |
+| Autosave on or off | `localStorage` (`sa-autosave`) | The ☰ switch, shared by all tabs of this browser |
+| Photo/map split, photo hidden | `localStorage` (`sa-split`, `sa-hidden-side`) | Layout preferences |
 
-Nothing is stored anywhere else. To remove everything, close all photo tabs, or clear the site's data in the browser settings.
+Nothing is stored anywhere else.
+
+**Deleting it:** ☰ → **Clear** deletes the saved photos and measurements and starts empty. Switching **Autosave** off deletes the saved copy and stops saving, for sensitive material. Closing a photo tab deletes that photo. The browser's *clear site data* removes everything, the layout preferences included.
+
+**How long it lasts:** until deleted. It survives refreshes, hard reloads and browser restarts. The browser may still evict it when the disk runs low (the site does not ask for persistent storage), and Safari deletes it after 7 days without a visit. It is per browser and per address: the live site and a local copy each keep their own.
 
 Only one browser tab of SiliconAperture saves at a time (a Web Lock). A second tab restores the saved work but keeps its own changes to itself until the first is closed.
 

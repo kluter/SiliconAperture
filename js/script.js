@@ -111,6 +111,7 @@ let exifGPS      = null;
 let loadSeq      = 0;      // bumped per photo, so a late EXIF read of an earlier photo is dropped
 let autosaveDb = null, autosaveTimer = null, autosaveReady = false, autosaveWarned = false;   // AUTOSAVE below
 let autosaveOwner = !navigator.locks;
+let autosaveOn = (() => { try { return localStorage.getItem('sa-autosave') !== '0'; } catch (err) { return true; } })();   // the ☰ switch
 
 const CUSTOM_IDX = CAMERA_DB.findIndex(c => c.brand === '—');
 
@@ -1578,7 +1579,7 @@ function initMap() {
   });
 
   map.on('click', e => {
-    if (e.originalEvent?.target?.closest?.('.map-pt')) return;   // a click on a point (or the end of its drag) places nothing
+    if (e.originalEvent?.target?.closest?.('.map-pt, .search-pin')) return;   // a click on a point or pin is theirs
     const p = { lat: e.lngLat.lat, lng: e.lngLat.lng };
     if (isFinite(p.lat) && isFinite(p.lng)) handleMapClick(p);
   });
@@ -1723,7 +1724,7 @@ function runSpin() {
     const dt = Math.min(0.1, (now - last) / 1000);   // no jump after the tab was in the background
     last = now;
     spinRaf = requestAnimationFrame(step);
-    // Map hidden (collapsed, or the small-window notice): keep the turn, skip the redraw
+    // Map without a size (the small-window notice): keep the turn, skip the redraw
     if (!map.getContainer().clientWidth) return;
     const c = map.getCenter();
     // zoomed in, the turn slows with the zoom so the surface does not race past
@@ -2045,27 +2046,104 @@ function isShortMapLink(text) {
 const SHORT_LINK_NOTE = "Short links can't be read here. Open it and copy the full address.";
 const COORD_HELP = 'Enter coordinates as 52.520, 13.405, 52°32\'43.8"N 13°13\'11.6"E or a map link';
 
-// A typed or pasted point. Size mode: the camera (or the object, once the camera is placed);
-// distance mode: the object, and the ring goes around it. Returns whether it was placed.
-function placePastedPoint(p) {
+/* ─── COORDINATE PINS (as in TracePoint) ─────────────────────── */
+// Pasted or typed coordinates drop a numbered pin and the map flies there, in either solve
+// mode. A pin is a reference, not a measurement point: click it to put the next point
+// (camera, object, or the object of the ring) exactly on it, or right-click the map there.
+// Pins live in memory only. The list floats on the map, next to its buttons.
+let searchPins = [];   // { lat, lng, marker }
+let searchList = null;
+const fmtCoords = p => `${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}`;
+
+// Gentle flight: keep the zoom unless zoomed out further than town level
+function flyToPin(p) {
   stopSpin();
-  if (solveMode === 'distance') return placeObjectRing(p);
-  if (mapPtA && mapPtB) clearMapPoints();
-  setMapPoint(mapPtA ? 'object' : 'camera', p);
-  map.flyTo({ center: [p.lng, p.lat], zoom: Math.max(map.getZoom(), 14), essential: true });
-  return true;
+  const z = map.getZoom() >= 11 ? map.getZoom() : 15;
+  const c = map.getContainer();
+  if (!c.clientWidth || !c.clientHeight) { map.jumpTo({ center: [p.lng, p.lat], zoom: z }); return; }
+  map.flyTo({ center: [p.lng, p.lat], zoom: z, duration: 1200, essential: true });
+}
+
+function addSearchPin(coords) {
+  if (!map) return;
+  const existing = searchPins.find(p => fmtCoords(p) === fmtCoords(coords));
+  if (existing) { flyToPin(existing); return; }
+  const pin = { lat: coords.lat, lng: coords.lng, marker: null };
+  const node = document.createElement('div');
+  node.className = 'search-pin';
+  node.textContent = searchPins.length + 1;
+  node.title = `${fmtCoords(pin)} · click: put the next point here`;
+  node.addEventListener('click', e => { e.stopPropagation(); handleMapClick({ lat: pin.lat, lng: pin.lng }); });
+  pin.marker = new maplibregl.Marker({ element: node }).setLngLat([pin.lng, pin.lat]).addTo(map);
+  searchPins.push(pin);
+  renderSearchList();
+  flyToPin(pin);
+}
+
+function removeSearchPin(i) {
+  searchPins[i].marker.remove();
+  searchPins.splice(i, 1);
+  searchPins.forEach((p, n) => { p.marker.getElement().textContent = n + 1; });   // numbers follow the list
+  renderSearchList();
+}
+
+function renderSearchList() {
+  if (!searchList) {
+    searchList = document.createElement('div');
+    searchList.className = 'search-list';
+    document.getElementById('map-container').appendChild(searchList);
+  }
+  searchList.innerHTML = '';
+  searchPins.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'search-row';
+    row.title = 'Go to this location';
+    const num = document.createElement('span');
+    num.className = 'search-num';
+    num.textContent = i + 1;
+    const txt = document.createElement('span');
+    txt.className = 'search-coords';
+    txt.textContent = fmtCoords(p);
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'search-del';
+    del.title = 'Remove pin';
+    del.setAttribute('aria-label', `Remove pin ${i + 1}`);
+    del.textContent = '×';
+    del.addEventListener('click', e => { e.stopPropagation(); removeSearchPin(i); });
+    row.append(num, txt, del);
+    row.addEventListener('click', () => flyToPin(p));
+    searchList.appendChild(row);
+  });
+  if (searchPins.length > 1) {
+    const clear = document.createElement('div');
+    clear.className = 'search-clear';
+    clear.textContent = 'Clear all';
+    clear.addEventListener('click', () => { searchPins.forEach(p => p.marker.remove()); searchPins = []; renderSearchList(); });
+    searchList.appendChild(clear);
+  }
+  searchList.style.display = searchPins.length ? 'block' : 'none';
 }
 
 document.getElementById('coord-input').addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') { this.value = ''; this.blur(); return; }
   if (e.key !== 'Enter') return;
   const p = parseCoordinates(this.value);
   if (!p) { showToast(isShortMapLink(this.value) ? SHORT_LINK_NOTE : COORD_HELP); return; }
-  if (placePastedPoint(p)) this.value = '';   // kept when there is nothing to place it for yet
+  this.value = '';
+  this.blur();
+  addSearchPin(p);
+});
+// A clean paste into the empty field drops the pin at once (as in TracePoint)
+document.getElementById('coord-input').addEventListener('paste', function (e) {
+  const text = e.clipboardData && e.clipboardData.getData('text');
+  const p = this.value === '' && parseCoordinates(text);
+  if (p) { e.preventDefault(); this.blur(); addSearchPin(p); }
 });
 
 /* ─── PASTE ANYWHERE ─────────────────────────────────────────── */
-// Ctrl+V outside text fields: an image opens as the photo, text with coordinates places a
-// point. An image wins over text ("Copy image" on a web page carries both). Only what is
+// Ctrl+V outside text fields: an image opens as the photo, text with coordinates drops a
+// pin. An image wins over text ("Copy image" on a web page carries both). Only what is
 // pasted is read, on the paste itself: the page never reads the clipboard on its own.
 document.addEventListener('paste', e => {
   const t = e.target;
@@ -2082,64 +2160,115 @@ document.addEventListener('paste', e => {
   e.preventDefault();
   const p = parseCoordinates(text);
   if (!p) { showToast(isShortMapLink(text) ? SHORT_LINK_NOTE : 'No image or coordinates found in the clipboard.'); return; }
-  placePastedPoint(p);
+  addSearchPin(p);
 });
 
 /* ─── MAP RIGHT-CLICK MENU ───────────────────────────────────── */
-// As in TracePoint and ShadowFinder. MapLibre fires 'contextmenu' only for a right-click
-// without drag, so right-drag still rotates. The links are plain hrefs: nothing is sent
-// anywhere until one is clicked.
+// As in TracePoint: the coordinates, copy, put a point here, the main map services and
+// TracePoint, then "Open in…" with the rest (formats after briatlon's mapLocationMenu.js).
+// MapLibre fires 'contextmenu' only for a right-click without drag, so right-drag still
+// rotates. The links are plain hrefs: nothing is sent anywhere until one is clicked.
+// The other services count zoom in 256 px tiles, MapLibre in 512 px: one level apart.
 const MAP_LINKS = [
   ['Google Maps',   (la, ln) => `https://www.google.com/maps/search/?api=1&query=${la},${ln}`],
-  ['Bing Maps',     (la, ln, z) => `https://www.bing.com/maps?cp=${la}~${ln}&lvl=${z}&sp=point.${la}_${ln}_Pin`],
-  ['OpenStreetMap', (la, ln, z) => `https://www.openstreetmap.org/?mlat=${la}&mlon=${ln}#map=${z}/${la}/${ln}`],
-  ['Google Earth',  (la, ln) => `https://earth.google.com/web/@${la},${ln},0a,2000d,35y,0h,0t,0r`]
+  ['Street View',   (la, ln) => `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${la},${ln}`],
+  ['Google Earth',  (la, ln) => `https://earth.google.com/web/@${la},${ln},0a,2000d,35y,0h,0t,0r`],
+  ['OpenStreetMap', (la, ln, z) => `https://www.openstreetmap.org/?mlat=${la}&mlon=${ln}#map=${z}/${la}/${ln}`]
 ];
-let mapMenu = null;
+// TracePoint opens a view from its URL hash: #lat,lng,zoom (MapLibre zoom), as ShadowFinder links it
+const TRACEPOINT_URL = 'https://kluter.github.io/TracePoint/';
+const MAP_MORE_LINKS = [
+  ['Apple Maps',  (la, ln, z) => `https://maps.apple.com/?ll=${la},${ln}&q=${la},${ln}&z=${z}`],
+  ['Lookmap',     (la, ln, z) => `https://lookmap.skzk.dev/#c=${z - 1}/${la}/${ln}`],
+  ['Bing Maps',   (la, ln, z) => `https://www.bing.com/maps?cp=${la}~${ln}&lvl=${z}&sp=point.${la}_${ln}_Pin`],
+  ['Mapillary',   (la, ln, z) => `https://www.mapillary.com/app/?lat=${la}&lng=${ln}&z=${z - 1}`],
+  ['Yandex Maps', (la, ln, z) => `https://yandex.com/maps/?ll=${ln},${la}&z=${z}&pt=${ln},${la}`],
+  ['Baidu Maps',  (la, ln) => `https://api.map.baidu.com/marker?location=${la},${ln}&coord_type=wgs84&title=SiliconAperture&content=${la},${ln}&output=html&src=webapp.siliconaperture`]
+];
+let mapMenu = null, mapSub = null, mapSubTimer = null;
 
-function hideMapMenu() { if (mapMenu) mapMenu.style.display = 'none'; }
+function hideMapSub()  { clearTimeout(mapSubTimer); if (mapSub) mapSub.style.display = 'none'; }
+function hideMapMenu() { if (mapMenu) mapMenu.style.display = 'none'; hideMapSub(); }
+// Leaving towards the submenu must not close it on the way: closing waits a moment
+function leaveMapSub() { clearTimeout(mapSubTimer); mapSubTimer = setTimeout(hideMapSub, 250); }
+
+// The submenu right of the menu, level with its "Open in…" row; left of it where the map ends
+function showMapSub(trigger) {
+  clearTimeout(mapSubTimer);
+  const box = map.getContainer().getBoundingClientRect();
+  const m = mapMenu.getBoundingClientRect(), t = trigger.getBoundingClientRect();
+  mapSub.style.display = 'block';
+  const w = mapSub.offsetWidth, h = mapSub.offsetHeight;
+  const left = m.right - box.left + w > box.width ? m.left - box.left - w + 1 : m.right - box.left - 1;
+  mapSub.style.left = `${Math.max(0, left)}px`;
+  mapSub.style.top  = `${Math.max(0, Math.min(t.top - box.top, box.height - h))}px`;
+}
 
 function showMapMenu(e) {
   const p  = { lat: e.lngLat.lat, lng: e.lngLat.lng };
   const la = p.lat.toFixed(6), ln = p.lng.toFixed(6);
-  const z  = Math.round(map.getZoom()) + 1;   // the other services count zoom in 256 px tiles
+  const z  = Math.round(map.getZoom()) + 1;
   if (!mapMenu) {
-    mapMenu = document.createElement('div');
-    mapMenu.className = 'map-ctx-menu';
-    mapMenu.setAttribute('role', 'menu');
-    map.getContainer().appendChild(mapMenu);
+    const make = cls => {
+      const d = document.createElement('div');
+      d.className = cls;
+      d.setAttribute('role', 'menu');
+      d.style.display = 'none';
+      map.getContainer().appendChild(d);
+      return d;
+    };
+    mapMenu = make('map-ctx-menu');
+    mapSub  = make('map-ctx-menu map-ctx-sub');
+    mapSub.addEventListener('mouseenter', () => clearTimeout(mapSubTimer));
+    mapSub.addEventListener('mouseleave', leaveMapSub);
   }
-  mapMenu.innerHTML = '';
-  const add = (tag, cls, text) => {
+  const add = (parent, tag, cls, text) => {
     const n = document.createElement(tag);
     n.className = cls;
     n.textContent = text;
     if (tag === 'button') { n.type = 'button'; n.setAttribute('role', 'menuitem'); }
-    mapMenu.appendChild(n);
+    parent.appendChild(n);
     return n;
   };
-  add('div', 'map-ctx-head', `${la}, ${ln}`);
-  add('button', 'map-ctx-item', 'Copy coordinates').onclick = () => {
+  const link = (parent, text, href) => {
+    const a = add(parent, 'a', 'map-ctx-item', text);
+    a.href = href;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.setAttribute('role', 'menuitem');
+    a.onclick = hideMapMenu;
+    return a;
+  };
+  mapMenu.innerHTML = '';
+  hideMapSub();
+  add(mapMenu, 'div', 'map-ctx-head', `${la}, ${ln}`);
+  add(mapMenu, 'button', 'map-ctx-item', 'Copy coordinates').onclick = () => {
     hideMapMenu();
     navigator.clipboard.writeText(`${la}, ${ln}`)
       .then(() => showToast('Coordinates copied.', 'success', 1800))
       .catch(() => showToast('Could not copy to clipboard.'));
   };
+  // Put a measurement point here: the camera or the object (distance mode: the object, centre of the ring)
   if (solveMode === 'size') {
-    add('button', 'map-ctx-item', 'The camera stood here').onclick = () => { hideMapMenu(); setMapPoint('camera', p); };
-    add('button', 'map-ctx-item', 'The object is here').onclick = () => { hideMapMenu(); setMapPoint('object', p); };
-  } else {
-    add('button', 'map-ctx-item', 'The object is here (draw the ring)').onclick = () => { hideMapMenu(); placeObjectRing(p); };
+    add(mapMenu, 'button', 'map-ctx-item', 'The camera stood here').onclick = () => { hideMapMenu(); setMapPoint('camera', p); };
   }
-  add('div', 'map-ctx-divider', '');
-  MAP_LINKS.forEach(([label, url]) => {
-    const a = add('a', 'map-ctx-item', `Open in ${label}`);
-    a.href = url(la, ln, z);
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.setAttribute('role', 'menuitem');
-    a.onclick = hideMapMenu;
-  });
+  add(mapMenu, 'button', 'map-ctx-item', 'The object is here').onclick = () => {
+    hideMapMenu();
+    if (solveMode === 'size') setMapPoint('object', p); else placeObjectRing(p);
+  };
+  add(mapMenu, 'div', 'map-ctx-divider', '');
+  MAP_LINKS.forEach(([label, url]) => link(mapMenu, `Open in ${label}`, url(la, ln, z)).addEventListener('mouseenter', leaveMapSub));
+  link(mapMenu, 'Open in TracePoint', `${TRACEPOINT_URL}#${la},${ln},${Math.max(14, Math.round(map.getZoom())).toFixed(2)}`)
+    .addEventListener('mouseenter', leaveMapSub);
+  // "Open in…" opens the submenu on hover and on click
+  const more = add(mapMenu, 'button', 'map-ctx-item map-ctx-more', 'Open in…');
+  more.setAttribute('aria-haspopup', 'true');
+  more.addEventListener('mouseenter', () => showMapSub(more));
+  more.addEventListener('mouseleave', leaveMapSub);
+  more.onclick = () => { if (mapSub.style.display === 'none') showMapSub(more); else hideMapSub(); };
+  mapSub.innerHTML = '';
+  MAP_MORE_LINKS.forEach(([label, url]) => link(mapSub, label, url(la, ln, z)));
+
   // At the click, flipped so it stays inside the map
   const box = map.getContainer().getBoundingClientRect();
   mapMenu.style.display = 'block';
@@ -2147,7 +2276,9 @@ function showMapMenu(e) {
   mapMenu.style.left = `${Math.max(0, e.point.x + w > box.width  ? e.point.x - w : e.point.x)}px`;
   mapMenu.style.top  = `${Math.max(0, e.point.y + h > box.height ? e.point.y - h : e.point.y)}px`;
 }
-document.addEventListener('mousedown', e => { if (mapMenu && !mapMenu.contains(e.target)) hideMapMenu(); });
+document.addEventListener('mousedown', e => {
+  if (mapMenu && !mapMenu.contains(e.target) && !mapSub.contains(e.target)) hideMapMenu();
+});
 
 
 function setBasemap(tile) {
@@ -2190,12 +2321,12 @@ document.getElementById('help-card').addEventListener('click', function (e) {
 
 /* ─── PHOTO / MAP DIVIDER ────────────────────────────────────── */
 // --split on #workspace is the photo panel's share of the width. Drag, double-click
-// (back to the default 60:40), arrow keys (Shift = bigger steps); the chevrons hide the map or the photo.
+// (back to the default 60:40), arrow keys (Shift = bigger steps); the chevron hides the photo.
 // Split and hidden state are remembered in this browser.
 const workspace = document.getElementById('workspace');
 const splitter  = document.getElementById('pane-splitter');
 const SPLIT_KEY = 'sa-split';
-const HIDDEN_KEY = 'sa-hidden-side';   // "map", "photo" or empty
+const HIDDEN_KEY = 'sa-hidden-side';   // "photo" or empty
 const SPLIT_DEFAULT = 60, SPLIT_MIN = 30, SPLIT_MAX = 80;   // photo share; the map gets the rest
 let splitPct  = SPLIT_DEFAULT;
 
@@ -2209,27 +2340,23 @@ function setSplit(pct, save = true) {
   if (save) storageSet(SPLIT_KEY, splitPct.toFixed(1));
 }
 
-// One side may be hidden: 'map', 'photo' or null. Each chevron hides its side, or brings it
-// back when the other one is hidden.
-let hiddenSide = null;
-function setHiddenSide(side, save = true) {
-  hiddenSide = side;
-  workspace.classList.toggle('map-collapsed', side === 'map');
-  workspace.classList.toggle('photo-collapsed', side === 'photo');
-  document.getElementById('app').classList.toggle('map-collapsed', side === 'map');
-  const label = (id, text, title) => {
-    const b = document.getElementById(id);
-    b.textContent = text; b.title = title; b.setAttribute('aria-label', title);
-  };
-  label('btn-map-collapse',   side === 'map'   ? '‹' : '›', side === 'map'   ? 'Show map'   : 'Hide map');
-  label('btn-photo-collapse', side === 'photo' ? '›' : '‹', side === 'photo' ? 'Show photo' : 'Hide photo');
-  if (save) storageSet(HIDDEN_KEY, side || '');
+// The chevron hides the photo for a full-width map, and brings it back (as in ShadowFinder).
+// The map itself is never hidden.
+let photoHidden = false;
+function setPhotoHidden(hidden, save = true) {
+  photoHidden = hidden;
+  workspace.classList.toggle('photo-collapsed', hidden);
+  const b = document.getElementById('btn-photo-collapse');
+  b.textContent = hidden ? '›' : '‹';
+  b.title = hidden ? 'Show photo' : 'Hide photo';
+  b.setAttribute('aria-label', b.title);
+  if (save) storageSet(HIDDEN_KEY, hidden ? 'photo' : '');
 }
 
-const mapHidden = () => hiddenSide !== null;   // either side hidden: nothing to drag
+const sideHidden = () => photoHidden;   // the photo hidden: nothing to drag
 
 splitter.addEventListener('pointerdown', e => {
-  if (e.button !== 0 || e.target.closest('.splitter-chevron') || mapHidden()) return;
+  if (e.button !== 0 || e.target.closest('.splitter-chevron') || sideHidden()) return;
   e.preventDefault();
   splitter.setPointerCapture(e.pointerId);
   splitter.classList.add('dragging');
@@ -2246,25 +2373,23 @@ splitter.addEventListener('lostpointercapture', () => {
   setSplit(splitPct);
 });
 splitter.addEventListener('dblclick', e => {
-  if (e.target.closest('.splitter-chevron') || mapHidden()) return;
+  if (e.target.closest('.splitter-chevron') || sideHidden()) return;
   setSplit(SPLIT_DEFAULT);
 });
 splitter.addEventListener('keydown', e => {
-  if (mapHidden() || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+  if (sideHidden() || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
   e.preventDefault();
   const step = e.shiftKey ? 10 : 2;
   setSplit(splitPct + (e.key === 'ArrowRight' ? step : -step));
 });
-document.getElementById('btn-map-collapse').addEventListener('click', () => setHiddenSide(hiddenSide ? null : 'map'));
-document.getElementById('btn-photo-collapse').addEventListener('click', () => setHiddenSide(hiddenSide ? null : 'photo'));
+document.getElementById('btn-photo-collapse').addEventListener('click', () => setPhotoHidden(!photoHidden));
 
 splitter.setAttribute('aria-valuemin', SPLIT_MIN);
 splitter.setAttribute('aria-valuemax', SPLIT_MAX);
 {
   const saved = parseFloat(storageGet(SPLIT_KEY));
   setSplit(isFinite(saved) ? saved : SPLIT_DEFAULT, false);
-  const side = storageGet(HIDDEN_KEY) ?? (storageGet('sa-map-hidden') === '1' ? 'map' : '');   // older key
-  setHiddenSide(side === 'map' || side === 'photo' ? side : null, false);
+  setPhotoHidden(storageGet(HIDDEN_KEY) === 'photo', false);   // a map hidden before stays shown
 }
 
 /* ─── AUTOSAVE ───────────────────────────────────────────────── */
@@ -2329,7 +2454,7 @@ function autosaveFailed() {
 }
 
 function scheduleAutosave() {
-  if (!autosaveReady || !autosaveOwner) return;
+  if (!autosaveOn || !autosaveReady || !autosaveOwner) return;
   clearTimeout(autosaveTimer);
   autosaveTimer = setTimeout(autosaveWrite, 400);
 }
@@ -2337,7 +2462,7 @@ function scheduleAutosave() {
 function autosaveWrite() {
   clearTimeout(autosaveTimer);
   autosaveTimer = null;
-  if (!autosaveReady || !autosaveOwner) return;
+  if (!autosaveOn || !autosaveReady || !autosaveOwner) return;
   const c = map ? map.getCenter() : null;
   const data = {
     v: 1,
@@ -2360,13 +2485,14 @@ function autosaveWrite() {
 }
 
 function autosavePutImage(t) {
-  if (!autosaveReady || !autosaveOwner || !t.file) return;
+  if (!autosaveOn || !autosaveReady || !autosaveOwner || !t.file) return;
   autosaveTx('readwrite', store => { store.put(t.file, 'img:' + t.id); }).catch(autosaveFailed);
 }
 
 // Runs once at start: puts the saved tabs, map view and basemap back
 async function autosaveRestore() {
   await claimAutosave();
+  if (!autosaveOn) { if (autosaveOwner) await autosaveClearStore(); autosaveReady = true; return; }
   let data = null;
   try {
     const json = await autosaveTx('readonly', store => store.get('state'));
@@ -2399,6 +2525,95 @@ async function autosaveRestore() {
   autosaveReady = true;
   if (autosaveOwner) autosaveWrite();   // tidies photos the saved state no longer lists
 }
+
+function autosaveClearStore() {
+  clearTimeout(autosaveTimer);
+  autosaveTimer = null;
+  return autosaveTx('readwrite', store => { store.clear(); }).catch(() => {});
+}
+
+// The ☰ switch (as in TracePoint and ShadowFinder): off deletes the saved copy at once and
+// stops saving; on saves the work there is now. Shared by all browser tabs (localStorage).
+function setAutosave(on) {
+  autosaveOn = on;
+  storageSet('sa-autosave', on ? '1' : '0');
+  if (on) {
+    autosaveWarned = false;
+    if (autosaveOwner) { tabs.forEach(autosavePutImage); autosaveWrite(); }
+    showToast('Autosave on: your work is kept in this browser.', 'success');
+  } else {
+    autosaveClearStore();
+    showToast('Autosave off: the saved copy was deleted.', 'success');
+  }
+}
+window.addEventListener('storage', e => {
+  if (e.key !== 'sa-autosave') return;
+  autosaveOn = e.newValue !== '0';
+  if (!autosaveOn) { clearTimeout(autosaveTimer); autosaveTimer = null; }
+  else if (autosaveOwner && autosaveReady) { tabs.forEach(autosavePutImage); autosaveWrite(); }
+});
+
+// Clear: delete the saved copy and start empty
+function clearSaved() {
+  if (!autosaveOwner) return showToast('SiliconAperture is open in another tab: clear the saved work there.');
+  if (!confirm('Delete the saved photos and measurements and start empty? This cannot be undone.')) return;
+  autosaveClearStore().then(() => {
+    tabs = [emptyTab()];
+    activeTab = 0;
+    showTab(tabs[0]);
+    if (map) { showWholeGlobe(); map.once('moveend', startIdleSpin); }
+    showToast('Saved work cleared.', 'success');
+  });
+}
+
+// The ☰ menu: This browser (autosave, Clear) · Demo. Sections as in ShadowFinder's session menu.
+function renderSessionMenu() {
+  const menu = document.getElementById('session-menu');
+  menu.innerHTML = '';
+  const close = () => openSessionMenu(false);
+  const section = title => {
+    const s = document.createElement('div');
+    s.className = 'panel-title';
+    s.textContent = title;
+    menu.appendChild(s);
+  };
+  section('This browser');
+  const row = document.createElement('div');
+  row.className = 'session-switch';
+  row.title = 'Keep the photos and measurements in this browser so a refresh does not lose them. Off deletes the saved copy.';
+  row.innerHTML = '<label for="sw-autosave">Autosave</label><span class="session-row-end">' +
+    `<button type="button" class="btn-clear-saved" ${autosaveOn && autosaveOwner && tabs.some(t => t.file) ? '' : 'disabled'} title="Delete the saved photos and measurements and start empty">Clear</button>` +
+    `<input type="checkbox" id="sw-autosave" class="adjust-switch" role="switch" ${autosaveOn ? 'checked' : ''}></span>`;
+  row.querySelector('input').addEventListener('change', e => { setAutosave(e.target.checked); renderSessionMenu(); });
+  row.querySelector('button').addEventListener('click', () => { close(); clearSaved(); });
+  menu.appendChild(row);
+  if (!autosaveOwner) {
+    const n = document.createElement('div');
+    n.className = 'session-note';
+    n.textContent = 'SiliconAperture is open in another tab: that tab saves, this one starts once it is closed.';
+    menu.appendChild(n);
+  }
+  section('Demo');
+  const demo = document.createElement('div');
+  demo.className = 'session-item';
+  demo.setAttribute('role', 'menuitem');
+  demo.textContent = 'Lake photo with EXIF and GPS';
+  demo.title = 'Load the demo photo; mark both ends of the object, then measure the distance on the map';
+  demo.addEventListener('click', () => { close(); loadDemo(); });
+  menu.appendChild(demo);
+}
+
+function openSessionMenu(show) {
+  if (show) renderSessionMenu();
+  document.getElementById('session-menu').style.display = show ? 'block' : 'none';
+  document.getElementById('btn-session').setAttribute('aria-expanded', String(show));
+}
+document.getElementById('btn-session').addEventListener('click', e => {
+  e.stopPropagation();
+  openSessionMenu(document.getElementById('session-menu').style.display === 'none');
+});
+document.addEventListener('click', e => { if (!document.getElementById('session-wrap').contains(e.target)) openSessionMenu(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') openSessionMenu(false); });
 
 // Leaving or hiding the page writes what is still pending
 document.addEventListener('visibilitychange', () => { if (document.hidden && autosaveTimer) autosaveWrite(); });

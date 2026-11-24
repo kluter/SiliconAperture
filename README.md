@@ -70,8 +70,8 @@ The pinhole diagram above the map shows what is still missing. Every control, ke
 
 - **Your photos never leave your machine.** No request carries image data. Check it in DevTools → Network.
 - **The only requests are map tiles** (Esri, OpenStreetMap). They carry no image data, but tile coordinates reveal the area you look at, and a photo with GPS in its EXIF flies the map there.
-- **Autosave keeps your photos and measurements in this browser** (`IndexedDB`), never anywhere else. Closing a tab deletes its copy.
-- **Right-click links** (Google Maps, Bing, OpenStreetMap, Google Earth) contact those sites only when you click one.
+- **Autosave keeps your photos and measurements in this browser** (`IndexedDB`), never anywhere else. Switch it off in the ☰ menu for sensitive material; **Clear** deletes the saved copy.
+- **Right-click links** (Google Maps, Google Earth, OpenStreetMap, TracePoint and others) contact those sites only when you click one.
 - **No CDN:** plain, unminified JavaScript with two pinned, bundled libraries ([MapLibre GL JS](https://maplibre.org/), [exifr](https://github.com/MikeKovarik/exifr)), behind a Content Security Policy.
 
 This tool was developed with AI assistance, disclosed because the [risks of opaque, AI-generated OSINT tools](https://www.dutchosintguy.com/post/vibe-coding-is-becoming-an-osint-risk) are real; the answer is readable code anyone can verify.
