@@ -102,12 +102,34 @@ let distance     = null;
 let solveMode      = 'size';   // 'size' | 'distance'
 let knownSize      = null;     // distance-mode input: real-world size of the marked span (m)
 let solvedDistance = null;     // distance-mode output (m), for the map ring
+let resultValue    = null;     // the current result (m): size, or distance in distance mode
+let resultRange    = null;     // unknown camera: [low, high] of the result (m)
+let solvedRange    = null;     // distance mode with an unknown camera: [near, far] (m), the ring is a band
 let objectRing     = false;    // distance-mode map ring placed (drawn by renderMarks)
 let exifFocal    = null;   // focal length from the photo's EXIF (mm): wins over the database's
 let exifGPS      = null;
 let loadSeq      = 0;      // bumped per photo, so a late EXIF read of an earlier photo is dropped
+let autosaveDb = null, autosaveTimer = null, autosaveReady = false, autosaveWarned = false;   // AUTOSAVE below
+let autosaveOwner = !navigator.locks;
 
 const CUSTOM_IDX = CAMERA_DB.findIndex(c => c.brand === '—');
+
+// Presets, shown first in the camera list: typical values when the exact model is not known.
+// Phone sensors are typical current 4:3 ones; focal_length = eq × sensor_w / 36, as in camera-db.js.
+// "Unknown" has no values: the result is a range over 24–35 mm equivalent (unknownCam).
+const PRESETS = [
+  { label: 'Phone · main camera (24 mm eq)',      sensor_w: 8.2,  sensor_h: 6.15, focal_length: 5.47, focal_length_eq: 24 },
+  { label: 'Phone · ultrawide (13 mm eq)',        sensor_w: 5.6,  sensor_h: 4.2,  focal_length: 2.02, focal_length_eq: 13 },
+  { label: 'Phone · telephoto 3× (77 mm eq)',     sensor_w: 4.0,  sensor_h: 3.0,  focal_length: 8.56, focal_length_eq: 77 },
+  { label: 'APS-C camera (enter the lens focal length)',      sensor_w: 23.5, sensor_h: 15.6, focal_length: null },
+  { label: 'Full-frame camera (enter the lens focal length)', sensor_w: 36.0, sensor_h: 24.0, focal_length: null },
+  { label: 'Unknown camera (range for 24–35 mm eq)', sensor_w: null, sensor_h: null, focal_length: null, unknown: true },
+].map(p => ({ brand: 'Preset', confidence: 'preset', ...p }));
+const PRESET_START = CAMERA_DB.length;
+CAMERA_DB.push(...PRESETS);
+const UNKNOWN_IDX = CAMERA_DB.findIndex(c => c.unknown);
+const UNKNOWN_EQ  = [24, 35];   // the 35 mm equivalents an unknown camera is computed for
+let unknownCam = false;
 
 let map          = null;
 let gpsMarker    = null;
@@ -118,31 +140,26 @@ let camIdx       = null;   // CAMERA_DB entry in use, for the optics slot
 let resetBtn     = null;   // map control: clear the map points (made in initMap)
 
 /* ─── IMAGE LOAD ─────────────────────────────────────────────── */
-function loadImage(file) {
-  const seq = ++loadSeq;
-  const url = URL.createObjectURL(file);
-  const newImg = new Image();
-  newImg.onload = () => {
-    URL.revokeObjectURL(url);
-    if (seq !== loadSeq) return;   // another photo was dropped (or N pressed) while this one decoded
-    // A new photo is a new scene: nothing of the previous photo carries over
-    resetPhotoState();
-    img = newImg;
-    resizeCanvas();
-    fitImage();
-    drawCanvas();
-    overlay.classList.add('hidden');
-    stopSpin();
-    photoName = file.name || 'Pasted photo';
-    compute();
-    updateDiagram();
-    readExif(file, seq);
-  };
-  newImg.onerror = () => {
-    URL.revokeObjectURL(url);
-    if (seq === loadSeq) showToast('Could not load image.');
-  };
-  newImg.src = url;
+// HEIC (iPhone) cannot be decoded by most browsers: say so rather than "could not load"
+const isHeic = file => /^image\/hei[cf]/i.test(file.type) || /\.hei[cf]$/i.test(file.name || '');
+
+function loadImage(file, name = file.name) {
+  if (isHeic(file)) {
+    showToast('HEIC photos cannot be opened in the browser. Export it as JPEG (keeps the EXIF) and drop that.');
+    return;
+  }
+  openPhotoInTab(file, name || 'Photo');
+}
+
+// Decodes a photo file into an Image (resolves null when it cannot be read)
+function decodeImage(file) {
+  return new Promise(resolve => {
+    const url = URL.createObjectURL(file);
+    const im = new Image();
+    im.onload  = () => { URL.revokeObjectURL(url); resolve(im); };
+    im.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+    im.src = url;
+  });
 }
 
 // The canvas is drawn in CSS pixels (viewW × viewH); its backing store is scaled by the
@@ -151,7 +168,13 @@ let viewW = 0, viewH = 0;
 
 const fitScale = () => Math.min(viewW / img.naturalWidth, viewH / img.naturalHeight) * 0.92;
 
+// A photo loaded while its panel has no size (photo side hidden, window below the minimum)
+// is fitted once the panel has one
+let needsFit = false;
+
 function fitImage() {
+  needsFit = !viewW || !viewH;
+  if (needsFit) return;
   scale   = fitScale();
   offsetX = (viewW - img.naturalWidth  * scale) / 2;
   offsetY = (viewH - img.naturalHeight * scale) / 2;
@@ -235,28 +258,33 @@ async function readExif(file, seq) {
   }
 
   // exifr.gps() returns { latitude, longitude } in decimal degrees, or undefined
-  if (g && g.latitude !== undefined && g.longitude !== undefined) {
+  if (g && isFinite(g.latitude) && isFinite(g.longitude)) {
     exifGPS = { lat: g.latitude, lng: g.longitude };
-    const gpsEl = document.getElementById('exif-gps-val');
-    gpsEl.textContent = `${g.latitude.toFixed(5)}, ${g.longitude.toFixed(5)}`;
-    gpsEl.classList.add('has-data', 'clickable');
-    gpsEl.onclick = copyGPS;
-    document.getElementById('btn-exif').classList.add('has-data');
-    // Mark it and fly there from wherever the globe is (the flight also stops the spin)
-    if (gpsMarker) gpsMarker.remove();
-    if (map) {
-      const el = document.createElement('div');
-      el.className = 'gps-marker';
-      el.title = 'Where the photo was taken (EXIF)';
-      gpsMarker = new maplibregl.Marker({ element: el }).setLngLat([g.longitude, g.latitude]).addTo(map);
-    }
-    stopSpin();
-    syncGpsButton();
-    flyToGPS();
+    showExifGps(exifGPS, true);
   }
 
   compute();
   updateDiagram();
+}
+
+// The photo's GPS: in the EXIF card (click copies), as a marker, and the GPS button.
+// fly: go there (a photo just opened); a tab switched back to keeps the map where it is.
+function showExifGps(gps, fly) {
+  const gpsEl = document.getElementById('exif-gps-val');
+  gpsEl.textContent = `${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`;
+  gpsEl.classList.add('has-data', 'clickable');
+  gpsEl.onclick = copyGPS;
+  document.getElementById('btn-exif').classList.add('has-data');
+  if (gpsMarker) gpsMarker.remove();
+  gpsMarker = null;
+  if (map) {
+    const el = document.createElement('div');
+    el.className = 'gps-marker';
+    el.title = 'Where the photo was taken (EXIF)';
+    gpsMarker = new maplibregl.Marker({ element: el }).setLngLat([gps.lng, gps.lat]).addTo(map);
+  }
+  syncGpsButton();
+  if (fly) { stopSpin(); flyToGPS(); }   // the flight also stops the spin
 }
 
 // The 35 mm equivalent says how much of the sensor this photo covers, with the lens it was
@@ -427,7 +455,8 @@ container.addEventListener('drop', e => {
   e.preventDefault();
   overlay.classList.remove('drag-active');
   const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) loadImage(file);
+  if (!file) return;
+  if (file.type.startsWith('image/') || isHeic(file) || !file.type) loadImage(file);   // no type: let the decoder decide
   else showToast('Please drop an image file.');
 });
 // A file dropped anywhere else must not make the browser open it (and leave the app)
@@ -440,49 +469,268 @@ window.addEventListener('dragover', e => {
 window.addEventListener('drop', e => { if (isFileDrag(e)) e.preventDefault(); });
 
 overlay.addEventListener('click', () => fileInput.click());
+overlay.addEventListener('keydown', e => {
+  if (e.target === overlay && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); fileInput.click(); }
+});
 
 /* ─── PHOTO TABS ─────────────────────────────────────────────── */
 // The header's tab strip, styled as in ShadowFinder and TracePoint. For now there is one photo:
 // its tab names the file, the dot turns red with a result, × and "+" both start over with a new
 // photo. Several photos side by side is the "Image tabs" issue.
 let photoName = null;
+
+/* ─── PHOTO TABS ─────────────────────────────────────────────── */
+// Several photos side by side (ported from TracePoint's sessions). Each tab keeps its photo
+// file and, while it is not shown, a snapshot of everything measured on it (captureState).
+// The shown tab lives in the global state above. A photo dropped or pasted while one is
+// open opens in a new tab. Double-click a name to rename it.
+let tabs = [];
+let activeTab = 0;
+let tabSeq = 0;
+const newTabId = () => `t${Date.now().toString(36)}${(tabSeq++).toString(36)}`;
+const emptyTab = () => ({ id: newTabId(), name: null, file: null, img: null, state: null });
+tabs.push(emptyTab());
+
+const INPUT_IDS = ['sensor-w-input', 'sensor-h-input', 'focal-length-input', 'distance-input', 'known-size-input'];
+const EXIF_IDS  = ['exif-camera-val', 'exif-focal-val', 'exif-size-val', 'exif-gps-val'];
+const SOURCES   = ['source-exif', 'source-db', 'source-manual'];
+
+// Everything that belongs to the shown photo, as plain data (also what autosave writes)
+function captureState() {
+  const $ = id => document.getElementById(id);
+  const inputs = {};
+  INPUT_IDS.forEach(id => {
+    const el = $(id);
+    inputs[id] = { v: el.value, src: SOURCES.find(c => el.classList.contains(c)) || '' };
+  });
+  const exifCells = {};
+  EXIF_IDS.forEach(id => { exifCells[id] = $(id).classList.contains('has-data') ? $(id).textContent : null; });
+  return {
+    markA, markB, solveMode, unknownCam, sensorW, sensorH, focalLength, distance, knownSize,
+    camLabel: camIdx !== null ? CAMERA_DB[camIdx].label : null,
+    exifFocal, exifGPS, exifCells, exifEq: $('exif-focal-eq').textContent, inputs,
+    mapPtA, mapPtB, objectRing,
+    view: img && viewW ? { scale, offsetX, offsetY, viewW, viewH } : null,
+    hasResult: resultValue !== null
+  };
+}
+
+// Puts a snapshot back (the photo itself is already in img)
+function applyState(s) {
+  const $ = id => document.getElementById(id);
+  markA = s.markA || null; markB = s.markB || null;
+  pixelSpan = markA && markB ? Math.hypot(markB.x - markA.x, markB.y - markA.y) : null;
+  $('pixel-span-input').value = pixelSpan !== null ? Math.round(pixelSpan) : '';
+  $('span-source').textContent = pixelSpan !== null ? 'from canvas' : 'click two points on photo';
+  $('btn-reset-marks').disabled = pixelSpan === null && !markA;
+
+  sensorW = s.sensorW ?? null; sensorH = s.sensorH ?? null; focalLength = s.focalLength ?? null;
+  distance = s.distance ?? null; knownSize = s.knownSize ?? null;
+  exifFocal = s.exifFocal ?? null;
+  INPUT_IDS.forEach(id => {
+    const saved = s.inputs?.[id];
+    $(id).value = saved?.v ?? '';
+    SOURCES.forEach(c => $(id).classList.remove(c));
+    if (saved?.src) $(id).classList.add(saved.src);
+  });
+  updateSensorSourceBadges();
+
+  const idx = s.camLabel ? CAMERA_DB.findIndex(c => c.label === s.camLabel) : -1;
+  if (idx >= 0) setCameraLabel(idx); else clearCameraSelection();
+  unknownCam = !!s.unknownCam;
+
+  let anyExif = false;
+  EXIF_IDS.forEach(id => {
+    const t = s.exifCells?.[id];
+    $(id).textContent = t ?? '—';
+    $(id).classList.toggle('has-data', t != null);
+    if (t != null) anyExif = true;
+  });
+  $('exif-focal-eq').textContent = s.exifEq || '';
+  $('btn-exif').classList.toggle('has-data', anyExif);
+  exifGPS = s.exifGPS || null;
+  if (exifGPS) showExifGps(exifGPS, false);
+  syncGpsButton();
+
+  solveMode = s.solveMode === 'distance' ? 'distance' : 'size';
+  updateModeUI();
+  mapPtA = s.mapPtA || null; mapPtB = s.mapPtB || null; objectRing = !!s.objectRing;
+
+  const v = s.view;
+  if (v && v.viewW === viewW && v.viewH === viewH) { scale = v.scale; offsetX = v.offsetX; offsetY = v.offsetY; needsFit = false; }
+  else fitImage();
+  compute();
+  renderMarks();
+}
+
+// The camera list's label for an entry, without loading its values
+function setCameraLabel(idx) {
+  const trigger = document.getElementById('camera-trigger');
+  trigger.textContent = CAMERA_DB[idx].label;
+  camIdx = idx;
+  trigger.classList.add('has-selection');
+  document.querySelectorAll('#camera-panel [data-idx]').forEach(el =>
+    el.classList.toggle('selected', parseInt(el.dataset.idx, 10) === idx));
+}
+
+// Shows tab t: its photo (decoded once, then kept) and its state, or the drop screen when empty.
+// A photo shown for the first time has its EXIF read.
+async function showTab(t) {
+  const seq = ++loadSeq;
+  resetPhotoState();
+  img = null;
+  photoName = t.name;
+  if (!t.file) {
+    overlay.classList.remove('hidden');
+    drawCanvas();
+    compute();
+    renderTabs();
+    return;
+  }
+  const im = t.img || await decodeImage(t.file);
+  if (seq !== loadSeq) return;   // another tab was chosen meanwhile
+  if (!im) {
+    showToast('Could not open this file: it is not an image the browser can read, or it is damaged.');
+    closeTab(tabs.indexOf(t), true);
+    return;
+  }
+  t.img = im;
+  img = im;
+  overlay.classList.add('hidden');
+  stopSpin();
+  resizeCanvas();
+  if (t.state) applyState(t.state);
+  else { fitImage(); compute(); readExif(t.file, seq); }
+  t.state = null;   // the shown tab's state is the live one
+  drawCanvas();
+  renderTabs();
+  scheduleAutosave();
+}
+
+function switchTab(i) {
+  if (i === activeTab || !tabs[i]) return;
+  if (tabs[activeTab]) tabs[activeTab].state = captureState();
+  activeTab = i;
+  showTab(tabs[i]);
+}
+
+// A new photo: into the shown tab if that one is empty, else into a new tab
+function openPhotoInTab(file, name) {
+  let t = tabs[activeTab];
+  if (t.file) {
+    t.state = captureState();
+    t = emptyTab();
+    tabs.push(t);
+    activeTab = tabs.length - 1;
+  }
+  t.file = file; t.name = name; t.img = null; t.state = null;
+  autosavePutImage(t);
+  showTab(t);
+}
+
+// "+" and N: a new empty tab (or stay, when the shown one is empty already)
+function addTab() {
+  if (!tabs[activeTab].file) return;
+  tabs[activeTab].state = captureState();
+  tabs.push(emptyTab());
+  activeTab = tabs.length - 1;
+  showTab(tabs[activeTab]);
+  scheduleAutosave();
+}
+
+// ×: the tab goes, with its photo and its saved copy. The last one leaves an empty tab and the
+// globe goes back to turning.
+function closeTab(i, quiet = false) {
+  if (!tabs[i]) return;
+  tabs.splice(i, 1);
+  const wasActive = i === activeTab;
+  if (!tabs.length) tabs.push(emptyTab());
+  if (i < activeTab || activeTab >= tabs.length) activeTab = Math.max(0, activeTab - 1);
+  if (wasActive) showTab(tabs[activeTab]); else renderTabs();
+  if (!tabs.some(t => t.file) && map) { showWholeGlobe(); map.once('moveend', startIdleSpin); }
+  if (!quiet) scheduleAutosave();
+}
+
+function renameTab(i, nameEl) {
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'photo-name-edit';
+  input.value = tabs[i].name || '';
+  input.setAttribute('aria-label', 'Photo name');
+  nameEl.replaceWith(input);
+  input.focus();
+  input.select();
+  let done = false;
+  const finish = keep => {
+    if (done) return;
+    done = true;
+    const v = input.value.trim();
+    if (keep && v) { tabs[i].name = v; if (i === activeTab) photoName = v; scheduleAutosave(); }
+    tabsKey = null;
+    renderTabs();
+  };
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') finish(true);
+    if (e.key === 'Escape') finish(false);
+    e.stopPropagation();
+  });
+  input.addEventListener('click', e => e.stopPropagation());
+  input.addEventListener('blur', () => finish(true));
+}
+
 let tabsKey = null;   // what the strip shows now: rebuilt only when that changes
 function renderTabs() {
-  const state = resultBar.classList.contains('has-result') ? 'result' : img ? 'loaded' : '';
-  const key = `${photoName}|${state}`;
+  const liveState = resultBar.classList.contains('has-result') ? 'result' : img ? 'loaded' : '';
+  const dotOf = (t, i) => i === activeTab ? liveState : t.state?.hasResult ? 'result' : t.file ? 'loaded' : '';
+  if (tabs[activeTab]) tabs[activeTab].name = photoName;
+  const key = tabs.map((t, i) => `${t.id}:${t.name}:${dotOf(t, i)}`).join('|') + `#${activeTab}`;
   if (key === tabsKey) return;
   tabsKey = key;
   const wrap = document.getElementById('photo-tabs');
   wrap.innerHTML = '';
-  const tab = document.createElement('div');
-  tab.className = 'photo-tab active';
-  tab.setAttribute('role', 'tab');
-  tab.setAttribute('aria-selected', 'true');
-  tab.title = photoName || 'No photo yet';
-  const dot = document.createElement('span');
-  dot.className = 'photo-dot' + (state ? ' ' + state : '');
-  const name = document.createElement('span');
-  name.className = 'photo-name';
-  name.textContent = photoName || 'New photo';
-  tab.append(dot, name);
-  if (img) {
-    const close = document.createElement('button');
-    close.type = 'button';
-    close.className = 'photo-tab-close';
-    close.textContent = '×';
-    close.title = 'Close this photo';
-    close.setAttribute('aria-label', 'Close this photo');
-    close.addEventListener('click', newImage);
-    tab.appendChild(close);
-  }
+  tabs.forEach((t, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'photo-tab' + (i === activeTab ? ' active' : '');
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('aria-selected', String(i === activeTab));
+    tab.tabIndex = i === activeTab ? 0 : -1;
+    tab.title = (t.name || 'No photo yet') + (t.file ? ' · double-click the name to rename' : '');
+    const dot = document.createElement('span');
+    const state = dotOf(t, i);
+    dot.className = 'photo-dot' + (state ? ' ' + state : '');
+    const name = document.createElement('span');
+    name.className = 'photo-name';
+    name.textContent = t.name || 'New photo';
+    tab.append(dot, name);
+    tab.addEventListener('click', () => switchTab(i));
+    tab.addEventListener('keydown', e => {
+      if (e.target !== tab || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
+      e.preventDefault();
+      const j = (i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+      switchTab(j);
+      wrap.querySelectorAll('.photo-tab')[j]?.focus();
+    });
+    if (t.file) name.addEventListener('dblclick', e => { e.stopPropagation(); renameTab(i, name); });
+    if (t.file || tabs.length > 1) {
+      const close = document.createElement('button');
+      close.type = 'button';
+      close.className = 'photo-tab-close';
+      close.textContent = '×';
+      close.title = 'Close this photo';
+      close.setAttribute('aria-label', `Close ${t.name || 'this tab'}`);
+      close.addEventListener('click', e => { e.stopPropagation(); closeTab(i); });
+      tab.appendChild(close);
+    }
+    wrap.appendChild(tab);
+  });
   const add = document.createElement('button');
   add.type = 'button';
   add.className = 'photo-tab-add';
   add.title = 'New photo (N)';
   add.setAttribute('aria-label', 'New photo');
   add.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
-  add.addEventListener('click', newImage);
-  wrap.append(tab, add);
+  add.addEventListener('click', addTab);
+  wrap.appendChild(add);
 }
 
 /* ─── DEMO ───────────────────────────────────────────────────── */
@@ -589,7 +837,7 @@ const GUIDE_STEPS = [
 
 function guideStatus() {
   if (!img) return { idx: 0, hint: '' };   // the drop overlay already says it
-  if (sensorW === null || focalLength === null)
+  if (!unknownCam && (sensorW === null || focalLength === null))
     return { idx: 1, hint: 'Pick the camera above, or enter sensor width and focal length' };
   if (pixelSpan === null)
     return { idx: 2, hint: markA ? 'Click the other end of the object'
@@ -597,10 +845,10 @@ function guideStatus() {
   if (solveMode === 'distance') {
     if (knownSize === null || solvedDistance === null) return { idx: 3, hint: "Enter the object's real size above" };
     if (mapPtA === null) return { idx: 3, hint: 'Click where the object is on the map to draw the ring' };
-    return { idx: GUIDE_STEPS.length, hint: 'The camera stood somewhere on this ring', cls: 'done' };
+    return { idx: GUIDE_STEPS.length, hint: solvedRange ? 'The camera stood somewhere in this band' : 'The camera stood somewhere on this ring', cls: 'done' };
   }
   if (distance === null) return { idx: 3, hint: 'Enter the distance above, or click camera then object on the map' };
-  return { idx: GUIDE_STEPS.length, hint: 'R resets the marks · N starts over', cls: 'muted' };
+  return { idx: GUIDE_STEPS.length, hint: 'R resets the marks · N opens another photo', cls: 'muted' };
 }
 
 function buildGuide() {
@@ -638,6 +886,8 @@ function updateGuide() {
   const h = document.getElementById('image-hint');
   h.textContent = hint;
   h.className = 'step-hint' + (cls ? ' ' + cls : '');
+  updateDiagram();
+  scheduleAutosave();
 
   // Mark the input the current step waits for.
   let awaitId = null;
@@ -661,6 +911,7 @@ function clearCameraSelection() {
   const trigger = document.getElementById('camera-trigger');
   trigger.textContent = '— select camera / phone —';
   camIdx = null;
+  unknownCam = false;
   trigger.classList.remove('has-selection');
   document.querySelectorAll('#camera-panel [data-idx]').forEach(el => el.classList.remove('selected'));
 }
@@ -672,6 +923,7 @@ function selectCamera(idx) {
   const trigger = document.getElementById('camera-trigger');
   trigger.textContent = cam.label;
   camIdx = idx;
+  unknownCam = !!cam.unknown;
   trigger.classList.add('has-selection');
   document.querySelectorAll('#camera-panel [data-idx]').forEach(el => {
     el.classList.toggle('selected', parseInt(el.dataset.idx, 10) === idx);
@@ -682,7 +934,7 @@ function selectCamera(idx) {
     document.getElementById('sensor-h-input').value = '';
     setInputSource('sensor-w-input', '');
     setInputSource('sensor-h-input', '');
-    document.getElementById('sensor-w-input').focus();
+    if (!cam.unknown) document.getElementById('sensor-w-input').focus();   // Custom: type them
     sensorW = null; sensorH = null;
   } else {
     document.getElementById('sensor-w-input').value = cam.sensor_w;
@@ -727,6 +979,7 @@ function populateCameraDropdown() {
   filterInput.type = 'text';
   filterInput.id = 'cam-filter';
   filterInput.placeholder = 'Filter cameras…';
+  filterInput.setAttribute('aria-label', 'Filter cameras');
   filterInput.autocomplete = 'off';
   filterInput.spellcheck = false;
   panel.appendChild(filterInput);
@@ -744,7 +997,9 @@ function populateCameraDropdown() {
       if (q && visible) brandEl.classList.add('open');
       else if (!q) brandEl.classList.remove('open');
     });
-    panel.querySelectorAll('.cam-category-hdr').forEach(hdr => {
+    // While filtering, only matching models show: the presets step aside
+    panel.querySelectorAll('.cam-preset, .cam-presets-hdr').forEach(el => { el.style.display = q ? 'none' : ''; });
+    panel.querySelectorAll('.cam-category-hdr:not(.cam-presets-hdr)').forEach(hdr => {
       let next = hdr.nextElementSibling;
       let anyVisible = false;
       while (next && !next.classList.contains('cam-category-hdr')) {
@@ -761,7 +1016,26 @@ function populateCameraDropdown() {
   });
   filterInput.addEventListener('click', e => e.stopPropagation());
 
-  // Custom entry at top
+  // Presets first: most photos come from a phone's main camera, and the camera is often unknown
+  const presetHdr = document.createElement('div');
+  presetHdr.className = 'cam-category-hdr cam-presets-hdr';
+  presetHdr.textContent = 'Presets';
+  panel.appendChild(presetHdr);
+  CAMERA_DB.forEach((cam, i) => {
+    if (cam.brand !== 'Preset') return;
+    const el = document.createElement('div');
+    el.className = 'cam-custom cam-preset';
+    el.textContent = cam.label;
+    el.dataset.idx = i;
+    el.addEventListener('click', () => { selectCamera(i); closeCameraPanel(); });
+    panel.appendChild(el);
+  });
+  const specificHdr = document.createElement('div');
+  specificHdr.className = 'cam-category-hdr cam-presets-hdr';
+  specificHdr.textContent = 'Specific model…';
+  panel.appendChild(specificHdr);
+
+  // Custom entry at the top of the specific models
   if (CUSTOM_IDX >= 0) {
     const el = document.createElement('div');
     el.className = 'cam-custom';
@@ -774,7 +1048,7 @@ function populateCameraDropdown() {
   // Group by brand (DB order = newest first within each brand)
   const byBrand = {};
   CAMERA_DB.forEach((cam, i) => {
-    if (cam.brand === '—') return;
+    if (cam.brand === '—' || cam.brand === 'Preset') return;
     if (!byBrand[cam.brand]) byBrand[cam.brand] = [];
     byBrand[cam.brand].push({ cam, i });
   });
@@ -907,6 +1181,14 @@ document.getElementById('known-size-input').addEventListener('input', function (
 
 /* ─── SOLVE MODE (size ⇄ distance) ───────────────────────────── */
 function applyMode() {
+  updateModeUI();
+  resetMapPoints();
+  compute();
+  updateDiagram();
+  scheduleAutosave();
+}
+// The toggle and the fields that follow the mode (also used when a tab is shown again)
+function updateModeUI() {
   const distMode = solveMode === 'distance';
   document.querySelectorAll('.solve-btn').forEach(b =>
     b.classList.toggle('active-solve', b.dataset.mode === solveMode));
@@ -915,9 +1197,6 @@ function applyMode() {
   document.getElementById('dist-size-label').textContent    = distMode ? 'Known size' : 'Distance';
   document.getElementById('known-source').textContent       = distMode ? "the object's real size" : 'type it, or click the map';
   document.getElementById('result-label').textContent       = distMode ? 'Distance to object' : 'Real-world size';
-  resetMapPoints();
-  compute();
-  updateDiagram();
 }
 document.querySelectorAll('.solve-btn').forEach(btn => {
   btn.addEventListener('click', () => { solveMode = btn.dataset.mode; applyMode(); });
@@ -940,7 +1219,8 @@ function updateOptics() {
   const DB_CONF = {
     '✓': { cls: 'ok',       text: '✓ confirmed' },
     '~': { cls: 'inferred', text: '~ unconfirmed' },
-    '?': { cls: '',         text: '? estimated' }
+    '?': { cls: '',         text: '? estimated' },
+    preset: { cls: '',      text: 'typical values' }
   };
   const deg = rad => (rad * 180 / Math.PI).toFixed(1) + '°';
   const fov = mm => deg(2 * Math.atan(mm / 2 / focalLength));
@@ -958,6 +1238,7 @@ function updateOptics() {
   setFact('fact-sensor', sensorW !== null ? `${sensorW} × ${sh !== null ? +sh.toFixed(2) : '?'} mm` : null);
   setFact('fact-crop', sensorW !== null ? `${(36 / sensorW).toFixed(2)}×` : null);
   setFact('fact-eq', haveLens ? `${Math.round(focalLength * 36 / sensorW)} mm` : null);
+  if (unknownCam) setFact('fact-eq', `${UNKNOWN_EQ[0]}–${UNKNOWN_EQ[1]} mm?`);
   setFact('fact-photo', img
     ? `${img.naturalWidth} × ${img.naturalHeight}`
     : null);
@@ -980,43 +1261,54 @@ function updateOptics() {
 
 /* ─── COMPUTE ────────────────────────────────────────────────── */
 function compute() {
-  if (!img || sensorW === null || focalLength === null || pixelSpan === null) {
-    solvedDistance = null; clearResult(); return;
+  const haveCamera = unknownCam || (sensorW !== null && focalLength !== null);
+  if (!img || !haveCamera || pixelSpan === null) {
+    solvedDistance = null; solvedRange = null; clearResult(); return;
   }
-  solvedDistance = null;   // set only on a valid distance-mode result below
+  solvedDistance = null; solvedRange = null;   // set only on a valid distance-mode result below
   // Pinhole: a span s on the sensor is s / f of the distance, whatever its angle on the photo
   // (Δx and Δy each times the pitch, then Pythagoras, is the span times the pitch).
   // real_size = distance × k, so distance = real_size / k.
-  const pitch  = pixelPitch();
-  const spanMm = pixelSpan * pitch;
-  const k      = spanMm / focalLength;
-  const spanTxt = `${Math.round(pixelSpan)} px × ${(pitch * 1000).toFixed(2)} µm`;
+  // Unknown camera: k for a 24 mm and a 35 mm equivalent lens, so the answer is a range.
+  // A 35 mm equivalent f₃₅ spans the photo's diagonal with the full-frame diagonal: k = span × 43.27 / (f₃₅ × diagonal px).
+  let kLo, kHi, spanTxt;
+  if (unknownCam) {
+    const diagPx = Math.hypot(img.naturalWidth, img.naturalHeight);
+    kHi = pixelSpan * FF_DIAG / (UNKNOWN_EQ[0] * diagPx);   // wide lens: more metres per pixel
+    kLo = pixelSpan * FF_DIAG / (UNKNOWN_EQ[1] * diagPx);
+  } else {
+    const pitch = pixelPitch();
+    kLo = kHi = pixelSpan * pitch / focalLength;
+    spanTxt = `${Math.round(pixelSpan)} px × ${(pitch * 1000).toFixed(2)} µm`;
+  }
 
-  let value, eqStr;
+  let lo, hi, eqStr;
   if (solveMode === 'distance') {
-    if (knownSize === null || !(k > 0)) { clearResult(); return; }
-    value = solvedDistance = knownSize / k;
-    eqStr = `${knownSize} m × ${focalLength} mm ÷ (${spanTxt})`;
+    if (knownSize === null || !(kLo > 0)) { clearResult(); return; }
+    lo = knownSize / kHi; hi = knownSize / kLo;
+    eqStr = unknownCam ? `${knownSize} m at ${UNKNOWN_EQ[0]}–${UNKNOWN_EQ[1]} mm equivalent (camera unknown)`
+                       : `${knownSize} m × ${focalLength} mm ÷ (${spanTxt})`;
   } else {
     if (distance === null) { clearResult(); return; }
-    value = distance * k;
-    eqStr = `${distance} m × (${spanTxt}) ÷ ${focalLength} mm`;
+    lo = distance * kLo; hi = distance * kHi;
+    eqStr = unknownCam ? `${distance} m at ${UNKNOWN_EQ[0]}–${UNKNOWN_EQ[1]} mm equivalent (camera unknown)`
+                       : `${distance} m × (${spanTxt}) ÷ ${focalLength} mm`;
   }
+  const value = (lo + hi) / 2;
+  if (!isFinite(hi) || !(lo > 0)) { clearResult(); return; }
+  resultValue = value;
+  resultRange = unknownCam ? [lo, hi] : null;
+  if (solveMode === 'distance') { solvedDistance = value; solvedRange = resultRange; }
 
-  if (!isFinite(value) || value <= 0) { solvedDistance = null; clearResult(); return; }
-
-  if (value >= 1000) {
-    valEl.textContent  = (value / 1000).toFixed(2);
-    unitEl.textContent = 'km';
-  } else {
-    valEl.textContent  = value >= 100 ? value.toFixed(1)
-                       : value >= 10  ? value.toFixed(2)
-                       :                value.toFixed(3);
-    unitEl.textContent = 'm';
-  }
+  // One unit for both ends of a range, chosen by the larger
+  const km = hi >= 1000;
+  const num = v => km ? (v / 1000).toFixed(2) : v >= 100 ? v.toFixed(1) : v >= 10 ? v.toFixed(2) : v.toFixed(3);
+  valEl.textContent  = resultRange ? `${num(lo)}–${num(hi)}` : num(value);
+  unitEl.textContent = km ? 'km' : 'm';
   document.getElementById('result-eq').textContent = eqStr;
   document.getElementById('result-eq').title = eqStr;
   resultBar.classList.add('has-result');
+  resultBar.classList.toggle('is-range', !!resultRange);
   renderTabs();
   updateOptics();
   updateGuide();
@@ -1024,6 +1316,9 @@ function compute() {
 }
 
 function clearResult() {
+  resultValue = null;
+  resultRange = null;
+  resultBar.classList.remove('is-range');
   document.getElementById('result-value').textContent  = '—';
   document.getElementById('result-unit').textContent   = 'm';
   document.getElementById('result-eq').textContent     = '';
@@ -1035,34 +1330,93 @@ function clearResult() {
 
 /* ─── DIAGRAM ────────────────────────────────────────────────── */
 function updateDiagram() {
-  const hasPixels = pixelSpan  !== null;
-  const hasDist   = (solveMode === 'distance') ? solvedDistance !== null : distance !== null;
-  const hasFocal  = focalLength !== null;
-  const hasSensor = sensorW    !== null;
-  const allSet    = hasPixels && hasDist && hasFocal && hasSensor && img;
+  const sizeMode = solveMode === 'size';
+  const hasResult = resultValue !== null;
+  const hasPixels = pixelSpan !== null, hasFocal = unknownCam || focalLength !== null, hasSensor = unknownCam || sensorW !== null;
+  const hasD      = sizeMode ? distance !== null : hasResult;
+  const hasObject = sizeMode ? hasResult : knownSize !== null;
+  const allSet    = hasResult;
+  const fmtMm = v => `${+v.toFixed(2)} mm`;
 
-  setLit('seg-object',      hasPixels);
-  setLit('seg-pixels',      hasPixels);
-  setLit('seg-distance',    hasDist);
-  setLit('seg-focal',       hasFocal);
-  setLit('seg-sensor',      hasSensor);
-  setLit('seg-pinhole',     allSet);
-  setLit('ray-tl',          allSet);
-  setLit('ray-bl',          allSet);
-  setLit('ray-tr',          allSet);
-  setLit('ray-br',          allSet);
-  setLit('diag-lbl-sensor', hasSensor);
-  setLit('diag-lbl-px',     hasPixels);
-  setLit('diag-lbl-f',      hasFocal);
-  setLit('diag-lbl-d',      hasDist);
-  setLit('diag-lbl-object', hasPixels);
+  // Which part the next step asks for (the same order as the step guide)
+  const idx = guideStatus().idx;
+  const next = idx === 0 || idx === 2 ? 'px' : idx === 1 ? 'camera' : idx === 3 ? (sizeMode ? 'd' : 'object') : null;
 
-  const resultLbl = document.getElementById('diag-lbl-result');
-  if (resultLbl) resultLbl.style.display = (allSet && solveMode === 'size') ? '' : 'none';
+  const part = (ids, state) => ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('lit',     state === 'known');
+    el.classList.toggle('result',  state === 'result');
+    el.classList.toggle('unknown', state === 'unknown');
+    el.classList.toggle('next',    state === 'next');
+  });
+  const state = (known, name, isUnknown = false) =>
+    isUnknown ? (known ? 'result' : 'unknown') : known ? 'known' : next === name ? 'next' : '';
+
+  part(['seg-sensor', 'diag-lbl-sensor'], state(hasSensor, 'camera'));
+  part(['seg-focal', 'diag-lbl-f'],       state(hasFocal,  'camera'));
+  part(['seg-pixels', 'diag-lbl-px'],     state(hasPixels, 'px'));
+  part(['seg-distance', 'diag-lbl-d'],    state(hasD, 'd', !sizeMode));
+  part(['seg-object', 'diag-lbl-object'], state(hasObject, 'object', sizeMode));
+  // The light path: lit once there is a result
+  ['seg-pinhole', 'ray-tl', 'ray-bl', 'ray-tr', 'ray-br'].forEach(id => part([id], allSet ? 'result' : ''));
+
+  const label = (id, text) => { document.getElementById(id).textContent = text; };
+  label('diag-lbl-sensor', unknownCam ? 'sensor ?' : hasSensor ? `sensor ${fmtMm(sensorW)}` : 'sensor');
+  label('diag-lbl-f',      unknownCam ? 'f ?' : hasFocal ? `f = ${fmtMm(focalLength)}` : 'f');
+  label('diag-lbl-px',     hasPixels ? `px = ${Math.round(pixelSpan)}` : 'px');
+  label('diag-lbl-d',      sizeMode ? (hasD ? `D = ${fmtLength(distance)}` : 'D')
+                                    : (hasResult ? `D = ${fmtResult()}` : 'D = ?'));
+  label('diag-lbl-object', sizeMode ? (hasResult ? `size = ${fmtResult()}` : 'size = ?')
+                                    : (hasObject ? `size = ${fmtLength(knownSize)}` : 'size'));
 }
 
-function setLit(id, on) {
-  document.getElementById(id)?.classList.toggle('lit', on);
+// The result for labels: one length, or "6.1–8.9 m" for an unknown camera
+function fmtResult() {
+  if (!resultRange) return fmtLength(resultValue);
+  const [lo, hi] = resultRange.map(fmtLength);
+  return lo.split(' ')[1] === hi.split(' ')[1] ? `${lo.split(' ')[0]}–${hi}` : `${lo}–${hi}`;
+}
+
+// A length for labels: 8.42 m, 312 m, 1.25 km
+function fmtLength(m) {
+  return m >= 1000 ? `${+(m / 1000).toFixed(2)} km`
+       : m >= 100  ? `${Math.round(m)} m`
+       : m >= 10   ? `${+m.toFixed(1)} m`
+       :             `${+m.toFixed(2)} m`;
+}
+
+// Clicking a part of the diagram goes to its input, where there is one
+function diagramAction(partName) {
+  if (partName === 'camera') {
+    if (sensorW === null || camIdx === null) document.getElementById('camera-trigger').click();
+    else document.getElementById('focal-length-input').focus();
+  } else if (partName === 'px') {
+    if (!img) fileInput.click();
+  } else if (partName === 'd' && solveMode === 'size') {
+    document.getElementById('distance-input').focus();
+  } else if (partName === 'object' && solveMode === 'distance') {
+    document.getElementById('known-size-input').focus();
+  }
+}
+{
+  const PARTS = { camera: ['seg-sensor', 'seg-focal', 'diag-lbl-sensor', 'diag-lbl-f'], px: ['seg-pixels', 'diag-lbl-px'],
+                  d: ['seg-distance', 'diag-lbl-d'], object: ['seg-object', 'diag-lbl-object'] };
+  Object.entries(PARTS).forEach(([name, ids]) => ids.forEach(id => {
+    const el = document.getElementById(id);
+    const targets = [el];
+    if (el.tagName === 'line') {   // a 2 px line is hard to hit: a wide invisible twin takes the click
+      const hit = el.cloneNode();
+      hit.removeAttribute('id');
+      hit.setAttribute('class', 'diag-hit');
+      el.after(hit);
+      targets.push(hit);
+    }
+    targets.forEach(t => {
+      t.classList.add('diag-part');
+      t.addEventListener('click', e => { e.stopPropagation(); diagramAction(name); });
+    });
+  }));
 }
 
 /* ─── RESET / NEW IMAGE ──────────────────────────────────────── */
@@ -1072,6 +1426,7 @@ function jumpToCustom() {
   if (trigger.textContent === CAMERA_DB[CUSTOM_IDX].label) return;
   trigger.textContent = CAMERA_DB[CUSTOM_IDX].label;
   camIdx = CUSTOM_IDX;
+  unknownCam = false;
   trigger.classList.add('has-selection');
   document.querySelectorAll('#camera-panel [data-idx]').forEach(el => {
     el.classList.toggle('selected', parseInt(el.dataset.idx, 10) === CUSTOM_IDX);
@@ -1122,18 +1477,8 @@ function resetPhotoState() {
   clearCameraSelection();
 }
 
-function newImage() {
-  loadSeq++;   // a photo still decoding, or its EXIF, is no longer wanted
-  img = null;
-  photoName = null;
-  resetPhotoState();
-  if (map) { showWholeGlobe(); map.once('moveend', startIdleSpin); }   // spin again once back on the whole globe
-
-  drawCanvas();
-  overlay.classList.remove('hidden');
-  compute();
-  updateDiagram();
-}
+// N: a new photo, in a tab of its own (the photos open now stay in theirs)
+function newImage() { addTab(); }
 
 document.getElementById('btn-reset-marks').addEventListener('click', resetMarks);
 
@@ -1208,8 +1553,11 @@ function initMap() {
     const p = { lat: e.lngLat.lat, lng: e.lngLat.lng };
     if (isFinite(p.lat) && isFinite(p.lng)) handleMapClick(p);
   });
-  map.on('movestart', e => { if (!e.spin && spinRaf) stopSpin(); });
+  map.on('contextmenu', e => { e.preventDefault(); showMapMenu(e); });
+  map.on('click', hideMapMenu);
+  map.on('movestart', e => { if (!e.spin) hideMapMenu(); if (!e.spin && spinRaf) stopSpin(); });
   map.on('move', updateMapView);
+  map.on('moveend', e => { if (!e.spin) scheduleAutosave(); });
   map.on('load', updateMapView);
   // Top left, each in its own box: back to the photo's GPS above Let it spin (as ShadowFinder's
   // Centre on the ring). The GPS button stays visible, greyed out until a photo brings GPS.
@@ -1409,13 +1757,17 @@ function ringCoords(c, radius) {
 
 function renderMarks() {
   updateMapHint();
+  scheduleAutosave();
   const src = map && map.getSource('sa-marks');
   if (!src) return;
   const features = [];
   const pt = p => ({ type: 'Feature', properties: { kind: 'pt' }, geometry: { type: 'Point', coordinates: [p.lng, p.lat] } });
   if (objectRing && mapPtA && solvedDistance !== null) {
-    features.push({ type: 'Feature', properties: { kind: 'ring' },
-      geometry: { type: 'Polygon', coordinates: [ringCoords(mapPtA, solvedDistance)] } });
+    // An unknown camera gives a band: the outer ring with the inner one as its hole
+    const rings = solvedRange
+      ? [ringCoords(mapPtA, solvedRange[1]), ringCoords(mapPtA, solvedRange[0]).reverse()]
+      : [ringCoords(mapPtA, solvedDistance)];
+    features.push({ type: 'Feature', properties: { kind: 'ring' }, geometry: { type: 'Polygon', coordinates: rings } });
   }
   if (mapPtA && mapPtB) {
     features.push({ type: 'Feature', properties: { kind: 'line' },
@@ -1426,22 +1778,18 @@ function renderMarks() {
   src.setData({ type: 'FeatureCollection', features });
 }
 
-// Clicking cycles: place A → place B + measure → third click resets and places new A.
+// Clicking cycles: place the camera (A) → place the object (B) + measure → a third click starts over.
 function handleMapClick(p) {
   if (solveMode === 'distance') { placeObjectRing(p); return; }
-  if (mapPtA && mapPtB) {
-    resetMapPoints();
-    distance = null;
-    document.getElementById('distance-input').value = '';
-    compute();
-  }
-  if (!mapPtA) {
-    mapPtA = p;
-  } else {
-    mapPtB = p;
-    const d = distM(mapPtA, mapPtB);
-    setDistance(d);
-  }
+  if (mapPtA && mapPtB) clearMapPoints();
+  setMapPoint(mapPtA ? 'object' : 'camera', p);
+}
+
+// Size mode: put the camera (A) or the object (B) at p; with both, their distance is D.
+// Used by clicks, the right-click menu and pasted coordinates.
+function setMapPoint(which, p) {
+  if (which === 'camera') mapPtA = p; else mapPtB = p;
+  if (mapPtA && mapPtB) setDistance(distM(mapPtA, mapPtB));
   renderMarks();
   updateGuide();
 }
@@ -1466,7 +1814,7 @@ function placeObjectRing(p) {
   renderMarks();
   // Fit the ring as if it sat at longitude 0, then centre on the real point: a ring across
   // the antimeridian would otherwise span the whole world in min/max longitude.
-  const ring = ringCoords({ lat: p.lat, lng: 0 }, solvedDistance);
+  const ring = ringCoords({ lat: p.lat, lng: 0 }, solvedRange ? solvedRange[1] : solvedDistance);
   const lngs = ring.map(c => c[0]), lats = ring.map(c => c[1]);
   const cam = map.cameraForBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: 30 });
   if (cam) map.easeTo({ center: [p.lng, cam.center.lat ?? p.lat], zoom: cam.zoom, bearing: 0, essential: true });
@@ -1495,11 +1843,14 @@ function formatMapDist(d) {
 // Called from renderMarks() and updateGuide(), so it follows every change of state.
 function updateMapHint() {
   const el = document.getElementById('map-hint-text');
-  const ready = img !== null && sensorW !== null && focalLength !== null && pixelSpan !== null;
+  const ready = img !== null && (unknownCam || (sensorW !== null && focalLength !== null)) && pixelSpan !== null;
   let text = '', cls = '';
   if (solveMode === 'distance') {
     if (objectRing && mapPtA && solvedDistance !== null) {
-      text = `The camera stood somewhere on this ring · r = ${formatMapDist(solvedDistance)}`; cls = 'done';
+      text = solvedRange
+        ? `The camera stood somewhere in this band · ${formatMapDist(solvedRange[0])} to ${formatMapDist(solvedRange[1])}`
+        : `The camera stood somewhere on this ring · r = ${formatMapDist(solvedDistance)}`;
+      cls = 'done';
     } else if (solvedDistance !== null) {
       text = 'Click where the object is to draw the ring';
     }
@@ -1507,12 +1858,14 @@ function updateMapHint() {
     text = `Camera → object · ${formatMapDist(distM(mapPtA, mapPtB))}`; cls = 'muted';
   } else if (mapPtA) {
     text = "Now click the object's position";
+  } else if (mapPtB) {
+    text = 'Now click where the camera stood';
   } else if (ready && distance === null) {
     text = 'Click where the camera stood, then the object';
   }
   el.textContent = text;
   el.className = 'step-hint' + (cls ? ' ' + cls : '');
-  if (resetBtn) resetBtn.disabled = !mapPtA;
+  if (resetBtn) resetBtn.disabled = !mapPtA && !mapPtB;
 }
 
 // The map's reset button (top left on the map): clears the points and the distance they gave
@@ -1565,54 +1918,196 @@ function parseCoordInput(raw) {
   let [a, b] = coords;
   if (a.axis && a.axis === b.axis) return null;            // two latitudes, or two longitudes
   if (a.axis === 'lng' || b.axis === 'lat') [a, b] = [b, a]; // written longitude first
-  return { lat: a.v, lng: b.v };
+  else if (!a.axis && !b.axis && Math.abs(a.v) > 90 && Math.abs(b.v) <= 90) [a, b] = [b, a];   // plainly lng first
+  return validLatLng(a.v, b.v);
+}
+
+function validLatLng(lat, lng) {
+  if (!isFinite(lat) || !isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  return { lat, lng };
+}
+
+// Coordinates in any form people paste: plain text (above), or a link from a map service.
+// Ported from TracePoint's parser (formats after briatlon's coordinatePaste.js).
+function parseCoordinates(text) {
+  const s = String(text || '').trim();
+  if (!s || s.length > 2000) return null;
+  if (/^https?:\/\//i.test(s)) {
+    const known = parseCoordinateUrl(s);
+    if (known !== undefined) return known;
+    const m = s.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/) ||
+              s.match(/[?&](?:q|ll|query|center)=(-?\d+(?:\.\d+)?)(?:,|%2C)\s*(-?\d+(?:\.\d+)?)/i);
+    return m ? validLatLng(+m[1], +m[2]) : null;
+  }
+  return parseCoordInput(s);
+}
+
+// A link from a known map service, read by that service's rules (Yandex writes longitude
+// first). undefined: not a service known here, the generic rules get their turn.
+function parseCoordinateUrl(s) {
+  let url;
+  try { url = new URL(s.replace(/\\&/g, '&')); } catch (err) { return null; }
+  const host = url.hostname.toLowerCase().replace(/^www\./, '');
+  const q = url.searchParams, hash = new URLSearchParams(url.hash.slice(1));
+  const NUM = '[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)';
+  const pair = (t, sep = ',', lngFirst = false) => {
+    const m = (t || '').match(new RegExp(`^\\s*(${NUM})\\s*${sep}\\s*(${NUM})\\s*$`));
+    return m ? validLatLng(+m[lngFirst ? 2 : 1], +m[lngFirst ? 1 : 2]) : null;
+  };
+  if (host === 'maps.apple.com') return pair(q.get('coordinate') ?? q.get('ll') ?? q.get('q'));
+  if (host === 'bing.com')       return pair(q.get('cp'), '~');
+  if (/^yandex\.[a-z.]+$/.test(host)) return pair(q.get('ll'), ',', true);
+  if (host === 'openstreetmap.org' || host === 'osm.org') {
+    if (q.has('mlat') && q.has('mlon')) return pair(`${q.get('mlat')},${q.get('mlon')}`);
+    const view = hash.get('map')?.split('/');   // #map=zoom/lat/lng
+    return view?.length === 3 ? pair(`${view[1]},${view[2]}`) : null;
+  }
+  if (host === 'earth.google.com') {
+    const m = url.pathname.match(/^\/web\/search\/([^/]+)/);
+    if (m) { try { const p = pair(decodeURIComponent(m[1])); if (p) return p; } catch (err) { /* not a pair */ } }
+  }
+  if (q.has('lat') && (q.has('lon') || q.has('lng'))) return pair(`${q.get('lat')},${q.get('lon') ?? q.get('lng')}`);
+  return undefined;
+}
+
+// Short links carry no coordinates; reading them would mean asking their server where they lead
+function isShortMapLink(text) {
+  const m = String(text || '').trim().match(/^https?:\/\/([^/?#]+)(\/[^?#]*)?/i);
+  if (!m) return false;
+  const host = m[1].toLowerCase().replace(/^www\./, '');
+  return ['maps.app.goo.gl', 'goo.gl', 'g.co', 'maps.apple', 'binged.it', 'bit.ly', 't.co', 'tinyurl.com'].includes(host) ||
+         (/^yandex\./.test(host) && /^\/maps\/-\//.test(m[2] || ''));
+}
+const SHORT_LINK_NOTE = "Short links can't be read here. Open it and copy the full address.";
+const COORD_HELP = 'Enter coordinates as 52.520, 13.405, 52°32\'43.8"N 13°13\'11.6"E or a map link';
+
+// A typed or pasted point. Size mode: the camera (or the object, once the camera is placed);
+// distance mode: the object, and the ring goes around it. Returns whether it was placed.
+function placePastedPoint(p) {
+  stopSpin();
+  if (solveMode === 'distance') return placeObjectRing(p);
+  if (mapPtA && mapPtB) clearMapPoints();
+  setMapPoint(mapPtA ? 'object' : 'camera', p);
+  map.flyTo({ center: [p.lng, p.lat], zoom: Math.max(map.getZoom(), 14), essential: true });
+  return true;
 }
 
 document.getElementById('coord-input').addEventListener('keydown', function (e) {
   if (e.key !== 'Enter') return;
-  const parsed = parseCoordInput(this.value);
-  if (!parsed) { showToast('Enter coordinates as: 52.520, 13.405 or 52°32\'43.8"N 13°13\'11.6"E'); return; }
-  const { lat, lng } = parsed;
-  if (!isFinite(lat) || !isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-    showToast('Coordinates out of range.');
-    return;
-  }
-  stopSpin();
-  // Distance mode: the pasted point is the object, so the ring goes around it
-  if (solveMode === 'distance') {
-    if (placeObjectRing({ lat, lng })) this.value = '';   // kept when there is no distance yet
-    return;
-  }
-  this.value = '';
-  resetMapPoints();
-  mapPtA = { lat, lng };
-  renderMarks();
-  map.flyTo({ center: [lng, lat], zoom: Math.max(map.getZoom(), 14), essential: true });
-  updateGuide();
+  const p = parseCoordinates(this.value);
+  if (!p) { showToast(isShortMapLink(this.value) ? SHORT_LINK_NOTE : COORD_HELP); return; }
+  if (placePastedPoint(p)) this.value = '';   // kept when there is nothing to place it for yet
 });
 
+/* ─── PASTE ANYWHERE ─────────────────────────────────────────── */
+// Ctrl+V outside text fields: an image opens as the photo, text with coordinates places a
+// point. An image wins over text ("Copy image" on a web page carries both). Only what is
+// pasted is read, on the paste itself: the page never reads the clipboard on its own.
+document.addEventListener('paste', e => {
+  const t = e.target;
+  if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable) return;
+  const image = [...(e.clipboardData?.files || [])].find(f => f.type.startsWith('image/'));
+  if (image) {
+    e.preventDefault();
+    loadImage(image, 'Pasted photo');
+    showToast('A pasted image has no EXIF: pick the camera, or a preset, above.', 'success');
+    return;
+  }
+  const text = e.clipboardData && e.clipboardData.getData('text');
+  if (!text || !text.trim()) return;
+  e.preventDefault();
+  const p = parseCoordinates(text);
+  if (!p) { showToast(isShortMapLink(text) ? SHORT_LINK_NOTE : 'No image or coordinates found in the clipboard.'); return; }
+  placePastedPoint(p);
+});
 
-document.querySelectorAll('.tile-btn').forEach(btn => {
-  btn.addEventListener('click', function () {
-    const tile = this.dataset.tile;
-    if (!map || tile === currentTile) return;
-    currentTile = tile;
-    setTileSet(tile);
-    document.querySelectorAll('.tile-btn').forEach(b => b.classList.toggle('active-tile', b === this));
+/* ─── MAP RIGHT-CLICK MENU ───────────────────────────────────── */
+// As in TracePoint and ShadowFinder. MapLibre fires 'contextmenu' only for a right-click
+// without drag, so right-drag still rotates. The links are plain hrefs: nothing is sent
+// anywhere until one is clicked.
+const MAP_LINKS = [
+  ['Google Maps',   (la, ln) => `https://www.google.com/maps/search/?api=1&query=${la},${ln}`],
+  ['Bing Maps',     (la, ln, z) => `https://www.bing.com/maps?cp=${la}~${ln}&lvl=${z}&sp=point.${la}_${ln}_Pin`],
+  ['OpenStreetMap', (la, ln, z) => `https://www.openstreetmap.org/?mlat=${la}&mlon=${ln}#map=${z}/${la}/${ln}`],
+  ['Google Earth',  (la, ln) => `https://earth.google.com/web/@${la},${ln},0a,2000d,35y,0h,0t,0r`]
+];
+let mapMenu = null;
+
+function hideMapMenu() { if (mapMenu) mapMenu.style.display = 'none'; }
+
+function showMapMenu(e) {
+  const p  = { lat: e.lngLat.lat, lng: e.lngLat.lng };
+  const la = p.lat.toFixed(6), ln = p.lng.toFixed(6);
+  const z  = Math.round(map.getZoom()) + 1;   // the other services count zoom in 256 px tiles
+  if (!mapMenu) {
+    mapMenu = document.createElement('div');
+    mapMenu.className = 'map-ctx-menu';
+    mapMenu.setAttribute('role', 'menu');
+    map.getContainer().appendChild(mapMenu);
+  }
+  mapMenu.innerHTML = '';
+  const add = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    n.className = cls;
+    n.textContent = text;
+    if (tag === 'button') { n.type = 'button'; n.setAttribute('role', 'menuitem'); }
+    mapMenu.appendChild(n);
+    return n;
+  };
+  add('div', 'map-ctx-head', `${la}, ${ln}`);
+  add('button', 'map-ctx-item', 'Copy coordinates').onclick = () => {
+    hideMapMenu();
+    navigator.clipboard.writeText(`${la}, ${ln}`)
+      .then(() => showToast('Coordinates copied.', 'success', 1800))
+      .catch(() => showToast('Could not copy to clipboard.'));
+  };
+  if (solveMode === 'size') {
+    add('button', 'map-ctx-item', 'The camera stood here').onclick = () => { hideMapMenu(); setMapPoint('camera', p); };
+    add('button', 'map-ctx-item', 'The object is here').onclick = () => { hideMapMenu(); setMapPoint('object', p); };
+  } else {
+    add('button', 'map-ctx-item', 'The object is here (draw the ring)').onclick = () => { hideMapMenu(); placeObjectRing(p); };
+  }
+  add('div', 'map-ctx-divider', '');
+  MAP_LINKS.forEach(([label, url]) => {
+    const a = add('a', 'map-ctx-item', `Open in ${label}`);
+    a.href = url(la, ln, z);
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.setAttribute('role', 'menuitem');
+    a.onclick = hideMapMenu;
   });
-});
+  // At the click, flipped so it stays inside the map
+  const box = map.getContainer().getBoundingClientRect();
+  mapMenu.style.display = 'block';
+  const w = mapMenu.offsetWidth, h = mapMenu.offsetHeight;
+  mapMenu.style.left = `${Math.max(0, e.point.x + w > box.width  ? e.point.x - w : e.point.x)}px`;
+  mapMenu.style.top  = `${Math.max(0, e.point.y + h > box.height ? e.point.y - h : e.point.y)}px`;
+}
+document.addEventListener('mousedown', e => { if (mapMenu && !mapMenu.contains(e.target)) hideMapMenu(); });
+
+
+function setBasemap(tile) {
+  if (!map || tile === currentTile || !TILE_SETS[tile]) return;
+  currentTile = tile;
+  setTileSet(tile);
+  document.querySelectorAll('.tile-btn').forEach(b => b.classList.toggle('active-tile', b.dataset.tile === tile));
+  scheduleAutosave();
+}
+document.querySelectorAll('.tile-btn').forEach(btn => btn.addEventListener('click', () => setBasemap(btn.dataset.tile)));
 
 /* ─── KEYBOARD ───────────────────────────────────────────────── */
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
   // Ctrl/Cmd+R and +N are the browser's (reload, new window): they must not wipe the work first
-  if (!e.key || e.ctrlKey || e.metaKey || e.altKey) return;
-  if (e.key.toUpperCase() !== 'ESCAPE' && document.getElementById('help-card').style.display !== 'none') return;
-  switch (e.key.toUpperCase()) {
-    case 'R': resetMarks(); break;
-    case 'N': newImage();   break;
-    case 'ESCAPE':
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.code !== 'Escape' && document.getElementById('help-card').style.display !== 'none') return;
+  // By key position (e.code), not by letter: R and N stay where they are on German or French layouts
+  switch (e.code) {
+    case 'KeyR': resetMarks(); break;
+    case 'KeyN': newImage();   break;
+    case 'Escape':
       document.getElementById('help-card').style.display = 'none';
+      hideMapMenu();
       break;
   }
 });
@@ -1629,12 +2124,12 @@ document.getElementById('help-card').addEventListener('click', function (e) {
 
 /* ─── PHOTO / MAP DIVIDER ────────────────────────────────────── */
 // --split on #workspace is the photo panel's share of the width. Drag, double-click
-// (back to the default 60:40), arrow keys (Shift = bigger steps); the chevron hides the map.
+// (back to the default 60:40), arrow keys (Shift = bigger steps); the chevrons hide the map or the photo.
 // Split and hidden state are remembered in this browser.
 const workspace = document.getElementById('workspace');
 const splitter  = document.getElementById('pane-splitter');
 const SPLIT_KEY = 'sa-split';
-const MAP_HIDDEN_KEY = 'sa-map-hidden';
+const HIDDEN_KEY = 'sa-hidden-side';   // "map", "photo" or empty
 const SPLIT_DEFAULT = 60, SPLIT_MIN = 30, SPLIT_MAX = 80;   // photo share; the map gets the rest
 let splitPct  = SPLIT_DEFAULT;
 
@@ -1648,17 +2143,24 @@ function setSplit(pct, save = true) {
   if (save) storageSet(SPLIT_KEY, splitPct.toFixed(1));
 }
 
-function setMapHidden(hidden, save = true) {
-  workspace.classList.toggle('map-collapsed', hidden);
-  document.getElementById('app').classList.toggle('map-collapsed', hidden);
-  const btn = document.getElementById('btn-map-collapse');
-  btn.textContent = hidden ? '‹' : '›';
-  btn.title = hidden ? 'Show map' : 'Hide map';
-  btn.setAttribute('aria-label', btn.title);
-  if (save) storageSet(MAP_HIDDEN_KEY, hidden ? '1' : '0');
+// One side may be hidden: 'map', 'photo' or null. Each chevron hides its side, or brings it
+// back when the other one is hidden.
+let hiddenSide = null;
+function setHiddenSide(side, save = true) {
+  hiddenSide = side;
+  workspace.classList.toggle('map-collapsed', side === 'map');
+  workspace.classList.toggle('photo-collapsed', side === 'photo');
+  document.getElementById('app').classList.toggle('map-collapsed', side === 'map');
+  const label = (id, text, title) => {
+    const b = document.getElementById(id);
+    b.textContent = text; b.title = title; b.setAttribute('aria-label', title);
+  };
+  label('btn-map-collapse',   side === 'map'   ? '‹' : '›', side === 'map'   ? 'Show map'   : 'Hide map');
+  label('btn-photo-collapse', side === 'photo' ? '›' : '‹', side === 'photo' ? 'Show photo' : 'Hide photo');
+  if (save) storageSet(HIDDEN_KEY, side || '');
 }
 
-const mapHidden = () => workspace.classList.contains('map-collapsed');
+const mapHidden = () => hiddenSide !== null;   // either side hidden: nothing to drag
 
 splitter.addEventListener('pointerdown', e => {
   if (e.button !== 0 || e.target.closest('.splitter-chevron') || mapHidden()) return;
@@ -1687,19 +2189,176 @@ splitter.addEventListener('keydown', e => {
   const step = e.shiftKey ? 10 : 2;
   setSplit(splitPct + (e.key === 'ArrowRight' ? step : -step));
 });
-document.getElementById('btn-map-collapse').addEventListener('click', () => setMapHidden(!mapHidden()));
+document.getElementById('btn-map-collapse').addEventListener('click', () => setHiddenSide(hiddenSide ? null : 'map'));
+document.getElementById('btn-photo-collapse').addEventListener('click', () => setHiddenSide(hiddenSide ? null : 'photo'));
 
 splitter.setAttribute('aria-valuemin', SPLIT_MIN);
 splitter.setAttribute('aria-valuemax', SPLIT_MAX);
 {
   const saved = parseFloat(storageGet(SPLIT_KEY));
   setSplit(isFinite(saved) ? saved : SPLIT_DEFAULT, false);
-  setMapHidden(storageGet(MAP_HIDDEN_KEY) === '1', false);
+  const side = storageGet(HIDDEN_KEY) ?? (storageGet('sa-map-hidden') === '1' ? 'map' : '');   // older key
+  setHiddenSide(side === 'map' || side === 'photo' ? side : null, false);
 }
+
+/* ─── AUTOSAVE ───────────────────────────────────────────────── */
+// A refresh keeps the work (ported from TracePoint): IndexedDB "siliconaperture", key "state"
+// holds the tabs with what was measured on each, the map view and the basemap; key
+// "img:<tab id>" holds each tab's photo file. Nothing leaves the browser. Closing a tab
+// deletes its saved copy. Only one browser tab writes (the one holding the Web Lock); a second
+// one restores the saved work but keeps its changes to itself until the first is closed.
+const AUTOSAVE_STORE = 'autosave';
+const AUTOSAVE_LOCK  = 'siliconaperture-autosave';
+
+function claimAutosave() {
+  if (!navigator.locks) return Promise.resolve();
+  const hold = () => new Promise(() => {});   // never settles: the lock lasts as long as the page
+  return new Promise(resolve => {
+    navigator.locks.request(AUTOSAVE_LOCK, { ifAvailable: true }, lock => {
+      if (!lock) { resolve(); return; }
+      autosaveOwner = true;
+      resolve();
+      return hold();
+    }).catch(() => { autosaveOwner = true; resolve(); });
+  }).then(() => {
+    if (autosaveOwner) return;
+    showToast('SiliconAperture is open in another tab. Changes here are not saved until that tab is closed.');
+    navigator.locks.request(AUTOSAVE_LOCK, () => {
+      autosaveOwner = true;
+      if (autosaveReady) { tabs.forEach(autosavePutImage); autosaveWrite(); }
+      return hold();
+    }).catch(() => {});
+  });
+}
+
+function openAutosaveDb() {
+  if (!autosaveDb) autosaveDb = new Promise((resolve, reject) => {
+    const req = indexedDB.open('siliconaperture', 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(AUTOSAVE_STORE);
+    req.onsuccess = () => {
+      // Another page deleting or upgrading the database must not wait on this one
+      req.result.onversionchange = () => { req.result.close(); autosaveDb = null; };
+      resolve(req.result);
+    };
+    req.onblocked = () => reject(new Error('autosave database blocked by another tab'));
+    req.onerror   = () => reject(req.error);
+  });
+  return autosaveDb;
+}
+
+// One transaction on the store; resolves with the result of the request fn returns (if any)
+function autosaveTx(mode, fn) {
+  return openAutosaveDb().then(db => new Promise((resolve, reject) => {
+    const tx  = db.transaction(AUTOSAVE_STORE, mode);
+    const req = fn(tx.objectStore(AUTOSAVE_STORE));
+    tx.oncomplete = () => resolve(req?.result);
+    tx.onerror = tx.onabort = () => reject(tx.error);
+  }));
+}
+
+function autosaveFailed() {
+  if (autosaveWarned) return;
+  autosaveWarned = true;
+  showToast('Autosave failed: browser storage is full or blocked.');
+}
+
+function scheduleAutosave() {
+  if (!autosaveReady || !autosaveOwner) return;
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(autosaveWrite, 400);
+}
+
+function autosaveWrite() {
+  clearTimeout(autosaveTimer);
+  autosaveTimer = null;
+  if (!autosaveReady || !autosaveOwner) return;
+  const c = map ? map.getCenter() : null;
+  const data = {
+    v: 1,
+    active: activeTab,
+    tabs: tabs.map((t, i) => ({ id: t.id, name: t.name, hasFile: !!t.file,
+                                state: i === activeTab ? (t.file ? captureState() : null) : t.state })),
+    map: c ? { center: [c.lng, c.lat], zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch() } : null,
+    basemap: currentTile
+  };
+  const keep = new Set(tabs.filter(t => t.file).map(t => 'img:' + t.id));
+  const json = tabs.some(t => t.file) ? JSON.stringify(data) : null;
+  autosaveTx('readwrite', store => {
+    if (json) store.put(json, 'state'); else store.delete('state');
+    store.getAllKeys().onsuccess = e => {
+      const have = new Set(e.target.result);
+      have.forEach(k => { if (k !== 'state' && !keep.has(k)) store.delete(k); });   // photos of closed tabs
+      tabs.forEach(t => { if (t.file && !have.has('img:' + t.id)) store.put(t.file, 'img:' + t.id); });
+    };
+  }).catch(autosaveFailed);
+}
+
+function autosavePutImage(t) {
+  if (!autosaveReady || !autosaveOwner || !t.file) return;
+  autosaveTx('readwrite', store => { store.put(t.file, 'img:' + t.id); }).catch(autosaveFailed);
+}
+
+// Runs once at start: puts the saved tabs, map view and basemap back
+async function autosaveRestore() {
+  await claimAutosave();
+  let data = null;
+  try {
+    const json = await autosaveTx('readonly', store => store.get('state'));
+    data = json ? JSON.parse(json) : null;
+  } catch (err) { autosaveReady = true; return; }   // no IndexedDB here: work without autosave
+  try {
+    if (data && Array.isArray(data.tabs)) {
+      const restored = [];
+      for (const td of data.tabs) {
+        if (!td || typeof td.id !== 'string' || !td.hasFile) continue;
+        const file = await autosaveTx('readonly', store => store.get('img:' + td.id));
+        if (file instanceof Blob) restored.push({ id: td.id, name: td.name ?? null, file, img: null, state: td.state || null });
+      }
+      if (restored.length) {
+        const activeId = data.tabs[data.active]?.id;
+        tabs = restored;
+        activeTab = Math.max(0, tabs.findIndex(t => t.id === activeId));
+        await mapReady;
+        stopSpin();
+        if (data.map) map.jumpTo({ center: data.map.center, zoom: data.map.zoom, bearing: data.map.bearing, pitch: data.map.pitch });
+        if (TILE_SETS[data.basemap]) setBasemap(data.basemap);
+        await showTab(tabs[activeTab]);
+      }
+    }
+  } catch (err) {
+    tabs = [emptyTab()]; activeTab = 0;
+    showTab(tabs[0]);
+    showToast('The saved work could not be restored. Starting fresh.');
+  }
+  autosaveReady = true;
+  if (autosaveOwner) autosaveWrite();   // tidies photos the saved state no longer lists
+}
+
+// Leaving or hiding the page writes what is still pending
+document.addEventListener('visibilitychange', () => { if (document.hidden && autosaveTimer) autosaveWrite(); });
+window.addEventListener('pagehide', () => { if (autosaveTimer) autosaveWrite(); });
+
+/* ─── SHOW THE MATH ──────────────────────────────────────────── */
+// The default view is the answer alone; the worked formula under it is one click away (remembered).
+const MATH_KEY = 'sa-show-math';
+function setShowMath(on, save = true) {
+  document.getElementById('app').classList.toggle('show-math', on);
+  const b = document.getElementById('btn-math');
+  b.setAttribute('aria-pressed', String(on));
+  b.textContent = on ? 'Hide the math' : 'Show the math';
+  if (save) storageSet(MATH_KEY, on ? '1' : '0');
+}
+document.getElementById('btn-math').addEventListener('click', () =>
+  setShowMath(!document.getElementById('app').classList.contains('show-math')));
+setShowMath(storageGet(MATH_KEY) === '1', false);
 
 /* ─── RESIZE ─────────────────────────────────────────────────── */
 // Panels change size with the window and with the divider: follow both.
-new ResizeObserver(() => { resizeCanvas(); drawCanvas(); }).observe(container);
+new ResizeObserver(() => {
+  resizeCanvas();
+  if (img && needsFit) fitImage();
+  drawCanvas();
+}).observe(container);
 new ResizeObserver(() => { if (map) map.resize(); }).observe(document.getElementById('map-container'));
 
 /* ─── INIT ───────────────────────────────────────────────────── */
@@ -1708,3 +2367,4 @@ renderTabs();
 resizeCanvas();
 initMap();
 updateGuide();
+autosaveRestore();

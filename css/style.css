@@ -37,7 +37,7 @@ input, select {
   width: 100%;
   transition: border-color 0.15s;
 }
-input:focus, select:focus { border-color: #e63946; }
+input:focus, select:focus { border-color: #777; }
 input[readonly] { color: #666; cursor: default; background: #111; }
 input::placeholder { color: #383838; }
 input.source-exif   { color: #e63946; }
@@ -84,6 +84,9 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 /* Map hidden: the photo takes the whole width */
 #workspace.map-collapsed #photo-panel { flex: 1 1 0; }
 #workspace.map-collapsed #map-panel   { display: none; }
+/* Photo hidden: the map takes the whole width (the inputs in the bar stay) */
+#workspace.photo-collapsed #photo-panel { display: none; }
+#workspace.photo-collapsed #pane-splitter { cursor: default; }
 
 /* ─── DIVIDER ───────────────────────────────────────────────── */
 #pane-splitter {
@@ -119,6 +122,13 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
   z-index: 2;
 }
 .splitter-chevron:hover:not(:disabled) { color: #ccc; background: #1e1e1e; }
+/* Two chevrons, one per side; with a side hidden only the one that brings it back shows */
+.chevron-photo { top: calc(50% - 21px); }
+.chevron-map   { top: calc(50% + 21px); }
+#workspace.map-collapsed .chevron-photo,
+#workspace.photo-collapsed .chevron-map { display: none; }
+#workspace.map-collapsed .chevron-map,
+#workspace.photo-collapsed .chevron-photo { top: 50%; }
 
 /* While dragging, keep the map and canvas from swallowing pointer events */
 body.splitter-dragging { cursor: col-resize; user-select: none; }
@@ -169,12 +179,20 @@ body.splitter-dragging #image-canvas { pointer-events: none; }
   min-width: 80px;
   height: 28px;
   padding: 0 4px 0 10px;
-  background: #1a0a0b;
-  border: 1px solid #8a3a40;
+  background: #141414;
+  border: 1px solid #262626;
   border-radius: 4px;
   font-size: 11px;
-  color: #e0e0e0;
+  color: #888;
   white-space: nowrap;
+  cursor: pointer;
+}
+.photo-tab:hover { color: #ccc; border-color: #333; }
+.photo-tab.active { background: #1e1e1e; border-color: #555; color: #eee; cursor: default; }
+.photo-tab:focus-visible { outline: 1px solid #777; outline-offset: 1px; }
+.photo-name-edit {
+  flex: 1; min-width: 0; height: 20px; padding: 0 4px;
+  font-size: 11px; color: #eee; background: #0d0d0d; border: 1px solid #555; border-radius: 3px;
 }
 .photo-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .photo-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: #444; }
@@ -344,7 +362,6 @@ a.icon-btn { text-decoration: none; }
   width: 64px;
   margin: 0 auto 14px;
   opacity: 0.45;
-  animation: spin 12s linear infinite;
 }
 .drop-icon svg { display: block; width: 100%; height: auto; }
 .drop-msg {
@@ -363,7 +380,7 @@ a.icon-btn { text-decoration: none; }
   color: #999;
   pointer-events: auto;
 }
-.demo-btn:hover:not(:disabled) { background: #1a0a0b; border-color: #8a3a40; color: #e63946; }
+.demo-btn:hover:not(:disabled) { background: #222; border-color: #555; color: #eee; }
 #file-input { display: none; }
 
 /* ─── EXIF CHIP + CARD ──────────────────────────────────────── */
@@ -422,7 +439,7 @@ a.icon-btn { text-decoration: none; }
 .exif-val.has-data { color: #ccc; }
 .exif-sub { font-size: 9px; color: #555; white-space: nowrap; }
 #exif-gps-val.clickable {
-  color: #e63946;
+  color: #ccc;
   cursor: pointer;
   text-decoration: underline;
   text-decoration-style: dotted;
@@ -461,10 +478,20 @@ a.icon-btn { text-decoration: none; }
 #diagram-svg .seg.dot      { fill: #4a4a4a; stroke: none; transition: fill 0.4s ease; }
 #diagram-svg .seg.px-mark  { stroke-width: 5; opacity: 0.4; }
 
-#diagram-svg .seg.lit                { stroke: #e63946; opacity: 1; }
-#diagram-svg .seg.ray.lit            { stroke: #e63946; opacity: 0.35; }
-#diagram-svg .seg.dot.lit            { fill: #e63946; stroke: none; }
-#diagram-svg .seg.px-mark.lit        { stroke: #e63946; opacity: 0.85; }
+/* The diagram is the step guide (updateDiagram in script.js):
+   known   — a value is in: light grey, with the value on its label
+   next    — what the next step asks for: red outline, steady (no pulse)
+   unknown — the value being solved for: dashed, "?" on its label
+   result  — the solved value and the light path: red */
+#diagram-svg .seg.lit                { stroke: #bdbdbd; opacity: 1; }
+#diagram-svg .seg.px-mark.lit        { stroke: #bdbdbd; opacity: 0.85; }
+#diagram-svg .seg.next               { stroke: #e63946; opacity: 0.9; filter: drop-shadow(0 0 3px rgba(230, 57, 70, 0.6)); }
+#diagram-svg .seg.unknown            { stroke: #8a8a8a; stroke-dasharray: 3 4; opacity: 1; }
+#diagram-svg .seg.result             { stroke: #e63946; opacity: 1; stroke-dasharray: none; }
+#diagram-svg .seg.ray.result         { stroke: #e63946; opacity: 0.4; }
+#diagram-svg .seg.dot.result         { fill: #e63946; stroke: none; }
+#diagram-svg .diag-part              { cursor: pointer; }
+#diagram-svg .diag-hit               { stroke: transparent; stroke-width: 16; fill: none; }
 
 .diag-lbl {
   fill: #6e6e6e;
@@ -473,8 +500,10 @@ a.icon-btn { text-decoration: none; }
   transition: fill 0.4s ease;
   user-select: none;
 }
-.diag-lbl.lit  { fill: #e63946; }
-.diag-result   { fill: #e63946; font-weight: 600; }
+.diag-lbl.lit     { fill: #cfcfcf; }
+.diag-lbl.next    { fill: #e63946; }
+.diag-lbl.unknown { fill: #9a9a9a; }
+.diag-lbl.result  { fill: #e63946; font-weight: 600; }
 
 /* ─── INPUT BAR ─────────────────────────────────────────────── */
 /* One solid bar across the full width, split where the workspace is split (--split on #app):
@@ -620,7 +649,7 @@ a.icon-btn { text-decoration: none; }
 }
 .field-source {
   font-size: 10px;
-  color: #e63946;
+  color: #777;
   font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
@@ -727,14 +756,14 @@ a.icon-btn { text-decoration: none; }
   user-select: none;
 }
 .cam-custom:hover { background: #222; color: #ccc; }
-.cam-custom.selected { color: #e63946; }
+.cam-custom.selected { color: #fff; font-weight: 600; }
 
 .cam-category-hdr {
   padding: 7px 12px 3px;
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #e63946;
+  color: #777;
   font-weight: 600;
   border-top: 1px solid #1e1e1e;
 }
@@ -772,7 +801,7 @@ a.icon-btn { text-decoration: none; }
   gap: 8px;
 }
 .cam-model:hover { background: #1a1a1a; color: #ccc; }
-.cam-model.selected { color: #e63946; }
+.cam-model.selected { color: #fff; font-weight: 600; }
 
 .cam-conf {
   font-size: 9px;
@@ -868,7 +897,7 @@ a.icon-btn { text-decoration: none; }
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .solve-btn:hover { background: #1e1e1e; color: #ccc; border-color: #383838; }
-.solve-btn.active-solve { border-color: #e63946; color: #e63946; background: #1a0a0b; }
+.solve-btn.active-solve { border-color: #666; color: #eee; background: #262626; }
 .tile-btn { padding: 0 7px; }
 
 /* Awaited-control glow — mirrors the active step indicator */
@@ -877,11 +906,7 @@ a.icon-btn { text-decoration: none; }
 #distance-input.awaiting,
 #known-size-input.awaiting {
   border-color: #e63946;
-  animation: input-glow 1.8s ease-in-out infinite;
-}
-@keyframes input-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0); }
-  50%      { box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.22); }
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.18);   /* steady: no looping animation */
 }
 
 #coord-input {
@@ -943,7 +968,7 @@ a.icon-btn { text-decoration: none; }
 .help-inner {
   background: #151515;
   border: 1px solid #2a2a2a;
-  border-top: 3px solid #e63946;
+  border-top: 3px solid #3a3a3a;
   border-radius: 8px;
   padding: 24px;
   width: 680px;
@@ -962,12 +987,12 @@ a.icon-btn { text-decoration: none; }
   padding-left: 18px;
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  font-size: 12px;
-  color: #999;
-  line-height: 1.6;
+  gap: 8px;
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.5;
 }
-.help-steps li::marker { color: #e63946; }
+.help-steps li::marker { color: #777; }
 
 .help-formulas {
   display: grid;
@@ -988,7 +1013,7 @@ a.icon-btn { text-decoration: none; }
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  color: #e63946;
+  color: #888;
   margin-bottom: 6px;
   font-weight: 600;
 }
@@ -1004,11 +1029,11 @@ a.icon-btn { text-decoration: none; }
 .help-formula-note {
   margin-top: 10px;
   font-size: 11px;
-  color: #c8828a;
+  color: #999;
   line-height: 1.6;
-  background: rgba(230, 57, 70, 0.08);
-  border: 1px solid rgba(230, 57, 70, 0.25);
-  border-left: 3px solid #e63946;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-left: 3px solid #444;
   border-radius: 4px;
   padding: 10px 14px;
 }
@@ -1023,12 +1048,12 @@ a.icon-btn { text-decoration: none; }
   flex-wrap: wrap;
 }
 kbd {
-  background: rgba(230, 57, 70, 0.07);
-  border: 1px solid rgba(230, 57, 70, 0.3);
+  background: #222;
+  border: 1px solid #3a3a3a;
   border-radius: 3px;
   padding: 2px 8px;
   font-size: 11px;
-  color: #e63946;
+  color: #ddd;
   font-family: system-ui;
   font-weight: 600;
 }
@@ -1069,16 +1094,10 @@ kbd {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #e63946;
-  border: 2px solid #1a0a0b;
-  box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.25);
+  background: #e8e8e8;
+  border: 2px solid #111;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.18);
   pointer-events: none;
-}
-
-/* ─── ANIMATIONS ────────────────────────────────────────────── */
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
 }
 
 
@@ -1152,11 +1171,52 @@ kbd {
 input.invalid,
 .labeled-input input.invalid { color: #e63946; text-decoration: underline wavy rgba(230, 57, 70, 0.6); }
 
-/* Reduced motion: no looping animations (the globe's spin already stays off in script.js) */
+/* Reduced motion: nothing loops any more; also no transitions (the globe's spin stays off in script.js) */
 @media (prefers-reduced-motion: reduce) {
-  .drop-icon,
-  #camera-trigger.awaiting,
-  #pixel-span-input.awaiting,
-  #distance-input.awaiting,
-  #known-size-input.awaiting { animation: none; }
+  *, *::before, *::after { transition: none !important; }
 }
+
+/* "Show the math": the worked formula under the result, off by default (remembered) */
+.math-toggle {
+  padding: 0 6px;
+  height: 16px;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  color: #666;
+  background: none;
+  border: 1px solid #2a2a2a;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.math-toggle:hover { color: #ccc; border-color: #444; }
+.math-toggle[aria-pressed="true"] { color: #ddd; border-color: #555; background: #222; }
+#app:not(.show-math) #result-eq { visibility: hidden; }
+
+/* Right-click menu on the map (as in TracePoint and ShadowFinder) */
+.map-ctx-menu {
+  position: absolute; z-index: 1000; display: none;
+  background: #151515; border: 1px solid #2a2a2a;
+  border-radius: 6px; min-width: 210px;
+  box-shadow: 0 4px 16px #000a; overflow: hidden;
+  font-size: 12px;
+}
+.map-ctx-head {
+  padding: 8px 14px; font-family: monospace; font-size: 11px;
+  color: #ccc; background: #0d0d0d; border-bottom: 1px solid #2a2a2a;
+  user-select: text;
+}
+.map-ctx-item {
+  display: block; width: 100%; box-sizing: border-box; text-align: left;
+  padding: 8px 14px; color: #bbb; text-decoration: none;
+  background: none; border: none; border-radius: 0; cursor: pointer; font: inherit;
+}
+.map-ctx-item:hover, .map-ctx-item:focus-visible { background: #222; color: #fff; outline: none; }
+.map-ctx-divider { height: 1px; background: #2a2a2a; margin: 2px 0; }
+
+/* Help: the steps up front, the method folded away */
+.help-more { margin-top: 14px; }
+.help-more summary { cursor: pointer; font-size: 12px; color: #999; user-select: none; }
+.help-more summary:hover { color: #ddd; }
+.help-more[open] summary { margin-bottom: 8px; }
+.help-formula { text-align: center; }
+.help-formula-note a { color: #ccc; }

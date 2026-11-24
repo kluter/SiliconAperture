@@ -107,6 +107,7 @@
     <section class="bar-slot slot-measure" aria-label="Measure">
       <div class="slot-head">
         <span class="slot-title">Measure</span>
+        <button type="button" id="btn-math" class="math-toggle" aria-pressed="false" title="Show how the result is worked out">Show the math</button>
       </div>
       <div class="measure-row">
         <div class="measure-field">
@@ -132,7 +133,7 @@
         <div class="measure-field measure-result" id="result-bar">
           <span class="field-label" id="result-label">Real-world size</span>
           <div class="result-display">
-            <span id="result-value">—</span>
+            <span id="result-value" aria-live="polite">—</span>
             <span id="result-unit" class="result-unit">m</span>
           </div>
           <span class="field-source muted" id="result-eq"></span>
@@ -179,8 +180,6 @@
         <text id="diag-lbl-f"      x="108" y="52"  class="diag-lbl" text-anchor="middle">f</text>
         <text id="diag-lbl-d"      x="315" y="52"  class="diag-lbl" text-anchor="middle">D</text>
         <text id="diag-lbl-object" x="465" y="120" class="diag-lbl" text-anchor="middle">object</text>
-        <!-- Real-size label (appears when result computed) -->
-        <text id="diag-lbl-result" x="465" y="10" class="diag-lbl diag-result" text-anchor="middle" style="display:none">size</text>
       </svg>
     </div>
 
@@ -200,7 +199,7 @@
         <div class="fact" title="Bearing: the compass direction at the top of the map"><dt>Bearing</dt><dd id="view-bearing">—</dd></div>
         <div class="fact" title="Tilt from straight down"><dt>Tilt</dt><dd id="view-tilt">—</dd></div>
       </dl>
-      <input type="text" id="coord-input" placeholder="paste lat, lng to place a point" autocomplete="off" spellcheck="false" aria-label="Coordinates">
+      <input type="text" id="coord-input" placeholder="Paste coordinates or a map link (Ctrl+V works anywhere)" autocomplete="off" spellcheck="false" aria-label="Coordinates or map link" title="52.52, 13.405 · 52°31'12&quot;N 13°24'18&quot;E · Google / OSM / Bing / Apple links · Enter places the point">
     </section>
    </div>
   </div>
@@ -211,8 +210,8 @@
   <div id="photo-panel">
 
     <div id="image-container">
-      <canvas id="image-canvas"></canvas>
-      <div id="drop-overlay">
+      <canvas id="image-canvas" role="img" aria-label="Photo: click both ends of the object to mark it"></canvas>
+      <div id="drop-overlay" role="button" tabindex="0" aria-label="Add a photo: drop, paste or browse">
         <div class="drop-inner">
           <div class="drop-icon">
           <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -225,11 +224,11 @@
             <polygon points="10,73 10,27 50,4 90,27 90,73 50,96" fill="none" stroke="#e63946" stroke-width="5"/>
           </svg>
         </div>
-          <div class="drop-msg">Drop a photo here<br><span>or click to browse</span></div>
+          <div class="drop-msg">Drop or paste a photo here<br><span>or click to browse · Ctrl+V pastes an image or coordinates</span></div>
           <button type="button" class="demo-btn" id="btn-demo" title="Load a demo photo to measure">Try the demo</button>
         </div>
       </div>
-      <input type="file" id="file-input" accept="image/*">
+      <input type="file" id="file-input" accept="image/*" aria-label="Choose a photo">
       <!-- Photo tools, top left on the photo (as the map's buttons on the map) -->
       <div class="canvas-tools">
         <button type="button" class="canvas-btn" id="btn-reset-marks" title="Reset the marks (R)" aria-label="Reset the marks" disabled>
@@ -238,14 +237,15 @@
       </div>
       <!-- Step guide (updateGuide in script.js): the steps as icons, the current one lit; the hint says what to do next -->
       <div id="guide"></div>
-      <div id="photo-hint"><span class="step-hint" id="image-hint"></span></div>
+      <div id="photo-hint" aria-live="polite"><span class="step-hint" id="image-hint"></span></div>
     </div>
   </div>
 
   <!-- ═══ DIVIDER ═══ -->
   <div id="pane-splitter" role="separator" aria-orientation="vertical" aria-label="Resize photo and map" tabindex="0"
        title="Drag to resize · double-click to reset to 60:40 · arrow keys when focused">
-    <button type="button" id="btn-map-collapse" class="splitter-chevron" aria-label="Hide map" title="Hide map">›</button>
+    <button type="button" id="btn-photo-collapse" class="splitter-chevron chevron-photo" aria-label="Hide photo" title="Hide photo">‹</button>
+    <button type="button" id="btn-map-collapse" class="splitter-chevron chevron-map" aria-label="Hide map" title="Hide map">›</button>
   </div>
 
   <!-- ═══ RIGHT: MAP PANEL ═══ -->
@@ -253,9 +253,9 @@
 
     <!-- Map -->
     <div id="map-section">
-      <div id="map-container"></div>
+      <div id="map-container" role="application" aria-label="Map"></div>
       <!-- The map's next step or what it measured (updateMapHint in script.js), like the photo's hint -->
-      <div id="map-hint"><span class="step-hint" id="map-hint-text"></span></div>
+      <div id="map-hint" aria-live="polite"><span class="step-hint" id="map-hint-text"></span></div>
     </div>
 
   </div>
@@ -279,44 +279,47 @@
 </div>
 
 <!-- Help overlay -->
-<div id="help-card" style="display:none">
+<div id="help-card" style="display:none" role="dialog" aria-modal="true" aria-labelledby="help-title">
   <div class="help-inner">
     <div class="help-header">
-      <span>How to use <span class="brand-accent">Silicon</span>Aperture</span>
+      <span id="help-title">How to use <span class="brand-accent">Silicon</span>Aperture</span>
       <button id="btn-help-close" class="icon-btn" aria-label="Close help">✕</button>
     </div>
     <ol class="help-steps">
-      <li>Drop a photo onto the left panel.</li>
-      <li>If the image contains EXIF metadata, camera model, sensor and focal length are detected automatically. Otherwise select your camera from the dropdown or enter sensor dimensions and focal length manually.</li>
-      <li>Click two points on the photo to mark the object's extent. The pixel span fills in.</li>
-      <li>Enter the distance to the object in meters, or click two points on the satellite map to measure it.</li>
-      <li>The real-world size appears as soon as all four inputs are valid.</li>
+      <li>Drop, paste or browse a photo (or try the demo).</li>
+      <li>Pick the camera: EXIF fills it in, or choose a preset or "Unknown".</li>
+      <li>Click both ends of the object on the photo.</li>
+      <li>Type the distance, or click camera then object on the map.</li>
+      <li>Read the size. <strong>Solve for → Distance</strong> works it backwards and draws a ring on the map.</li>
     </ol>
-    <p class="help-formula-note">Flip the <strong>Solve for</strong> toggle to <strong>Distance</strong> to work it the other way: enter an object's known real-world size and the tool returns the distance to it, then click the object on the satellite map to draw a ring of possible camera positions.</p>
-    <div class="help-formulas">
-      <div class="help-formula" style="text-align:center">
-        <div class="help-formula-label">Solve for size</div>
-        <code>size = D · √( (Δx·p)² + (Δy·p)² ) / f</code>
+    <details class="help-more">
+      <summary>How it works</summary>
+      <div class="help-formulas">
+        <div class="help-formula">
+          <div class="help-formula-label">Solve for size</div>
+          <code>size = D · √( (Δx·p)² + (Δy·p)² ) / f</code>
+        </div>
+        <div class="help-formula">
+          <div class="help-formula-label">Solve for distance</div>
+          <code>D = size · f / √( (Δx·p)² + (Δy·p)² )</code>
+        </div>
       </div>
-      <div class="help-formula" style="text-align:center">
-        <div class="help-formula-label">Solve for distance</div>
-        <code>D = size · f / √( (Δx·p)² + (Δy·p)² )</code>
-      </div>
-    </div>
-    <table class="help-legend">
-      <tr><td>D</td><td>distance to object</td><td>f</td><td>focal length</td></tr>
-      <tr><td>Δx, Δy</td><td>pixel span per axis</td><td>p</td><td>pixel size on the sensor</td></tr>
-    </table>
-    <p class="help-formula-note">The pixel size comes from the sensor size and the photo's pixel count. The sensor's long side lies along the photo's long side, so portrait photos and crops (16:9, 1:1) work too. When the photo's EXIF gives a 35 mm equivalent that does not fit the camera database's main camera (a telephoto or ultrawide lens, or a digital zoom), the sensor size is taken from the EXIF instead. Works for marks at any angle.<br><br>Accurate results require the object to be <strong>perpendicular to the camera axis</strong>. If the surface is angled, the apparent extent seen by the lens no longer maps linearly to the true physical size, and the result will be inaccurate. <strong>D</strong> is the distance along the camera's axis: a distance measured on the map is along the ground, which is close to it for an object near the middle of the photo and at about the camera's height.<br><br>A photo with GPS in its EXIF flies the map there, so the map tiles for that place are fetched from the tile server.</p>
+      <table class="help-legend">
+        <tr><td>D</td><td>distance to object</td><td>f</td><td>focal length</td></tr>
+        <tr><td>Δx, Δy</td><td>pixel span per axis</td><td>p</td><td>pixel size on the sensor</td></tr>
+      </table>
+      <p class="help-formula-note">Accurate only when the object faces the camera: an angled surface is foreshortened. A distance from the map is along the ground, close to the needed distance along the camera's axis when the object is near the middle of the photo. Full method, limits and the unknown-camera range: <a href="https://github.com/kluter/SiliconAperture/blob/main/docs/method.md" target="_blank" rel="noopener noreferrer">docs/method.md</a> · every control: <a href="https://github.com/kluter/SiliconAperture/blob/main/docs/controls.md" target="_blank" rel="noopener noreferrer">docs/controls.md</a> · privacy: <a href="https://github.com/kluter/SiliconAperture/blob/main/docs/privacy.md" target="_blank" rel="noopener noreferrer">docs/privacy.md</a></p>
+    </details>
     <div class="help-shortcuts">
       <kbd>R</kbd><span>Reset marks</span>
-      <kbd>N</kbd><span>New image</span>
+      <kbd>N</kbd><span>New photo tab</span>
+      <kbd>Ctrl+V</kbd><span>Paste a photo or coordinates</span>
       <kbd>Esc</kbd><span>Close help</span>
     </div>
   </div>
 </div>
 
-<div id="toast-container"></div>
+<div id="toast-container" role="status" aria-live="polite"></div>
 
 <script type="module" src="js/maplibre-global.js"></script>
 <script src="vendor/exifr/full.umd.js"></script><!-- exifr 7.1.3, bundled: no third-party script -->

@@ -51,9 +51,9 @@ The pinhole camera model relates image pixels to real-world distances through si
 
 By similar triangles, a span `s` on the sensor, `f` behind the pinhole, is a span `D · s / f` at distance `D`. Each axis is converted with the pixel size, then the two components are combined with Pythagoras. This means the line you draw on the photo can be at any angle (horizontal, vertical, or diagonal), and the result is always the true Euclidean length, not its projection onto one axis.
 
-The pixel size follows the photo, not a fixed sensor orientation: the sensor's long side lies along the photo's long side, so portrait photos work, and a photo cropped to another aspect (16:9, 1:1) still fills the sensor along one side. When the EXIF holds both the focal length and the 35 mm equivalent, and they do not fit the camera database's main camera (a telephoto or ultrawide lens, or a digital zoom), the sensor size is derived from the EXIF instead: `sensor diagonal = f × 43.27 mm ÷ f₃₅`.
+Portrait photos, crops, telephoto and ultrawide shots, and photos from an unknown camera (a 24–35 mm range) are all handled. How, and the limits of the method: **[docs/method.md](docs/method.md)**.
 
-Accurate results require the object to be **perpendicular to the camera axis**. If the surface is angled toward or away from the lens, the apparent extent seen by the sensor no longer maps linearly to the true physical size, and the measurement will be off.
+> Accurate results require the object to be **perpendicular to the camera axis**. If the surface is angled toward or away from the lens, the apparent extent seen by the sensor no longer maps linearly to the true physical size, and the measurement will be off.
 
 ---
 
@@ -102,32 +102,12 @@ Some entries carry no marker: interchangeable-lens bodies (`focal_length: null`)
 
 ## How to use
 
-1. **Drop a photo** onto the left panel (or click to browse).
-2. **Select your camera** from the dropdown. If the image has EXIF metadata, the camera model, sensor dimensions, and focal length are filled in automatically. Otherwise pick from the list or enter sensor dimensions and focal length manually.
-3. **Mark the object's extent** by clicking two points on the photo. The pixel span is calculated automatically. The line can be at any angle.
-4. **Enter the distance** to the object in metres, or click two points on the satellite map to measure it.
+1. **Drop, paste or browse a photo**, or try the demo. Several photos open in tabs, and a refresh keeps them.
+2. **Pick the camera.** EXIF fills it in; otherwise choose a model, a preset (phone main, ultrawide, telephoto, APS-C, full frame) or **Unknown**.
+3. **Mark the object** by clicking both ends on the photo. The line can be at any angle.
+4. **Enter the distance** in metres, or click the camera's and the object's positions on the map.
 
-The result appears as soon as all four inputs are valid.
-
-### Keyboard shortcuts
-
-| Key | Action |
-|-----|--------|
-| `R` | Reset marks |
-| `N` | New image |
-| `Esc` | Close help |
-
----
-
-## Accuracy
-
-The formula assumes a standard pinhole camera. Real lenses introduce distortion, but for moderate focal lengths (above ~24 mm equivalent) on well-corrected optics the error is small. The larger practical sources of error are:
-
-- **Object not perpendicular to the camera axis.** A surface angled toward or away from the lens has its apparent extent foreshortened or expanded. The tool cannot detect or correct for this.
-- **Sensor dimensions.** The database draws from manufacturer specs, DXOMark, and imaging-resource.com. Values marked approximate may differ from the production unit. For precision work, verify against the camera's service documentation.
-- **EXIF focal length.** This is the physical focal length at the time of capture. Zoom lenses report their actual position. Cropped or binned images may carry the full-sensor focal length against a resized pixel grid. Verify the image dimensions match the sensor's native resolution.
-- **Distance uncertainty.** The result scales linearly with `D`. A 5% distance error produces a 5% size error.
-- **Distance from the map.** The formula wants the distance along the camera's axis. A distance clicked on the map is along the ground, which is close to it when the object is near the middle of the photo and at about the camera's height. For an object near the edge of a wide-angle photo, or far above or below the camera, the map distance is too long.
+The result appears as soon as everything is in; the pinhole diagram above the map shows what is still missing. Every control, key and coordinate format: **[docs/controls.md](docs/controls.md)**.
 
 ---
 
@@ -145,26 +125,7 @@ python3 -m http.server
 
 ## Security & Privacy
 
-Your photo never leaves your browser. It is drawn into a canvas and its EXIF is read in memory: no upload, no server. All EXIF text is written via `textContent`, so a file with crafted metadata cannot inject anything into the page.
-
-Both libraries are bundled in `vendor/`, so the only outbound requests are map tiles from public tile servers (Esri, OpenStreetMap). A Content Security Policy in `index.html` allows scripts from the site itself only, and network requests to those tile servers only.
-
-```javascript
-// Every network request SiliconAperture makes:
-// GET .../tile/{z}/{y}/{x}                (map tiles)
-// No image data, no coordinates, nothing else.
-```
-
-**Note on map tiles:** tile requests encode the area you are viewing. A tile server can infer what location you are measuring. When a photo carries GPS in its EXIF, the map flies there by itself, so the tile server sees the area where the photo was taken. Use a VPN if that matters, or strip the GPS from the photo first.
-
-### Dependencies
-
-| Library | Purpose | Loaded from |
-|---------|---------|-------------|
-| [MapLibre GL JS](https://maplibre.org/) 6.19 | Map rendering (globe) | `vendor/maplibre-gl/` |
-| [exifr](https://github.com/MikeKovarik/exifr) 7.1.3 | EXIF metadata parsing | `vendor/exifr/` |
-
-This tool was built with AI assistance. The code is plain, unminified JavaScript - read it directly in `js/script.js`.
+Your photo never leaves your browser: no upload, no server. Both libraries are bundled, and the only network requests are map tiles. Your work is autosaved in the browser (IndexedDB) so a refresh keeps it. Every request, every stored value and all caveats: **[docs/privacy.md](docs/privacy.md)**.
 
 ---
 
