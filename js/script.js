@@ -111,7 +111,7 @@ let exifGPS      = null;
 let loadSeq      = 0;      // bumped per photo, so a late EXIF read of an earlier photo is dropped
 let autosaveDb = null, autosaveTimer = null, autosaveReady = false, autosaveWarned = false;   // AUTOSAVE below
 let autosaveOwner = !navigator.locks;
-let autosaveOn = (() => { try { return localStorage.getItem('sa-autosave') !== '0'; } catch (err) { return true; } })();   // the ☰ switch
+let autosaveOn = (() => { try { return localStorage.getItem('sa-autosave') !== '0'; } catch (err) { return true; } })();   // the header's Autosave switch
 
 const CUSTOM_IDX = CAMERA_DB.findIndex(c => c.brand === '—');
 
@@ -674,6 +674,7 @@ function renameTab(i, nameEl) {
 
 let tabsKey = null;   // what the strip shows now: rebuilt only when that changes
 function renderTabs() {
+  updateAutosaveControls();
   const liveState = resultBar.classList.contains('has-result') ? 'result' : img ? 'loaded' : '';
   const dotOf = (t, i) => i === activeTab ? liveState : t.state?.hasResult ? 'result' : t.file ? 'loaded' : '';
   if (tabs[activeTab]) tabs[activeTab].name = photoName;
@@ -2417,6 +2418,7 @@ function claimAutosave() {
     navigator.locks.request(AUTOSAVE_LOCK, () => {
       autosaveOwner = true;
       if (autosaveReady) { tabs.forEach(autosavePutImage); autosaveWrite(); }
+      updateAutosaveControls();
       return hold();
     }).catch(() => {});
   });
@@ -2532,7 +2534,7 @@ function autosaveClearStore() {
   return autosaveTx('readwrite', store => { store.clear(); }).catch(() => {});
 }
 
-// The ☰ switch (as in TracePoint and ShadowFinder): off deletes the saved copy at once and
+// The Autosave switch (as in TracePoint and ShadowFinder): off deletes the saved copy at once and
 // stops saving; on saves the work there is now. Shared by all browser tabs (localStorage).
 function setAutosave(on) {
   autosaveOn = on;
@@ -2551,6 +2553,7 @@ window.addEventListener('storage', e => {
   autosaveOn = e.newValue !== '0';
   if (!autosaveOn) { clearTimeout(autosaveTimer); autosaveTimer = null; }
   else if (autosaveOwner && autosaveReady) { tabs.forEach(autosavePutImage); autosaveWrite(); }
+  updateAutosaveControls();
 });
 
 // Clear: delete the saved copy and start empty
@@ -2566,54 +2569,21 @@ function clearSaved() {
   });
 }
 
-// The ☰ menu: This browser (autosave, Clear) · Demo. Sections as in ShadowFinder's session menu.
-function renderSessionMenu() {
-  const menu = document.getElementById('session-menu');
-  menu.innerHTML = '';
-  const close = () => openSessionMenu(false);
-  const section = title => {
-    const s = document.createElement('div');
-    s.className = 'panel-title';
-    s.textContent = title;
-    menu.appendChild(s);
-  };
-  section('This browser');
-  const row = document.createElement('div');
-  row.className = 'session-switch';
-  row.title = 'Keep the photos and measurements in this browser so a refresh does not lose them. Off deletes the saved copy.';
-  row.innerHTML = '<label for="sw-autosave">Autosave</label><span class="session-row-end">' +
-    `<button type="button" class="btn-clear-saved" ${autosaveOn && autosaveOwner && tabs.some(t => t.file) ? '' : 'disabled'} title="Delete the saved photos and measurements and start empty">Clear</button>` +
-    `<input type="checkbox" id="sw-autosave" class="adjust-switch" role="switch" ${autosaveOn ? 'checked' : ''}></span>`;
-  row.querySelector('input').addEventListener('change', e => { setAutosave(e.target.checked); renderSessionMenu(); });
-  row.querySelector('button').addEventListener('click', () => { close(); clearSaved(); });
-  menu.appendChild(row);
-  if (!autosaveOwner) {
-    const n = document.createElement('div');
-    n.className = 'session-note';
-    n.textContent = 'SiliconAperture is open in another tab: that tab saves, this one starts once it is closed.';
-    menu.appendChild(n);
-  }
-  section('Demo');
-  const demo = document.createElement('div');
-  demo.className = 'session-item';
-  demo.setAttribute('role', 'menuitem');
-  demo.textContent = 'Lake photo with EXIF and GPS';
-  demo.title = 'Load the demo photo; mark both ends of the object, then measure the distance on the map';
-  demo.addEventListener('click', () => { close(); loadDemo(); });
-  menu.appendChild(demo);
+// The header's autosave switch and Clear (right of the photo tabs, before Try the Demo and GitHub).
+// Clear is live only when there is saved work this tab owns.
+function updateAutosaveControls() {
+  const swAutosave = document.getElementById('sw-autosave'), btnClearSaved = document.getElementById('btn-clear-saved');
+  swAutosave.checked = autosaveOn;
+  btnClearSaved.disabled = !(autosaveOn && autosaveOwner && tabs.some(t => t.file));
+  document.getElementById('autosave-ctl').classList.toggle('not-owner', !autosaveOwner);
+  btnClearSaved.title = autosaveOwner
+    ? 'Delete the saved photos and measurements and start empty'
+    : 'SiliconAperture is open in another tab: that tab saves, this one starts once it is closed.';
 }
-
-function openSessionMenu(show) {
-  if (show) renderSessionMenu();
-  document.getElementById('session-menu').style.display = show ? 'block' : 'none';
-  document.getElementById('btn-session').setAttribute('aria-expanded', String(show));
-}
-document.getElementById('btn-session').addEventListener('click', e => {
-  e.stopPropagation();
-  openSessionMenu(document.getElementById('session-menu').style.display === 'none');
-});
-document.addEventListener('click', e => { if (!document.getElementById('session-wrap').contains(e.target)) openSessionMenu(false); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') openSessionMenu(false); });
+document.getElementById('sw-autosave').addEventListener('change', e => { setAutosave(e.target.checked); updateAutosaveControls(); });
+document.getElementById('btn-clear-saved').addEventListener('click', clearSaved);
+document.getElementById('btn-demo-top').addEventListener('click', loadDemo);
+updateAutosaveControls();
 
 // Leaving or hiding the page writes what is still pending
 document.addEventListener('visibilitychange', () => { if (document.hidden && autosaveTimer) autosaveWrite(); });

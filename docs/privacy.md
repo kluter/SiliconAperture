@@ -29,12 +29,12 @@ The right-click menu's *Open in …* entries (Google Maps, Street View, Google E
 | What | Where | Why |
 |---|---|---|
 | Your photos and what you measured on them, the map view and basemap | IndexedDB `siliconaperture` | Autosave: a refresh keeps the work. Closing a tab deletes its copy |
-| Autosave on or off | `localStorage` (`sa-autosave`) | The ☰ switch, shared by all tabs of this browser |
+| Autosave on or off | `localStorage` (`sa-autosave`) | The header's Autosave switch, shared by all tabs of this browser |
 | Photo/map split, photo hidden | `localStorage` (`sa-split`, `sa-hidden-side`) | Layout preferences |
 
 Nothing is stored anywhere else.
 
-**Deleting it:** ☰ → **Clear** deletes the saved photos and measurements and starts empty. Switching **Autosave** off deletes the saved copy and stops saving, for sensitive material. Closing a photo tab deletes that photo. The browser's *clear site data* removes everything, the layout preferences included.
+**Deleting it:** **Clear** (header, next to Autosave) deletes the saved photos and measurements and starts empty. Switching **Autosave** off deletes the saved copy and stops saving, for sensitive material. Closing a photo tab deletes that photo. The browser's *clear site data* removes everything, the layout preferences included.
 
 **How long it lasts:** until deleted. It survives refreshes, hard reloads and browser restarts. The browser may still evict it when the disk runs low (the site does not ask for persistent storage), and Safari deletes it after 7 days without a visit. It is per browser and per address: the live site and a local copy each keep their own.
 

@@ -16,15 +16,15 @@ Each tab is one photo with everything measured on it: marks, camera, the known v
 
 Work is saved in the browser as you go and comes back after a refresh (see [privacy.md](privacy.md)).
 
-## ☰ menu
+## Header, right
 
-At the right end of the bar over the photo (as in ShadowFinder).
+Right of the photo tabs, before the GitHub link and **?**.
 
 | Control | Action |
 |---|---|
 | **Autosave** switch | On (default): photos and measurements are kept in this browser. Off: the saved copy is deleted and nothing is saved |
 | **Clear** | Delete the saved copy and start with one empty tab (asks first) |
-| **Demo** | Open the demo photo |
+| **Try the Demo** | Open the demo photo |
 
 ## Photo
 

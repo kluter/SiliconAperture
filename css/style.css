@@ -1159,35 +1159,18 @@ input.invalid,
 .map-pt:active { cursor: grabbing; }
 .map-pt[data-role="camera"] { background: #111; border-color: #e63946; }
 
-/* ☰ menu at the right end of the photo half of the bar (as in ShadowFinder): autosave, demo */
-.bar-end { display: flex; align-items: flex-start; padding: var(--bar-pad-y) 10px 0 4px; }
-.session-wrap { position: relative; }
-.session-menu {
-  position: absolute; top: calc(100% + 6px); right: 0; z-index: 1000;
-  min-width: 240px; padding: 0 0 6px; overflow: hidden;
-  background: #151515; border: 1px solid #2a2a2a; border-radius: 6px;
-  box-shadow: 0 4px 20px #000c;
-}
-.session-menu .panel-title {
-  padding: 9px 12px 4px; border-top: 1px solid #2a2a2a;
-  font-size: 9px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: #777;
-}
-.session-menu .panel-title:first-child { border-top: none; }
-.session-item {
+/* Header, right: Autosave switch and Clear, a wide gap, then Try the Demo before GitHub and ? */
+.autosave-ctl {
   display: flex; align-items: center; gap: 8px;
-  padding: 7px 12px; font-size: 12px; color: #aaa;
-  cursor: pointer; white-space: nowrap;
+  margin-right: 28px;   /* keeps the browser's saving apart from demo and links */
+  font-size: 11px; color: #888; user-select: none;
 }
-.session-item:hover { background: #222; color: #fff; }
-.session-switch {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 6px 12px; font-size: 12px; color: #aaa;
-}
-.session-switch label { cursor: pointer; }
-.session-switch label:hover { color: #fff; }
-.session-row-end { display: flex; align-items: center; gap: 10px; }
-.session-note { padding: 0 12px 7px; max-width: 240px; font-size: 11px; line-height: 1.35; color: #777; white-space: normal; }
-.btn-clear-saved { font-size: 11px; padding: 4px 10px; height: auto; }
+.autosave-ctl label { cursor: pointer; }
+.autosave-ctl label:hover { color: #ddd; }
+.autosave-ctl.not-owner label { color: #555; }
+.btn-demo-top { height: 28px; padding: 0 12px; font-size: 11px; background: transparent; color: #888; border-color: #2a2a2a; }
+.btn-demo-top:hover:not(:disabled) { background: #1e1e1e; color: #ddd; border-color: #383838; }
+.btn-clear-saved { font-size: 11px; padding: 0 10px; height: 24px; }
 .btn-clear-saved:not(:disabled):hover { color: #ff5555; border-color: #ff5555; }
 /* On/off switch, as in ShadowFinder (neutral here: red is for the measurement) */
 .adjust-switch {
