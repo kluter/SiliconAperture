@@ -1130,12 +1130,14 @@ function syncGpsButton() { if (gpsBtn) gpsBtn.disabled = !exifGPS; }
 // 512·2^z / (2π·cos lat) px; seen from the camera its edge is at cam·tan(asin(R / (cam + R))).
 function globeFitZoom(lat = map.getCenter().lat) {
   const H = map.getContainer().clientHeight, W = map.getContainer().clientWidth;
+  if (!H || !W) return map.getZoom();   // map hidden (or the app, below the minimum window): no size to fit
   const target = Math.max(80, Math.min(H - 80, W - 80) / 2);
   const cam = 0.5 * H / Math.tan(CAMERA_FOV / 2 * Math.PI / 180);
   const t = target / cam, k = t / Math.sqrt(1 + t * t);
   const R = k * cam / (1 - k);
   const cosLat = Math.cos(Math.min(89, Math.abs(lat)) * Math.PI / 180);
-  return Math.log2(2 * Math.PI * R * cosLat / 512);
+  const z = Math.log2(2 * Math.PI * R * cosLat / 512);
+  return isFinite(z) ? z : map.getZoom();
 }
 
 // Back to the whole globe, upright, around the current longitude
@@ -1200,6 +1202,7 @@ function runSpin() {
   const step = now => {
     const dt = Math.min(0.1, (now - last) / 1000);   // no jump after the tab was in the background
     last = now;
+    const c = map.getCenter();
     // zoomed in, the turn slows with the zoom so the surface does not race past
     const speed = SPIN_DEG_PER_SEC * Math.min(1, 2 ** (globeFitZoom(c.lat) - map.getZoom()));
     map.jumpTo({ center: [((c.lng - speed * dt + 540) % 360) - 180, c.lat] }, { spin: true });

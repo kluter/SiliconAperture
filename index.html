@@ -54,7 +54,7 @@
         <span class="slot-title">Camera</span>
         <div class="lamps">
           <div class="exif-wrap">
-            <button type="button" id="btn-exif" aria-label="Photo metadata"><span id="src-exif" class="lamp lamp-exif">EXIF</span></button>
+            <button type="button" id="btn-exif" aria-label="Photo metadata"><span id="src-exif" class="lamp lamp-exif" title="Photo metadata (EXIF)">EXIF</span></button>
             <div id="exif-card" role="tooltip">
               <div class="exif-row"><span class="exif-lbl">Camera</span><span class="exif-val" id="exif-camera-val">—</span></div>
               <div class="exif-row"><span class="exif-lbl">Focal length</span><span class="exif-val" id="exif-focal-val">—</span><span class="exif-sub" id="exif-focal-eq"></span></div>
@@ -257,6 +257,21 @@
   </div>
 
   </div><!-- /workspace -->
+</div>
+
+<!-- Shown instead of the app when the window is too small to measure in (style.css, RESPONSIVE) -->
+<div id="small-screen" role="note">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs><clipPath id="ss-hex-clip"><polygon points="10,73 10,27 50,4 90,27 90,73 50,96"/></clipPath></defs>
+    <polygon points="10,73 10,27 50,4 90,27 90,73 50,96" fill="#130608"/>
+    <g clip-path="url(#ss-hex-clip)">
+      <polygon points="50,62 27,100 73,100" fill="#e63946"/>
+      <polygon points="50,62 5,-10 95,-10" fill="#e63946"/>
+    </g>
+    <polygon points="10,73 10,27 50,4 90,27 90,73 50,96" fill="none" stroke="#e63946" stroke-width="5"/>
+  </svg>
+  <p><span class="brand-accent">Silicon</span>Aperture needs a bigger window.</p>
+  <p class="small-screen-sub">Photo, map and measurements sit side by side. Widen the window, or open it on a desktop.</p>
 </div>
 
 <!-- Help overlay -->

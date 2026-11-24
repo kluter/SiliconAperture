@@ -68,7 +68,7 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 
 #photo-panel {
   flex: 0 1 var(--split);
-  min-width: 360px;
+  min-width: 560px;   /* camera + measure slots above it stay usable; same as .bar-photo */
   display: flex;
   flex-direction: column;
 }
@@ -482,6 +482,8 @@ a.icon-btn { text-decoration: none; }
    over the map the diagram and the map controls.
    The diagram sets the height: change --diagram-h and the whole bar follows. */
 #input-bar {
+  position: relative;
+  z-index: 20;   /* above the photo overlays, so the EXIF card hanging below shows */
   --diagram-h: 100px;
   --bar-pad-y: 9px;
   flex-shrink: 0;
@@ -492,9 +494,9 @@ a.icon-btn { text-decoration: none; }
   background: #0d0d0d;
 }
 /* Same flex values as #photo-panel / #pane-splitter / #map-panel, so the halves line up */
-.bar-photo { flex: 0 1 var(--split); min-width: 360px; display: flex; overflow: hidden; }
+.bar-photo { flex: 0 1 var(--split); min-width: 560px; display: flex; }   /* no overflow clip: the EXIF card hangs below */
 .bar-split { flex: 0 0 7px; background: #0d0d0d; border-left: 1px solid #2a2a2a; border-right: 1px solid #2a2a2a; }
-.bar-map   { flex: 1 1 0; min-width: 260px; display: flex; overflow: hidden; }
+.bar-map   { flex: 1 1 0; min-width: 260px; display: flex; }
 /* Map hidden: the photo half takes the room, the diagram stays at the right end */
 #app.map-collapsed .bar-photo { flex: 1 1 0; }
 #app.map-collapsed .bar-split,
@@ -1079,3 +1081,69 @@ kbd {
   to   { transform: rotate(360deg); }
 }
 
+
+/* ─── RESPONSIVE ────────────────────────────────────────────── */
+/* Made for a desktop window. As the window (or one half of it) narrows, each half of the bar
+   gives up detail in order of importance, measured by its own width (container queries), so
+   dragging the divider has the same effect as resizing the window:
+     photo half   1. Optics goes (nice to know, not needed to measure)
+                  2. Camera slot and lamps get compact, solve-for buttons narrower
+     map half     1. Zoom / bearing / tilt go
+                  2. The diagram goes, the map controls stay
+   Short windows get a slimmer header and bar. Below 960 × 560 a notice replaces the app. */
+.bar-photo { container: bar-photo / inline-size; }
+.bar-map   { container: bar-map / inline-size; }
+/* Map hidden: the bar's map half is just the diagram at its own width, so no container there */
+#app.map-collapsed .bar-map { container-type: normal; }
+
+@container bar-photo (max-width: 1020px) {
+  .slot-optics { display: none; }
+}
+@container bar-photo (max-width: 740px) {
+  .slot-camera  { flex-basis: 250px; min-width: 230px; }
+  .slot-measure { min-width: 0; }
+  .bar-slot     { padding-left: 12px; padding-right: 12px; }
+  .lamps        { gap: 3px; }
+  .lamp         { padding: 0 6px; gap: 4px; font-size: 9px; letter-spacing: 0.3px; }
+  .measure-row  { gap: 8px; }
+  .measure-solve { padding-left: 8px; }
+  .measure-solve .solve-btn { width: 68px; font-size: 9px; padding: 0; }
+  #result-value { font-size: 18px; }
+}
+
+@container bar-map (max-width: 680px) {
+  .map-facts { display: none; }
+  .slot-map  { flex-basis: 180px; min-width: 170px; justify-content: flex-start; gap: 12px; }
+}
+@container bar-map (max-width: 480px) {
+  #diagram-wrap { display: none; }
+  .slot-map     { border-left: none; }
+}
+
+/* Short windows: slimmer header and bar, more room for photo and map */
+@media (max-height: 800px) {
+  #app-header { height: 44px; }
+  #input-bar  { --diagram-h: 88px; --bar-pad-y: 7px; }
+  .facts      { row-gap: 3px; }
+}
+
+/* Too small to measure in: a calm notice instead of a squeezed app */
+#small-screen { display: none; }
+@media (max-width: 959px), (max-height: 559px) {
+  #app, #help-card, #toast-container { display: none !important; }
+  #small-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+    background: #0a0a0a;
+  }
+  #small-screen svg { width: 56px; height: 56px; margin-bottom: 8px; opacity: 0.9; }
+  #small-screen p { font-size: 15px; font-weight: 600; color: #e0e0e0; }
+  #small-screen .small-screen-sub { max-width: 340px; font-size: 12px; font-weight: 400; color: #777; line-height: 1.6; }
+}
