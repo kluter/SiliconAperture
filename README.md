@@ -53,7 +53,7 @@ Portrait photos, crops, telephoto and ultrawide shots, and unknown cameras, and 
 
 ## How to use
 
-1. **Add a photo:** drop it, paste it with `Ctrl+V`, or click to browse. Several photos open in tabs, and a refresh keeps them.
+1. **Add a photo:** drop it, paste it with `Ctrl+V`, or click **Browse**. Several photos open in tabs, and a refresh keeps them.
 2. **Pick the camera:** EXIF fills it in; otherwise choose a model, a preset (phone main, ultrawide, telephoto, APS-C, full frame) or **Unknown**.
 3. **Mark the object:** click both of its ends on the photo.
 4. **Give the distance:** type it, or click where the camera stood and then the object on the map.

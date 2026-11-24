@@ -468,16 +468,10 @@ window.addEventListener('dragover', e => {
 });
 window.addEventListener('drop', e => { if (isFileDrag(e)) e.preventDefault(); });
 
-overlay.addEventListener('click', () => fileInput.click());
-overlay.addEventListener('keydown', e => {
-  if (e.target === overlay && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); fileInput.click(); }
-});
+// Browse opens the file picker (the screen itself is not a click target, as in TracePoint)
+document.getElementById('btn-browse').addEventListener('click', () => fileInput.click());
 
-/* ─── PHOTO TABS ─────────────────────────────────────────────── */
-// The header's tab strip, styled as in ShadowFinder and TracePoint. For now there is one photo:
-// its tab names the file, the dot turns red with a result, × and "+" both start over with a new
-// photo. Several photos side by side is the "Image tabs" issue.
-let photoName = null;
+let photoName = null;   // the shown tab's name
 
 /* ─── PHOTO TABS ─────────────────────────────────────────────── */
 // Several photos side by side (ported from TracePoint's sessions). Each tab keeps its photo
@@ -745,10 +739,7 @@ function loadDemo() {
     })
     .catch(() => showToast('Could not load the demo image.'));
 }
-document.getElementById('btn-demo').addEventListener('click', e => {
-  e.stopPropagation();   // not the overlay's browse click
-  loadDemo();
-});
+document.getElementById('btn-demo').addEventListener('click', loadDemo);
 fileInput.addEventListener('change', () => {
   if (fileInput.files[0]) loadImage(fileInput.files[0]);
   fileInput.value = '';

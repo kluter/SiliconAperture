@@ -349,7 +349,7 @@ a.icon-btn { text-decoration: none; }
   align-items: center;
   justify-content: center;
   background: #111;
-  cursor: pointer;
+  cursor: default;   /* nothing to click but the buttons */
   z-index: 10;
   transition: background 0.15s;
 }
@@ -370,17 +370,17 @@ a.icon-btn { text-decoration: none; }
   color: #4a4a4a;
   line-height: 2;
 }
-.drop-msg span { font-size: 11px; color: #333; }
-/* Try the demo: under the drop message, as in ShadowFinder and TracePoint */
-.demo-btn {
-  margin-top: 16px;
+/* Browse or Try the demo, under the message, as in TracePoint */
+.drop-actions { margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.drop-btn {
   height: 28px;
   padding: 0 14px;
   font-size: 11px;
   color: #999;
   pointer-events: auto;
 }
-.demo-btn:hover:not(:disabled) { background: #222; border-color: #555; color: #eee; }
+.drop-btn:hover:not(:disabled) { background: #222; border-color: #555; color: #eee; }
+.drop-or { font-size: 11px; color: #555; }
 #file-input { display: none; }
 
 /* ─── EXIF CHIP + CARD ──────────────────────────────────────── */

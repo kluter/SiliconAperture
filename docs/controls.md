@@ -20,7 +20,7 @@ Work is saved in the browser as you go and comes back after a refresh (see [priv
 
 | Input | Action |
 |---|---|
-| Drop, `Ctrl+V` or click | Open a photo. With a photo already open, it opens in a new tab |
+| Drop, `Ctrl+V` or **Browse** | Open a photo. With a photo already open, it opens in a new tab |
 | **Try the demo** | Open the demo photo with its EXIF (camera, focal length, GPS) |
 | Click | Place mark A, then B. The span fills in |
 | Drag a mark | Move it; span and result follow |

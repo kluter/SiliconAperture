@@ -31,8 +31,7 @@
             </g>
             <polygon points="10,73 10,27 50,4 90,27 90,73 50,96" fill="none" stroke="#e63946" stroke-width="5"/>
           </svg><span><span class="brand-accent">Silicon</span>Aperture</span></div>
-      <!-- Photo tabs (renderTabs in script.js). One photo for now; "+" starts a new one.
-           Proper tabs, several photos side by side, are the "Image tabs" issue. -->
+      <!-- Photo tabs, one per photo (renderTabs in script.js) -->
       <div class="photo-tabs" id="photo-tabs" role="tablist" aria-label="Photos"></div>
       <div class="toolbar">
         <a id="github-link" class="icon-btn" href="https://github.com/kluter/SiliconAperture" target="_blank" rel="noopener noreferrer" title="View source on GitHub" aria-label="View source on GitHub">
@@ -210,7 +209,7 @@
 
     <div id="image-container">
       <canvas id="image-canvas" role="img" aria-label="Photo: click both ends of the object to mark it"></canvas>
-      <div id="drop-overlay" role="button" tabindex="0" aria-label="Add a photo: drop, paste or browse">
+      <div id="drop-overlay" role="region" aria-label="Add a photo">
         <div class="drop-inner">
           <div class="drop-icon">
           <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -223,8 +222,12 @@
             <polygon points="10,73 10,27 50,4 90,27 90,73 50,96" fill="none" stroke="#e63946" stroke-width="5"/>
           </svg>
         </div>
-          <div class="drop-msg">Drop or paste a photo here<br><span>or click to browse · Ctrl+V pastes an image or coordinates</span></div>
-          <button type="button" class="demo-btn" id="btn-demo" title="Load a demo photo to measure">Try the demo</button>
+          <div class="drop-msg">Drop / Paste a photo here</div>
+          <div class="drop-actions">
+            <button type="button" class="drop-btn" id="btn-browse">Browse</button>
+            <span class="drop-or">or</span>
+            <button type="button" class="drop-btn demo-btn" id="btn-demo" title="Load a demo photo to measure">Try the demo</button>
+          </div>
         </div>
       </div>
       <input type="file" id="file-input" accept="image/*" aria-label="Choose a photo">
