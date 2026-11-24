@@ -1643,7 +1643,8 @@ let gpsBtn = null;
 function flyToGPS() {
   if (!exifGPS || !map) return;
   stopSpin();
-  map.flyTo({ center: [exifGPS.lng, exifGPS.lat], zoom: 16, bearing: 0, pitch: 0, duration: 3500, essential: true });
+  const zoom = tabs[activeTab]?.file?.name === DEMO_FILE ? 14 : 16;   // the demo: wider, to see the lake
+  map.flyTo({ center: [exifGPS.lng, exifGPS.lat], zoom, bearing: 0, pitch: 0, duration: 3500, essential: true });
 }
 function syncGpsButton() { if (gpsBtn) gpsBtn.disabled = !exifGPS; }
 
