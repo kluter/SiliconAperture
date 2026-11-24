@@ -50,31 +50,84 @@ select { cursor: pointer; }
 select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 
 /* ─── APP LAYOUT ────────────────────────────────────────────── */
+/* Header across the full width; below it the workspace: photo | divider | map.
+   --split is the photo panel's share of the width (set and remembered by script.js). */
 #app {
+  --split: 60%;   /* the photo half; the bar and the workspace both divide here */
   display: flex;
+  flex-direction: column;
   height: 100vh;
   overflow: hidden;
 }
 
-#image-panel {
+#workspace {
   flex: 1;
-  min-width: 0;
+  min-height: 0;
   display: flex;
-  flex-direction: column;
-  border-right: 1px solid #2a2a2a;
 }
 
-#controls-panel {
-  width: 520px;
-  flex-shrink: 0;
+#photo-panel {
+  flex: 0 1 var(--split);
+  min-width: 360px;
+  display: flex;
+  flex-direction: column;
+}
+
+#map-panel {
+  flex: 1 1 0;
+  min-width: 260px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-/* ─── PANEL HEADER ──────────────────────────────────────────── */
-.panel-header {
-  height: 60px;
+/* Map hidden: the photo takes the whole width */
+#workspace.map-collapsed #photo-panel { flex: 1 1 0; }
+#workspace.map-collapsed #map-panel   { display: none; }
+
+/* ─── DIVIDER ───────────────────────────────────────────────── */
+#pane-splitter {
+  flex: 0 0 7px;
+  position: relative;
+  cursor: col-resize;
+  background: #0d0d0d;
+  border-left: 1px solid #2a2a2a;
+  border-right: 1px solid #2a2a2a;
+  touch-action: none;
+  outline: none;
+}
+#pane-splitter:hover,
+#pane-splitter.dragging,
+#pane-splitter:focus-visible { background: #1e1e1e; }
+#workspace.map-collapsed #pane-splitter { cursor: default; }
+
+.splitter-chevron {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 36px;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1;
+  color: #666;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 3px;
+  cursor: pointer;
+  z-index: 2;
+}
+.splitter-chevron:hover:not(:disabled) { color: #ccc; background: #1e1e1e; }
+
+/* While dragging, keep the map and canvas from swallowing pointer events */
+body.splitter-dragging { cursor: col-resize; user-select: none; }
+body.splitter-dragging #map-container,
+body.splitter-dragging #image-canvas { pointer-events: none; }
+
+/* ─── HEADER ────────────────────────────────────────────────── */
+#app-header {
+  height: 52px;
   padding: 0 16px;
   display: flex;
   align-items: center;
@@ -97,15 +150,76 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 .brand-accent { color: #e63946; }
 .brand-logo { width: 22px; height: 22px; flex-shrink: 0; }
 
-.panel-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #666;
-  letter-spacing: 0.3px;
-  user-select: none;
-}
-
 .toolbar { display: flex; align-items: center; gap: 8px; }
+
+/* Photo tabs, between the brand and the toolbar (renderTabs in script.js), as in ShadowFinder */
+.photo-tabs {
+  flex: 1;
+  min-width: 0;
+  margin-left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.photo-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 1 200px;
+  min-width: 80px;
+  height: 28px;
+  padding: 0 4px 0 10px;
+  background: #1a0a0b;
+  border: 1px solid #8a3a40;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #e0e0e0;
+  white-space: nowrap;
+}
+.photo-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.photo-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: #444; }
+.photo-dot.loaded { background: #8a3a40; }
+.photo-dot.result { background: #e63946; box-shadow: 0 0 6px rgba(230, 57, 70, 0.55); }
+.photo-tab-close, .photo-tab-close:hover:not(:disabled) {
+  width: 20px; height: 20px; padding: 0; flex-shrink: 0;
+  background: none; border: none; border-radius: 3px;
+  font-size: 14px; line-height: 1; color: #777;
+}
+.photo-tab-close:hover:not(:disabled) { background: #3a1515; color: #ff5555; }
+/* "+" as in TracePoint: a square button with a drawn plus */
+.photo-tab-add {
+  width: 28px; height: 28px; padding: 0; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: #999;
+}
+.photo-tab-add svg { width: 11px; height: 11px; display: block; }
+
+/* Photo tools on the photo, top left: same box as the map's buttons on the map */
+.canvas-tools {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 11;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.canvas-btn, .canvas-btn:hover:not(:disabled) {
+  width: 29px;
+  height: 29px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  background: #151515;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px #0006;
+}
+.canvas-btn:hover:not(:disabled) { background: #222; color: #e0e0e0; }
+.canvas-btn:disabled { color: #444; opacity: 1; }
+.canvas-btn svg { width: 17px; height: 17px; }
+#drop-overlay:not(.hidden) ~ .canvas-tools { display: none; }   /* nothing to reset before a photo */
 
 .icon-btn {
   background: transparent;
@@ -124,65 +238,71 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 .icon-btn:hover:not(:disabled) { background: #1e1e1e; color: #ccc; border-color: #383838; }
 a.icon-btn { text-decoration: none; }
 
-.header-actions { display: flex; align-items: center; gap: 8px; }
-
-/* ─── STEP BAR ──────────────────────────────────────────────── */
-#step-bar {
-  height: 38px;
-  padding: 0 16px;
+/* ─── STEP GUIDE (as in TracePoint and ShadowFinder) ────────── */
+/* The steps as icons down the right edge of the photo, a rail filling with progress,
+   the current step lit. No looping animation: the lit step holds a steady glow. */
+#guide {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 11;
+  width: 46px;
+  padding: 8px 0;
+  background: rgba(21, 21, 21, 0.85);
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #2a2a2a;
-  background: #0d0d0d;
+}
+.guide-rail { position: absolute; right: 7px; top: 24px; bottom: 24px; width: 2px; background: #333; border-radius: 1px; }
+.guide-rail-fill { width: 100%; height: 0; background: #e63946; border-radius: 1px; transition: height 0.3s; }
+.guide-step, .guide-step:hover:not(:disabled) {
+  position: relative;
+  width: 46px;
+  height: 40px;
   flex-shrink: 0;
-}
-.step-chain {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  cursor: default;
   display: flex;
   align-items: center;
-  gap: 5px;
-  flex: 1;
+  justify-content: center;
+  color: #555;
 }
+.guide-step svg { width: 20px; height: 20px; margin-right: 8px; }
+.guide-step.done, .guide-step.done:hover:not(:disabled) { color: #8a3a40; }
+.guide-step.current, .guide-step.current:hover:not(:disabled) { color: #e63946; cursor: pointer; }
+.guide-step.current svg { filter: drop-shadow(0 0 4px rgba(230, 57, 70, 0.7)); }
 
-.step-node {
+/* Next-step hint, centred at the bottom of the photo */
+#photo-hint, #map-hint {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
   display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
-  border-radius: 20px;
-  border: 1px solid #1e1e1e;
-  font-size: 11px;
-  color: #2e2e2e;
-  white-space: nowrap;
-  user-select: none;
-  transition: color 0.3s, border-color 0.3s, background 0.3s, box-shadow 0.3s;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 11;
 }
-
-.step-node.done {
-  color: #484848;
-  border-color: #2a2a2a;
-}
-
-.step-node.active {
-  color: #e63946;
-  border-color: rgba(230, 57, 70, 0.45);
-  background: rgba(230, 57, 70, 0.08);
-  animation: step-glow 1.8s ease-in-out infinite;
-}
-
-.step-icon { font-size: 9px; font-weight: 700; }
-.step-icon::before       { content: attr(data-n); }
-.step-node.done .step-icon::before { content: '✓'; }
-.step-label { display: none; }
-.step-node.active .step-label { display: inline; }
-
-.step-connector { font-size: 10px; color: #222; flex-shrink: 0; letter-spacing: -1px; }
-.step-val {
+.step-hint {
+  max-width: calc(100% - 140px);
+  padding: 8px 16px;
+  text-align: center;
+  background: rgba(21, 21, 21, 0.85);
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
   font-size: 12px;
-  font-weight: 700;
   color: #e63946;
-  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
 }
+.step-hint:empty { display: none; }
+.step-hint.done { color: #a0dbb8; }
+.step-hint.muted { color: #888; }
 
 /* ─── IMAGE CONTAINER ───────────────────────────────────────── */
 #image-container {
@@ -202,21 +322,6 @@ a.icon-btn { text-decoration: none; }
   display: block;
 }
 
-.zoom-hint {
-  position: absolute;
-  bottom: 10px;
-  left: 12px;
-  font-size: 10px;
-  color: #888;
-  background: rgba(10, 10, 10, 0.72);
-  border: 1px solid #2a2a2a;
-  border-radius: 20px;
-  padding: 4px 11px;
-  letter-spacing: 0.3px;
-  user-select: none;
-  pointer-events: none;
-  z-index: 5;
-}
 
 /* ─── DROP OVERLAY ──────────────────────────────────────────── */
 #drop-overlay {
@@ -249,34 +354,60 @@ a.icon-btn { text-decoration: none; }
   line-height: 2;
 }
 .drop-msg span { font-size: 11px; color: #333; }
+/* Try the demo: under the drop message, as in ShadowFinder and TracePoint */
+.demo-btn {
+  margin-top: 16px;
+  height: 28px;
+  padding: 0 14px;
+  font-size: 11px;
+  color: #999;
+  pointer-events: auto;
+}
+.demo-btn:hover:not(:disabled) { background: #1a0a0b; border-color: #8a3a40; color: #e63946; }
 #file-input { display: none; }
 
-/* ─── EXIF BAR ──────────────────────────────────────────────── */
-#exif-bar {
-  height: 38px;
-  display: flex;
-  border-bottom: 1px solid #2a2a2a;
-  background: #0d0d0d;
-  flex-shrink: 0;
+/* ─── EXIF CHIP + CARD ──────────────────────────────────────── */
+/* The EXIF lamp is the chip: hover or focus shows the photo's metadata.
+   With metadata loaded it gets a dotted underline, a hint that there is something to see. */
+.exif-wrap { position: relative; flex-shrink: 0; display: flex; }
+#btn-exif, #btn-exif:hover:not(:disabled) {
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 11px;
+  cursor: help;
 }
+#btn-exif.has-data .lamp { text-decoration: underline dotted; text-underline-offset: 3px; }
+#btn-exif.has-data .lamp:not(.active) { color: #888; border-color: #383838; }
 
-.exif-cell {
-  flex: 1;
-  min-width: 0;
-  padding: 0 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border-right: 1px solid #1a1a1a;
+#exif-card {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 4000;
+  min-width: 280px;
+  padding: 8px 12px;
+  background: #151515;
+  border: 1px solid #383838;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.75);
 }
-.exif-cell:last-child { border-right: none; }
+.exif-wrap:hover #exif-card,
+.exif-wrap:focus-within #exif-card { display: block; }
 
+.exif-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 3px 0;
+}
 .exif-lbl {
+  flex: 0 0 82px;
   font-size: 9px;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.7px;
-  margin-bottom: 3px;
   user-select: none;
 }
 .exif-val {
@@ -289,7 +420,7 @@ a.icon-btn { text-decoration: none; }
   transition: color 0.2s;
 }
 .exif-val.has-data { color: #ccc; }
-.exif-sub { font-size: 9px; color: #555; margin-top: 1px; }
+.exif-sub { font-size: 9px; color: #555; white-space: nowrap; }
 #exif-gps-val.clickable {
   color: #e63946;
   cursor: pointer;
@@ -299,38 +430,44 @@ a.icon-btn { text-decoration: none; }
 }
 
 /* ─── CAMERA OBSCURA DIAGRAM ────────────────────────────────── */
+/* First thing over the map, on the bar's own background. Its height is the bar's height;
+   its width follows from the drawing's proportions (viewBox 530 × 132). Unlit parts are a
+   mid grey that reads on #0d0d0d; lit parts turn red. */
 #diagram-wrap {
-  padding: 10px 16px 6px;
-  border-bottom: 1px solid #1a1a1a;
-  background: #080808;
-  flex-shrink: 0;
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: var(--bar-pad-y) 14px;
+  display: flex;
+  align-items: center;
 }
 
 #diagram-svg {
   display: block;
-  width: 100%;
-  height: auto;
+  height: var(--diagram-h);
+  width: auto;
+  aspect-ratio: 530 / 132;
+  max-width: 100%;
 }
 
 #diagram-svg .seg {
-  stroke: #333;
+  stroke: #4a4a4a;
   stroke-width: 2;
   stroke-linecap: round;
   fill: none;
   transition: stroke 0.4s ease, opacity 0.4s ease;
 }
 #diagram-svg .seg.dashed   { stroke-dasharray: 5 4; }
-#diagram-svg .seg.ray      { stroke: #2a2a2a; stroke-width: 1; }
-#diagram-svg .seg.dot      { fill: #333; stroke: none; transition: fill 0.4s ease; }
-#diagram-svg .seg.px-mark  { stroke-width: 5; opacity: 0.35; }
+#diagram-svg .seg.ray      { stroke: #383838; stroke-width: 1; }
+#diagram-svg .seg.dot      { fill: #4a4a4a; stroke: none; transition: fill 0.4s ease; }
+#diagram-svg .seg.px-mark  { stroke-width: 5; opacity: 0.4; }
 
 #diagram-svg .seg.lit                { stroke: #e63946; opacity: 1; }
-#diagram-svg .seg.ray.lit            { stroke: #e63946; opacity: 0.25; }
+#diagram-svg .seg.ray.lit            { stroke: #e63946; opacity: 0.35; }
 #diagram-svg .seg.dot.lit            { fill: #e63946; stroke: none; }
 #diagram-svg .seg.px-mark.lit        { stroke: #e63946; opacity: 0.85; }
 
 .diag-lbl {
-  fill: #5a5a5a;
+  fill: #6e6e6e;
   font-size: 13px;
   font-family: system-ui, sans-serif;
   transition: fill 0.4s ease;
@@ -339,20 +476,134 @@ a.icon-btn { text-decoration: none; }
 .diag-lbl.lit  { fill: #e63946; }
 .diag-result   { fill: #e63946; font-weight: 600; }
 
-/* ─── INPUTS SECTION ────────────────────────────────────────── */
-#inputs-section {
+/* ─── INPUT BAR ─────────────────────────────────────────────── */
+/* One solid bar across the full width, split where the workspace is split (--split on #app):
+   over the photo camera · optics · measure (with the result); a strip continuing the divider;
+   over the map the diagram and the map controls.
+   The diagram sets the height: change --diagram-h and the whole bar follows. */
+#input-bar {
+  --diagram-h: 100px;
+  --bar-pad-y: 9px;
   flex-shrink: 0;
-  padding: 12px 14px;
+  height: calc(var(--diagram-h) + 2 * var(--bar-pad-y));
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid #2a2a2a;
+  background: #0d0d0d;
+}
+/* Same flex values as #photo-panel / #pane-splitter / #map-panel, so the halves line up */
+.bar-photo { flex: 0 1 var(--split); min-width: 360px; display: flex; overflow: hidden; }
+.bar-split { flex: 0 0 7px; background: #0d0d0d; border-left: 1px solid #2a2a2a; border-right: 1px solid #2a2a2a; }
+.bar-map   { flex: 1 1 0; min-width: 260px; display: flex; overflow: hidden; }
+/* Map hidden: the photo half takes the room, the diagram stays at the right end */
+#app.map-collapsed .bar-photo { flex: 1 1 0; }
+#app.map-collapsed .bar-split,
+#app.map-collapsed .slot-map  { display: none; }
+#app.map-collapsed .bar-map   { flex: 0 0 auto; min-width: 0; border-left: 1px solid #1e1e1e; }
+
+.bar-slot {
+  padding: var(--bar-pad-y) 16px;
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  justify-content: space-between;
+  min-width: 0;
+}
+.bar-slot + .bar-slot { border-left: 1px solid #1e1e1e; }
+/* Optics gives way first, so the measure slot (with the result) fills the photo half */
+.slot-camera  { flex: 0 1 340px; min-width: 260px; }
+.slot-optics  { flex: 0 1 270px; min-width: 190px; }
+.slot-measure { flex: 1 1 400px; min-width: 330px; }
+.slot-map     { flex: 1 1 220px; min-width: 200px; border-left: 1px solid #1e1e1e; }
+.facts.map-facts { grid-template-columns: repeat(3, 1fr); }   /* zoom · bearing · tilt on one line */
+
+/* Optics: label / value pairs in two columns, three rows */
+.optics-db { font-size: 10px; color: #666; white-space: nowrap; }
+.optics-db.ok       { color: #5a8f57; }
+.optics-db.inferred { color: #c47f2a; }
+.facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+  min-width: 0;
+}
+.fact {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #181818;
+}
+.fact dt {
+  flex-shrink: 0;
+  font-size: 9px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+.fact dd {
+  min-width: 0;
+  font-size: 11px;
+  color: #444;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fact dd.has-data { color: #ccc; }
+
+/* Slot head: title on the left, its indicator or toggle on the right */
+.slot-head {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.slot-title {
+  font-size: 10px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+  user-select: none;
 }
 
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+/* Source lamps: which source fed sensor and focal length. A dot + label, lit in the
+   source's colour. Hovering the EXIF lamp shows the photo's metadata. */
+.lamps { display: flex; align-items: center; gap: 5px; }
+.lamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 9px 0 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #4a4a4a;
+  background: #121212;
+  border: 1px solid #242424;
+  border-radius: 11px;
+  user-select: none;
+  transition: color 0.25s, border-color 0.25s, background 0.25s;
 }
+.lamp::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2e2e2e;
+  transition: background 0.25s, box-shadow 0.25s;
+}
+.lamp-exif.active   { --lamp: #e63946; }
+.lamp-db.active     { --lamp: #c47f2a; }
+.lamp-custom.active { --lamp: #5b8def; }
+.lamp.active { color: var(--lamp); border-color: color-mix(in srgb, var(--lamp) 45%, transparent); background: color-mix(in srgb, var(--lamp) 8%, #121212); }
+.lamp.active::before { background: var(--lamp); box-shadow: 0 0 6px var(--lamp); }
 
 .field-label {
   font-size: 10px;
@@ -369,29 +620,29 @@ a.icon-btn { text-decoration: none; }
   font-size: 10px;
   color: #e63946;
   font-weight: 400;
-  text-transform: none;
-  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+.field-source.muted         { color: #666; }
 .field-source.source-db     { color: #c47f2a; }
 .field-source.source-manual { color: #5b8def; }
 
-.src-badge {
-  font-size: 9px;
-  font-weight: 400;
-  color: #2e2e2e;
-  text-transform: none;
-  letter-spacing: 0;
-  margin-left: 3px;
-  transition: color 0.25s;
-}
-#src-exif.active   { color: #e63946; }
-#src-db.active     { color: #c47f2a; }
-#src-custom.active { color: #5b8def; }
-
 .input-row {
   display: flex;
-  gap: 5px;
+  gap: 6px;
   align-items: stretch;
+}
+
+/* Measure slot: span and the known value side by side, each with a label above
+   and its source below */
+.measure-row { display: flex; gap: 12px; }
+.measure-field {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .labeled-input {
@@ -426,7 +677,6 @@ a.icon-btn { text-decoration: none; }
   border: 1px solid #383838;
   border-radius: 4px;
   padding: 6px 8px;
-  margin-bottom: 2px;
   height: auto;
   white-space: nowrap;
   overflow: hidden;
@@ -531,46 +781,33 @@ a.icon-btn { text-decoration: none; }
 .cam-conf--inferred,
 .cam-conf--unknown  { color: #666; }
 
-/* ─── RESULT BAR ────────────────────────────────────────────── */
-#result-bar {
-  padding: 5px 16px;
-  border-top: 1px solid #2a2a2a;
-  background: #0a0a0a;
-  flex-shrink: 0;
+/* ─── RESULT ────────────────────────────────────────────────── */
+/* Third field of the measure slot: the value the other two give, on the same line as the
+   inputs (span · known · result). A box of its own, the inputs' height, dashed and dim while
+   it waits and solid red once there is a result: the thing the inputs work towards. */
+.measure-result { flex: 1.4 1 0; }
+.result-display {
+  height: 30px;
+  padding: 0 10px;
   display: flex;
   align-items: center;
-  gap: 14px;
-}
-#result-main {
-  flex: 1;
-  min-width: 0;
-  text-align: center;
-}
-.result-divider {
-  width: 1px;
-  align-self: stretch;
-  background: #2a2a2a;
-  flex-shrink: 0;
-}
-.result-label {
-  font-size: 9px;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.7px;
-  margin-bottom: 1px;
-  user-select: none;
-}
-.result-display {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
   gap: 5px;
+  border: 1px dashed #3a2224;
+  border-radius: 4px;
+  background: #110809;
+  transition: border-color 0.35s, background 0.35s, box-shadow 0.35s;
 }
+#result-bar.has-result .result-display {
+  border: 1px solid #e63946;
+  background: #1a0a0b;
+  box-shadow: 0 0 10px rgba(230, 57, 70, 0.18);
+}
+#result-label { color: #c8828a; }
 #result-value {
-  font-size: 30px;
+  font-size: 22px;
   font-weight: 700;
   color: #444;
-  letter-spacing: -1.5px;
+  letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums;
   transition: color 0.35s;
   line-height: 1;
@@ -578,74 +815,46 @@ a.icon-btn { text-decoration: none; }
 #result-bar.has-result #result-value { color: #e63946; }
 
 .result-unit {
-  font-size: 16px;
+  font-size: 13px;
   color: #444;
   font-weight: 400;
   transition: color 0.35s;
 }
 #result-bar.has-result .result-unit { color: #aaa; }
 
-#result-eq {
-  font-size: 9px;
-  color: #555;
-  margin-top: 3px;
-  font-variant-numeric: tabular-nums;
-  min-height: 12px;
-  font-family: monospace;
-  transition: color 0.35s;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+#result-eq { font-family: monospace; font-size: 9px; min-height: 13px; }
 #result-bar.has-result #result-eq { color: #888; }
+
+/* Solve for: last, after the result it decides, set off by a line */
+.measure-solve { padding-left: 12px; border-left: 1px solid #1e1e1e; }
 
 /* ─── MAP SECTION (always visible) ─────────────────────────── */
 #map-section {
+  position: relative;
   flex: 1;
-  min-height: 220px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  border-top: 1px solid #2a2a2a;
 }
 
-#map-header {
-  height: 30px;
-  padding: 0 8px 0 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #0f0f0f;
-  border-bottom: 1px solid #1e1e1e;
-  flex-shrink: 0;
-}
-.map-dist-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; }
-#map-dist-val { font-size: 13px; color: #aaa; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#map-dist-val.map-prompt-active {
-  color: #e63946;
-  animation: prompt-pulse 1.8s ease-in-out infinite;
-}
-@keyframes prompt-pulse {
-  0%, 100% { opacity: 0.6; }
-  50%      { opacity: 1; }
-}
+/* Map slot (right end of the bar): basemap in its head, coordinate paste below.
+   The reset is on the map (top left), the hint at the bottom of the map. */
+#map-tile-btns { display: flex; gap: 4px; flex-shrink: 0; }
+.tile-btn:hover:not(:disabled) { background: #1e1e1e; color: #ccc; border-color: #383838; }
+.tile-btn.active-tile, .tile-btn.active-tile:hover:not(:disabled) { border-color: #484848; color: #e0e0e0; background: #1e1e1e; }
 
-#map-tile-btns { display: flex; gap: 3px; }
-.tile-btn { font-size: 9px; padding: 2px 7px; height: 20px; }
-.tile-btn.active-tile { border-color: #e63946; color: #e63946; background: #1a0a0b; }
-
-/* ─── SOLVE MODE TOGGLE (stacked, in result bar) ────────────── */
+/* ─── SOLVE MODE TOGGLE (in the measure slot's head) ─────────── */
+/* Two buttons stacked, filling the field the inputs have (label above) */
 #solve-toggle {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-  width: 112px;
+  gap: 3px;
 }
-.solve-btn {
-  width: 94px;
+.measure-solve { flex: 0 0 auto; }
+.measure-solve .solve-btn { width: 84px; height: 21px; }
+.solve-btn, .tile-btn {
   height: 22px;
-  padding: 0;
+  padding: 0 10px;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.4px;
@@ -658,6 +867,7 @@ a.icon-btn { text-decoration: none; }
 }
 .solve-btn:hover { background: #1e1e1e; color: #ccc; border-color: #383838; }
 .solve-btn.active-solve { border-color: #e63946; color: #e63946; background: #1a0a0b; }
+.tile-btn { padding: 0 7px; }
 
 /* Awaited-control glow — mirrors the active step indicator */
 #camera-trigger.awaiting,
@@ -672,26 +882,17 @@ a.icon-btn { text-decoration: none; }
   50%      { box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.22); }
 }
 
-#map-coord-row {
-  height: 26px;
-  padding: 0 8px 0 14px;
-  display: flex;
-  align-items: center;
-  background: #0a0a0a;
-  border-bottom: 1px solid #1a1a1a;
-  flex-shrink: 0;
-}
 #coord-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  border-radius: 0;
+  flex: 0 0 auto;
+  min-width: 0;
+  height: 24px;
+  padding: 0 8px;
   font-size: 11px;
-  color: #888;
-  padding: 0;
-  width: 100%;
+  color: #aaa;
+  background: #121212;
+  border-color: #242424;
 }
-#coord-input:focus { border-color: transparent; color: #ccc; }
+#coord-input:focus { color: #e0e0e0; }
 #coord-input::placeholder { color: #555; }
 
 #map-container { flex: 1; min-height: 0; background: #1a1a1a; }
@@ -830,28 +1031,51 @@ kbd {
   font-weight: 600;
 }
 
-/* ─── LEAFLET OVERRIDES ─────────────────────────────────────── */
-.leaflet-container { background: #1a1a1a; }
-.leaflet-control-zoom a { background: #1e1e1e !important; color: #aaa !important; border-color: #383838 !important; }
-.leaflet-control-zoom a:hover { background: #2a2a2a !important; color: #fff !important; }
-.leaflet-control-attribution { background: rgba(10,10,10,0.7) !important; color: #444 !important; font-size: 9px !important; }
-.leaflet-control-attribution a { color: #555 !important; }
-#map-container { cursor: crosshair !important; }
-
-/* GPS marker pulse */
-@keyframes gps-pulse {
-  0%, 100% { opacity: 0.9; }
-  50%       { opacity: 0.15; }
+/* ─── MAPLIBRE (globe, as in ShadowFinder) ──────────────────── */
+/* Space behind the globe: a dark sky with a starfield (painted in script.js) */
+#map-container { position: relative; overflow: hidden; }
+#map-container.space {
+  background:
+    var(--stars, none),
+    radial-gradient(ellipse at 50% 50%, #0d1424 0%, #070a12 45%, #020204 100%);
+  background-size: 600px 600px, cover;
 }
-.gps-pulse-marker { animation: gps-pulse 2s ease-in-out infinite; }
+#map-container .maplibregl-canvas { cursor: crosshair; }
+#map-container .maplibregl-canvas:active { cursor: grabbing; }
+
+.maplibregl-ctrl-group { background: #151515; border: 1px solid #2a2a2a; box-shadow: 0 2px 6px #0006; }
+.maplibregl-ctrl-group button, .maplibregl-ctrl-group button:hover:not(:disabled) { background-color: transparent; border: none; border-radius: 0; padding: 0; }
+.maplibregl-ctrl-group button:not(:disabled):hover { background-color: #222; }
+/* Compass (resets bearing and tilt): own needle, north half in the app's red (as ShadowFinder's in amber) */
+.maplibregl-ctrl-group button.maplibregl-ctrl-compass .maplibregl-ctrl-icon {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29' viewBox='0 0 29 29'%3E%3Cpath d='m10.5 14 4-8 4 8z' fill='%23e63946'/%3E%3Cpath d='m10.5 16 4 8 4-8z' fill='%23666'/%3E%3C/svg%3E");
+}
+.maplibregl-ctrl-group button.maplibregl-ctrl-compass:not(:disabled):hover { background-color: #1a0a0b; }
+.maplibregl-ctrl-top-right .maplibregl-ctrl { margin: 10px 10px 0 0; }
+.maplibregl-ctrl-top-left .maplibregl-ctrl  { margin: 10px 0 0 10px; }
+.maplibregl-ctrl-top-left .maplibregl-ctrl + .maplibregl-ctrl { margin-top: 6px; }
+.sa-map-btn { display: flex; align-items: center; justify-content: center; color: #aaa; }
+.sa-map-btn svg { width: 18px; height: 18px; }
+.sa-gps-btn svg { width: 16px; height: 16px; }
+.maplibregl-ctrl-group button.sa-map-btn:disabled { color: #444; cursor: default; opacity: 1; }
+.maplibregl-ctrl-group button.sa-spin-btn.active { color: #e0e0e0; background-color: #262626; }
+.maplibregl-ctrl-attrib.maplibregl-compact { background: #151515cc; color: #888; }
+.maplibregl-ctrl-attrib a { color: #aaa; }
+
+/* GPS marker from the photo's EXIF */
+.gps-marker {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #e63946;
+  border: 2px solid #1a0a0b;
+  box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.25);
+  pointer-events: none;
+}
 
 /* ─── ANIMATIONS ────────────────────────────────────────────── */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
-}
-@keyframes step-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0); }
-  50%       { box-shadow: 0 0 8px 3px rgba(230, 57, 70, 0.3); }
 }
 
