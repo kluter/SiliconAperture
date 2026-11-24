@@ -1,7 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════
    SiliconAperture — script.js
    Single-image photogrammetry using the pinhole camera model.
-   Formula: real_size = distance × tan( px_span/img_w × sensor_w/focal_len )
+   Formula (pinhole, object facing the camera): real_size = distance × span_on_sensor / focal_len,
+   per image axis with the sensor side that axis lies along, combined with Pythagoras.
    ═══════════════════════════════════════════════════════════════ */
 
 /* ─── DOM REFS ───────────────────────────────────────────────── */
@@ -63,15 +64,23 @@ function showToast(msg, type = 'error', duration = TOAST_DURATION) {
   setTimeout(() => dismissToast(item, msg), duration);
 }
 
+// Fades out, then goes. Once per toast (× and the timer may both call this), and not only on
+// transitionend: a hidden container (small window) or no transition never fires it.
+const TOAST_FADE_MS = 450;
 function dismissToast(item, msg) {
-  if (!item.isConnected) return;
+  if (!item.isConnected || item.classList.contains('toast-hiding')) return;
   item.classList.add('toast-hiding');
-  item.addEventListener('transitionend', () => {
+  let done = false;
+  const remove = () => {
+    if (done) return;
+    done = true;
     item.remove();
     const n = toastCounts.get(msg) || 1;
     if (n <= 1) toastCounts.delete(msg);
     else toastCounts.set(msg, n - 1);
-  }, { once: true });
+  };
+  item.addEventListener('transitionend', remove, { once: true });
+  setTimeout(remove, TOAST_FADE_MS + 100);
 }
 
 /* ─── STATE ──────────────────────────────────────────────────── */
@@ -88,16 +97,15 @@ const DRAG_THRESHOLD = 4;
 let sensorW      = null;
 let sensorH      = null;
 let focalLength  = null;
-let pixelSpan = null;
-let pixelDx   = null;
-let pixelDy   = null;
+let pixelSpan = null;   // marked span on the photo, in image pixels
 let distance     = null;
 let solveMode      = 'size';   // 'size' | 'distance'
 let knownSize      = null;     // distance-mode input: real-world size of the marked span (m)
 let solvedDistance = null;     // distance-mode output (m), for the map ring
 let objectRing     = false;    // distance-mode map ring placed (drawn by renderMarks)
-let exifHasFocalLength = false;
+let exifFocal    = null;   // focal length from the photo's EXIF (mm): wins over the database's
 let exifGPS      = null;
+let loadSeq      = 0;      // bumped per photo, so a late EXIF read of an earlier photo is dropped
 
 const CUSTOM_IDX = CAMERA_DB.findIndex(c => c.brand === '—');
 
@@ -111,39 +119,73 @@ let resetBtn     = null;   // map control: clear the map points (made in initMap
 
 /* ─── IMAGE LOAD ─────────────────────────────────────────────── */
 function loadImage(file) {
+  const seq = ++loadSeq;
   const url = URL.createObjectURL(file);
   const newImg = new Image();
   newImg.onload = () => {
     URL.revokeObjectURL(url);
+    if (seq !== loadSeq) return;   // another photo was dropped (or N pressed) while this one decoded
+    // A new photo is a new scene: nothing of the previous photo carries over
+    resetPhotoState();
     img = newImg;
     resizeCanvas();
     fitImage();
     drawCanvas();
     overlay.classList.add('hidden');
     stopSpin();
-    updateGuide();
     photoName = file.name || 'Pasted photo';
-    renderTabs();
-    readExif(file);
+    compute();
+    updateDiagram();
+    readExif(file, seq);
   };
-  newImg.onerror = () => { URL.revokeObjectURL(url); showToast('Could not load image.'); };
+  newImg.onerror = () => {
+    URL.revokeObjectURL(url);
+    if (seq === loadSeq) showToast('Could not load image.');
+  };
   newImg.src = url;
 }
 
+// The canvas is drawn in CSS pixels (viewW × viewH); its backing store is scaled by the
+// device pixel ratio so the photo stays sharp on high-DPI screens.
+let viewW = 0, viewH = 0;
+
+const fitScale = () => Math.min(viewW / img.naturalWidth, viewH / img.naturalHeight) * 0.92;
+
 function fitImage() {
-  scale   = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight) * 0.92;
-  offsetX = (canvas.width  - img.naturalWidth  * scale) / 2;
-  offsetY = (canvas.height - img.naturalHeight * scale) / 2;
+  scale   = fitScale();
+  offsetX = (viewW - img.naturalWidth  * scale) / 2;
+  offsetY = (viewH - img.naturalHeight * scale) / 2;
 }
 
 function resizeCanvas() {
   const r = container.getBoundingClientRect();
-  canvas.width  = r.width;
-  canvas.height = r.height;
+  const dpr = window.devicePixelRatio || 1;
+  viewW = r.width;
+  viewH = r.height;
+  canvas.width  = Math.round(r.width  * dpr);
+  canvas.height = Math.round(r.height * dpr);
+  canvas.style.width  = r.width  + 'px';
+  canvas.style.height = r.height + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.imageSmoothingQuality = 'high';
+}
+
+// The size of one photo pixel on the sensor (mm). Pixels are square, and the sensor's long
+// side lies along the photo's long side whichever way the photo is turned (portrait or
+// landscape). A photo cropped to another aspect (16:9, 1:1) still fills the sensor along one
+// side: the smaller of the two ratios is that side. Without a sensor height, the photo's
+// own aspect stands in for the sensor's.
+function pixelPitch() {
+  if (!img || sensorW === null) return null;
+  const longPx  = Math.max(img.naturalWidth, img.naturalHeight);
+  const shortPx = Math.min(img.naturalWidth, img.naturalHeight);
+  const b = sensorH ?? sensorW * shortPx / longPx;
+  const longMm = Math.max(sensorW, b), shortMm = Math.min(sensorW, b);
+  return Math.min(longMm / longPx, shortMm / shortPx);
 }
 
 /* ─── EXIF ───────────────────────────────────────────────────── */
-async function readExif(file) {
+async function readExif(file, seq) {
   if (typeof exifr === 'undefined') return;
 
   // Run both parses concurrently; gps() is a dedicated path that
@@ -158,29 +200,34 @@ async function readExif(file) {
     exifr.gps(file)
   ]);
 
+  if (seq !== loadSeq) return;   // a newer photo (or N) came first: this EXIF is not for it
+
   const t = tags.status === 'fulfilled' ? tags.value : null;
   const g = gps.status  === 'fulfilled' ? gps.value  : null;
 
   if (!t && !g) return;
 
   if (t) {
+    const f   = typeof t.FocalLength === 'number' && t.FocalLength > 0 ? t.FocalLength : null;
+    const f35 = typeof t.FocalLengthIn35mmFormat === 'number' && t.FocalLengthIn35mmFormat > 0 ? t.FocalLengthIn35mmFormat : null;
+    exifFocal = f;   // before the camera match, so selectCamera keeps it
+
     const camera = [t.Make, t.Model].filter(Boolean).join(' ').trim();
     if (camera) {
       setExifCell('exif-camera-val', camera);
       autoSelectCamera(t.Make, t.Model);
     }
 
-    if (t.FocalLength) {
-      exifHasFocalLength = true;
-      focalLength = t.FocalLength;
-      setExifCell('exif-focal-val', t.FocalLength.toFixed(1) + ' mm');
-      document.getElementById('focal-length-input').value = t.FocalLength.toFixed(2);
+    if (f) {
+      focalLength = f;
+      setExifCell('exif-focal-val', f.toFixed(1) + ' mm');
+      document.getElementById('focal-length-input').value = f.toFixed(2);
       setInputSource('focal-length-input', 'exif');
     }
-    if (t.FocalLengthIn35mmFormat) {
-      const eqEl = document.getElementById('exif-focal-eq');
-      eqEl.textContent = `≈ ${Math.round(t.FocalLengthIn35mmFormat)} mm eq`;
+    if (f35) {
+      document.getElementById('exif-focal-eq').textContent = `≈ ${Math.round(f35)} mm eq`;
     }
+    if (f && f35) applyExifSensor(f, f35);
 
     const w = t.ExifImageWidth  || t.ImageWidth;
     const h = t.ExifImageHeight || t.ImageHeight;
@@ -193,14 +240,16 @@ async function readExif(file) {
     const gpsEl = document.getElementById('exif-gps-val');
     gpsEl.textContent = `${g.latitude.toFixed(5)}, ${g.longitude.toFixed(5)}`;
     gpsEl.classList.add('has-data', 'clickable');
-    gpsEl.onclick = goToGPS;
+    gpsEl.onclick = copyGPS;
     document.getElementById('btn-exif').classList.add('has-data');
     // Mark it and fly there from wherever the globe is (the flight also stops the spin)
     if (gpsMarker) gpsMarker.remove();
-    const el = document.createElement('div');
-    el.className = 'gps-marker';
-    el.title = 'Where the photo was taken (EXIF)';
-    gpsMarker = new maplibregl.Marker({ element: el }).setLngLat([g.longitude, g.latitude]).addTo(map);
+    if (map) {
+      const el = document.createElement('div');
+      el.className = 'gps-marker';
+      el.title = 'Where the photo was taken (EXIF)';
+      gpsMarker = new maplibregl.Marker({ element: el }).setLngLat([g.longitude, g.latitude]).addTo(map);
+    }
     stopSpin();
     syncGpsButton();
     flyToGPS();
@@ -208,6 +257,38 @@ async function readExif(file) {
 
   compute();
   updateDiagram();
+}
+
+// The 35 mm equivalent says how much of the sensor this photo covers, with the lens it was
+// taken with: diagonal = f × 43.27 mm (full-frame diagonal) ÷ f35. The database holds the
+// main camera only, so a telephoto or ultrawide shot, or a digital crop, does not fit it.
+// Keep the database entry when it agrees with the photo; otherwise use the EXIF sensor.
+const FF_DIAG = Math.hypot(36, 24);
+const EXIF_SENSOR_TOLERANCE = 0.06;   // f35 is a whole number of mm: about ±2 % at 24 mm, plus conventions
+
+function applyExifSensor(f, f35) {
+  if (!img) return;
+  const W = img.naturalWidth, H = img.naturalHeight, diagPx = Math.hypot(W, H);
+  const diag = f * FF_DIAG / f35;
+  const longMm  = diag * Math.max(W, H) / diagPx;
+  const shortMm = diag * Math.min(W, H) / diagPx;
+  if (!(longMm > 1 && longMm < 60)) return;   // implausible tags
+
+  const dbPitch = pixelPitch();
+  if (dbPitch !== null && Math.abs(dbPitch / (longMm / Math.max(W, H)) - 1) <= EXIF_SENSOR_TOLERANCE) return;
+
+  const dbCam = camIdx !== null && camIdx !== CUSTOM_IDX ? CAMERA_DB[camIdx] : null;
+  sensorW = +longMm.toFixed(2);
+  sensorH = +shortMm.toFixed(2);
+  document.getElementById('sensor-w-input').value = sensorW;
+  document.getElementById('sensor-h-input').value = sensorH;
+  setInputSource('sensor-w-input', 'exif');
+  setInputSource('sensor-h-input', 'exif');
+  if (dbCam) {
+    clearCameraSelection();
+    showToast(`This photo does not match the ${dbCam.label} main camera (another lens, or a crop). ` +
+              'Sensor size taken from its 35 mm equivalent instead.', 'success');
+  }
 }
 
 /* ─── CAMERA AUTOCOMPLETE FROM EXIF ─────────────────────────── */
@@ -224,6 +305,7 @@ const BRAND_MAP = {
   panasonic: 'Panasonic', olympus: 'OM System',
   'om digital': 'OM System', 'om system': 'OM System',
   gopro: 'GoPro', hasselblad: 'Hasselblad', 'phase one': 'Phase One',
+  leica: 'Leica', pentax: 'Pentax', ricoh: 'Ricoh', sigma: 'Sigma', blackmagic: 'Blackmagic',
 };
 
 // Words that distinguish variants within a model line (Pro, Max, Plus…).
@@ -239,31 +321,38 @@ function autoSelectCamera(make, model) {
   for (const [key, val] of Object.entries(BRAND_MAP)) {
     if (normMake.includes(key)) { brand = val; break; }
   }
+  // Pentax bodies are made by Ricoh Imaging and say so in Make; the model still says PENTAX
+  if (brand === 'Ricoh' && normModel.includes('pentax')) brand = 'Pentax';
   if (!brand) return;
 
-  // Keep single-char tokens (e.g. the "7" in "Pixel 7") — that was the bug.
-  const modelWords = normModel.split(/[\s\-\/,_]+/).filter(w => /[a-z0-9]/i.test(w));
+  // Whole words only: a substring test let "7" match "iPhone 17" and "8" match "(2018)".
+  const words = s => s.split(/[\s\-\/,_()]+/).filter(w => /[a-z0-9]/i.test(w));
+  const modelWords = words(normModel);
   const modelSet   = new Set(modelWords);
   if (!modelWords.length) return;
+  // Every number in the model name (7, 15, s24, 2nd…) has to be in the label
+  const modelNumbers = modelWords.filter(w => /\d/.test(w));
 
   let bestIdx = -1, bestScore = -Infinity;
 
   CAMERA_DB.forEach((cam, i) => {
     if (cam.brand !== brand || cam.sensor_w === null) return;
-    const normLabel  = cam.label.toLowerCase();
-    const matchCount = modelWords.filter(w => normLabel.includes(w)).length;
+    const normLabel = cam.label.toLowerCase();
+    const labelSet  = new Set(words(normLabel));
+    if (!modelNumbers.every(w => labelSet.has(w))) return;
+    const matchCount = modelWords.filter(w => labelSet.has(w)).length;
     if (matchCount === 0) return;
 
-    // Penalise label variant words that the EXIF model doesn't mention.
-    const labelWords     = normLabel.split(/[\s\-\/,]+/).filter(w => /[a-z0-9]/i.test(w));
-    const extraVariants  = labelWords.filter(w => VARIANT_WORDS.has(w) && !modelSet.has(w)).length;
-    const score          = matchCount * 10 - extraVariants;
+    // Penalise variant words (Pro, Max…) the EXIF model doesn't mention. A label lists
+    // alternatives with "/" ("iPhone 15 / 15 Plus"): the best-fitting alternative counts.
+    const extraVariants = Math.min(...normLabel.split('/').map(alt =>
+      words(alt).filter(w => VARIANT_WORDS.has(w) && !modelSet.has(w)).length));
+    const score = matchCount * 10 - extraVariants * 3;
 
     if (score > bestScore) { bestScore = score; bestIdx = i; }
   });
 
-  // Require at least one real word match (score ≥ 0 after variant penalty).
-  if (bestIdx < 0 || bestScore < 0) return;
+  if (bestIdx < 0 || bestScore <= 0) return;
   selectCamera(bestIdx);
 }
 
@@ -276,7 +365,7 @@ function setExifCell(id, text) {
 
 /* ─── CANVAS DRAW ────────────────────────────────────────────── */
 function drawCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, viewW, viewH);
   if (!img) return;
   ctx.drawImage(img, offsetX, offsetY, img.naturalWidth * scale, img.naturalHeight * scale);
 
@@ -296,6 +385,13 @@ function drawCanvas() {
   }
   if (markA) drawMark(imgToCanvas(markA), 'A');
   if (markB) drawMark(imgToCanvas(markB), 'B');
+}
+
+// Pan and zoom draw at most once per frame, however many events arrive
+let drawRaf = 0;
+function requestDraw() {
+  if (drawRaf) return;
+  drawRaf = requestAnimationFrame(() => { drawRaf = 0; drawCanvas(); });
 }
 
 function drawMark(pt, label) {
@@ -323,7 +419,10 @@ container.addEventListener('dragover', e => {
   e.preventDefault();
   overlay.classList.add('drag-active');
 });
-container.addEventListener('dragleave', () => overlay.classList.remove('drag-active'));
+// Leaving for a child element (the drop message, the buttons) is not leaving the photo
+container.addEventListener('dragleave', e => {
+  if (!container.contains(e.relatedTarget)) overlay.classList.remove('drag-active');
+});
 container.addEventListener('drop', e => {
   e.preventDefault();
   overlay.classList.remove('drag-active');
@@ -331,6 +430,14 @@ container.addEventListener('drop', e => {
   if (file && file.type.startsWith('image/')) loadImage(file);
   else showToast('Please drop an image file.');
 });
+// A file dropped anywhere else must not make the browser open it (and leave the app)
+const isFileDrag = e => e.dataTransfer && [...e.dataTransfer.types].includes('Files');
+window.addEventListener('dragover', e => {
+  if (!isFileDrag(e) || container.contains(e.target)) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'none';   // no "copy" cursor where a drop does nothing
+});
+window.addEventListener('drop', e => { if (isFileDrag(e)) e.preventDefault(); });
 
 overlay.addEventListener('click', () => fileInput.click());
 
@@ -339,7 +446,12 @@ overlay.addEventListener('click', () => fileInput.click());
 // its tab names the file, the dot turns red with a result, × and "+" both start over with a new
 // photo. Several photos side by side is the "Image tabs" issue.
 let photoName = null;
+let tabsKey = null;   // what the strip shows now: rebuilt only when that changes
 function renderTabs() {
+  const state = resultBar.classList.contains('has-result') ? 'result' : img ? 'loaded' : '';
+  const key = `${photoName}|${state}`;
+  if (key === tabsKey) return;
+  tabsKey = key;
   const wrap = document.getElementById('photo-tabs');
   wrap.innerHTML = '';
   const tab = document.createElement('div');
@@ -348,7 +460,7 @@ function renderTabs() {
   tab.setAttribute('aria-selected', 'true');
   tab.title = photoName || 'No photo yet';
   const dot = document.createElement('span');
-  dot.className = 'photo-dot' + (resultBar.classList.contains('has-result') ? ' result' : img ? ' loaded' : '');
+  dot.className = 'photo-dot' + (state ? ' ' + state : '');
   const name = document.createElement('span');
   name.className = 'photo-name';
   name.textContent = photoName || 'New photo';
@@ -410,22 +522,29 @@ canvas.addEventListener('mousemove', e => {
   offsetX += dx;
   offsetY += dy;
   panStart = { x: e.clientX, y: e.clientY };
-  drawCanvas();
+  requestDraw();
 });
 canvas.addEventListener('mouseup', e => {
   if (e.button === 0 && !hasDragged) handleCanvasClick(e);
   if (e.button === 0 || e.button === 1) panStart = null;
 });
+// Zoom follows how far the wheel moved: one mouse notch (~100 px) is 12 %, a trackpad's many
+// small events add up to the same, rather than 12 % each. From a quarter of the fitted size
+// up to 64 screen pixels per photo pixel.
+const WHEEL_LINE_PX = 33, WHEEL_PAGE_PX = 800, MAX_ZOOM = 64;
 canvas.addEventListener('wheel', e => {
   e.preventDefault();
+  if (!img) return;
   const rect = canvas.getBoundingClientRect();
   const mx = e.clientX - rect.left;
   const my = e.clientY - rect.top;
-  const factor = e.deltaY > 0 ? 0.88 : 1 / 0.88;
+  const px = e.deltaY * (e.deltaMode === 1 ? WHEEL_LINE_PX : e.deltaMode === 2 ? WHEEL_PAGE_PX : 1);
+  const target = Math.min(MAX_ZOOM, Math.max(fitScale() / 4, scale * 0.88 ** (px / 100)));
+  const factor = target / scale;
   offsetX = mx - (mx - offsetX) * factor;
   offsetY = my - (my - offsetY) * factor;
-  scale *= factor;
-  drawCanvas();
+  scale = target;
+  requestDraw();
 }, { passive: false });
 
 function handleCanvasClick(e) {
@@ -445,10 +564,8 @@ function handleCanvasClick(e) {
 }
 
 function computePixelSpan() {
-  if (!markA || !markB) { pixelSpan = null; pixelDx = null; pixelDy = null; return; }
-  pixelDx   = markB.x - markA.x;
-  pixelDy   = markB.y - markA.y;
-  pixelSpan = Math.hypot(pixelDx, pixelDy);
+  if (!markA || !markB) { pixelSpan = null; return; }
+  pixelSpan = Math.hypot(markB.x - markA.x, markB.y - markA.y);
   document.getElementById('pixel-span-input').value = Math.round(pixelSpan);
   document.getElementById('span-source').textContent = 'from canvas';
   document.getElementById('btn-reset-marks').disabled = false;
@@ -576,10 +693,21 @@ function selectCamera(idx) {
     sensorH = cam.sensor_h ?? null;
   }
 
-  if (cam.focal_length !== null) {
-    document.getElementById('focal-length-input').value = cam.focal_length;
-    setInputSource('focal-length-input', 'db');
+  // The photo's own focal length wins (it is the lens actually used); else the database's.
+  // An interchangeable-lens body has none: the previous camera's must not linger.
+  const fInput = document.getElementById('focal-length-input');
+  if (exifFocal !== null) {
+    focalLength = exifFocal;
+    fInput.value = exifFocal.toFixed(2);
+    setInputSource('focal-length-input', 'exif');
+  } else if (cam.focal_length !== null) {
     focalLength = cam.focal_length;
+    fInput.value = cam.focal_length;
+    setInputSource('focal-length-input', 'db');
+  } else if (fInput.classList.contains('source-db')) {
+    focalLength = null;
+    fInput.value = '';
+    setInputSource('focal-length-input', '');
   }
 
   compute();
@@ -744,29 +872,36 @@ function populateCameraDropdown() {
   window.addEventListener('resize', closeCameraPanel);
 }
 
+// A typed value counts only if it is a positive number (the inputs' min is not enforced on typing)
+function positiveValue(input) {
+  const v = parseFloat(input.value);
+  input.classList.toggle('invalid', input.value.trim() !== '' && !(v > 0 && isFinite(v)));
+  return v > 0 && isFinite(v) ? v : null;
+}
+
 document.getElementById('sensor-w-input').addEventListener('input', function () {
-  sensorW = parseFloat(this.value) || null;
+  sensorW = positiveValue(this);
   setInputSource('sensor-w-input', sensorW ? 'manual' : '');
   jumpToCustom();
   compute(); updateDiagram();
 });
 document.getElementById('sensor-h-input').addEventListener('input', function () {
-  sensorH = parseFloat(this.value) || null;
+  sensorH = positiveValue(this);
   setInputSource('sensor-h-input', sensorH ? 'manual' : '');
   jumpToCustom();
-  updateOptics();
+  compute(); updateDiagram();
 });
 document.getElementById('focal-length-input').addEventListener('input', function () {
-  focalLength = parseFloat(this.value) || null;
+  focalLength = positiveValue(this);
   setInputSource('focal-length-input', focalLength ? 'manual' : '');
   compute(); updateDiagram();
 });
 document.getElementById('distance-input').addEventListener('input', function () {
-  distance = parseFloat(this.value) || null;
+  distance = positiveValue(this);
   compute(); updateDiagram();
 });
 document.getElementById('known-size-input').addEventListener('input', function () {
-  knownSize = parseFloat(this.value) || null;
+  knownSize = positiveValue(this);
   compute(); updateDiagram();
 });
 
@@ -808,12 +943,18 @@ function updateOptics() {
     '?': { cls: '',         text: '? estimated' }
   };
   const deg = rad => (rad * 180 / Math.PI).toFixed(1) + '°';
-  const sh  = sensorH ?? (sensorW !== null && img ? sensorW * img.naturalHeight / img.naturalWidth : null);
+  const fov = mm => deg(2 * Math.atan(mm / 2 / focalLength));
+  const pitch = pixelPitch();
+  // Without a sensor height, the photo's aspect stands in for the sensor's (landscape)
+  const sh  = sensorH ?? (sensorW !== null && img
+    ? sensorW * Math.min(img.naturalWidth, img.naturalHeight) / Math.max(img.naturalWidth, img.naturalHeight)
+    : null);
   const haveLens = sensorW !== null && focalLength !== null;
 
-  setFact('fact-fov', haveLens
-    ? `${deg(2 * Math.atan(sensorW / 2 / focalLength))}` + (sh !== null ? ` × ${deg(2 * Math.atan(sh / 2 / focalLength))}` : '')
-    : null);
+  // With a photo: the photo's own field of view, across × down, as it is turned and cropped
+  setFact('fact-fov', !haveLens ? null
+    : pitch !== null ? `${fov(img.naturalWidth * pitch)} × ${fov(img.naturalHeight * pitch)}`
+    : fov(sensorW) + (sh !== null ? ` × ${fov(sh)}` : ''));
   setFact('fact-sensor', sensorW !== null ? `${sensorW} × ${sh !== null ? +sh.toFixed(2) : '?'} mm` : null);
   setFact('fact-crop', sensorW !== null ? `${(36 / sensorW).toFixed(2)}×` : null);
   setFact('fact-eq', haveLens ? `${Math.round(focalLength * 36 / sensorW)} mm` : null);
@@ -825,8 +966,8 @@ function updateOptics() {
   const D = solveMode === 'distance' ? solvedDistance : distance;
   const atD = D ?? 100;
   document.getElementById('fact-px-lbl').textContent = `1 px @ ${formatMapDist(atD).replace('.0 m', ' m')}`;
-  if (haveLens && img) {
-    const m = atD * Math.tan(sensorW / focalLength / img.naturalWidth);
+  if (haveLens && pitch !== null) {
+    const m = atD * pitch / focalLength;
     setFact('fact-px', m >= 1 ? `${m.toFixed(2)} m` : m >= 0.01 ? `${(m * 100).toFixed(1)} cm` : `${(m * 1000).toFixed(1)} mm`);
   } else setFact('fact-px', null);
 
@@ -843,29 +984,23 @@ function compute() {
     solvedDistance = null; clearResult(); return;
   }
   solvedDistance = null;   // set only on a valid distance-mode result below
-  const sh = sensorH ?? sensorW * img.naturalHeight / img.naturalWidth;
-  // Per-axis angular terms. real_size = distance × k, so distance = real_size / k.
-  const tx = Math.tan(Math.abs(pixelDx) / img.naturalWidth  * (sensorW / focalLength));
-  const ty = Math.tan(Math.abs(pixelDy) / img.naturalHeight * (sh       / focalLength));
-  const k  = Math.hypot(tx, ty);
+  // Pinhole: a span s on the sensor is s / f of the distance, whatever its angle on the photo
+  // (Δx and Δy each times the pitch, then Pythagoras, is the span times the pitch).
+  // real_size = distance × k, so distance = real_size / k.
+  const pitch  = pixelPitch();
+  const spanMm = pixelSpan * pitch;
+  const k      = spanMm / focalLength;
+  const spanTxt = `${Math.round(pixelSpan)} px × ${(pitch * 1000).toFixed(2)} µm`;
 
   let value, eqStr;
   if (solveMode === 'distance') {
-    if (knownSize === null || k <= 0) { clearResult(); return; }
+    if (knownSize === null || !(k > 0)) { clearResult(); return; }
     value = solvedDistance = knownSize / k;
-    eqStr = `${knownSize} m ÷ √( tan²(Δx) + tan²(Δy) ) = ${knownSize} m ÷ ${k.toFixed(4)}`;
+    eqStr = `${knownSize} m × ${focalLength} mm ÷ (${spanTxt})`;
   } else {
     if (distance === null) { clearResult(); return; }
-    solvedDistance = null;
     value = distance * k;
-    const real_x = distance * tx, real_y = distance * ty;
-    if (Math.abs(pixelDy) < 1) {
-      eqStr = `${distance} m × tan( ${Math.round(Math.abs(pixelDx))}px / ${img.naturalWidth}px × ${sensorW}mm / ${focalLength}mm )`;
-    } else if (Math.abs(pixelDx) < 1) {
-      eqStr = `${distance} m × tan( ${Math.round(Math.abs(pixelDy))}px / ${img.naturalHeight}px × ${sh.toFixed(2)}mm / ${focalLength}mm )`;
-    } else {
-      eqStr = `√( ${real_x.toFixed(3)}² + ${real_y.toFixed(3)}² ) m`;
-    }
+    eqStr = `${distance} m × (${spanTxt}) ÷ ${focalLength} mm`;
   }
 
   if (!isFinite(value) || value <= 0) { solvedDistance = null; clearResult(); return; }
@@ -943,27 +1078,31 @@ function jumpToCustom() {
   });
 }
 
-function resetMarks() {
-  markA = null; markB = null; pixelSpan = null; pixelDx = null; pixelDy = null;
+// The marks only, state and inputs; the caller recomputes
+function clearMarks() {
+  markA = null; markB = null; pixelSpan = null;
   document.getElementById('pixel-span-input').value = '';
   document.getElementById('span-source').textContent = 'click two points on photo';
   document.getElementById('btn-reset-marks').disabled = true;
+}
+
+function resetMarks() {
+  clearMarks();
   drawCanvas();
-  updateGuide();
-  compute();
+  compute();        // also updates the guide, tabs and optics
   updateDiagram();
 }
 
-function newImage() {
-  img = null;
-  photoName = null;
-  resetMarks();
-  exifHasFocalLength = false; exifGPS = null;
+// Everything that belongs to one photo: marks, EXIF, camera, the known value and the map
+// points. Shared by "new photo" and by loading a photo over another one. The caller recomputes.
+function resetPhotoState() {
+  clearMarks();
+  exifFocal = null; exifGPS = null;
   syncGpsButton();
   focalLength = null; sensorW = null; sensorH = null; distance = null;
+  knownSize = null; solvedDistance = null;
   if (gpsMarker) { gpsMarker.remove(); gpsMarker = null; }
   resetMapPoints();
-  if (map) { showWholeGlobe(); map.once('moveend', startIdleSpin); }   // spin again once back on the whole globe
 
   ['exif-camera-val', 'exif-focal-val', 'exif-size-val', 'exif-gps-val'].forEach(id => {
     const el = document.getElementById(id);
@@ -972,22 +1111,26 @@ function newImage() {
     el.onclick = null;
   });
   document.getElementById('btn-exif').classList.remove('has-data');
-
-  document.getElementById('focal-length-input').value = '';
-  setInputSource('focal-length-input', '');
   document.getElementById('exif-focal-eq').textContent = '';
-  document.getElementById('sensor-w-input').value     = '';
-  setInputSource('sensor-w-input', '');
-  setInputSource('sensor-h-input', '');
-  document.getElementById('sensor-h-input').value     = '';
-  clearCameraSelection();
-  document.getElementById('distance-input').value     = '';
-  document.getElementById('known-size-input').value   = '';
-  knownSize = null; solvedDistance = null;
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ['focal-length-input', 'sensor-w-input', 'sensor-h-input', 'distance-input', 'known-size-input'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.classList.remove('invalid');
+  });
+  ['focal-length-input', 'sensor-w-input', 'sensor-h-input'].forEach(id => setInputSource(id, ''));
+  clearCameraSelection();
+}
+
+function newImage() {
+  loadSeq++;   // a photo still decoding, or its EXIF, is no longer wanted
+  img = null;
+  photoName = null;
+  resetPhotoState();
+  if (map) { showWholeGlobe(); map.once('moveend', startIdleSpin); }   // spin again once back on the whole globe
+
+  drawCanvas();
   overlay.classList.remove('hidden');
-  updateGuide();
   compute();
   updateDiagram();
 }
@@ -1006,11 +1149,11 @@ const RING_STEPS = 128;
 
 const TILE_SETS = {
   dark: [
-    { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', attribution: 'Tiles © Esri', maxzoom: 16 },
+    { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', attribution: 'Powered by Esri · Esri, TomTom, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors, and the GIS User Community', maxzoom: 16 },
     { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', maxzoom: 16 }
   ],
   esri: [
-    { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attribution: 'Tiles © Esri', maxzoom: 19 },
+    { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attribution: 'Powered by Esri · Esri, Maxar, Earthstar Geographics, and the GIS User Community', maxzoom: 19 },
     { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', opacity: 0.7, maxzoom: 19 }
   ],
   osm: [
@@ -1202,11 +1345,13 @@ function runSpin() {
   const step = now => {
     const dt = Math.min(0.1, (now - last) / 1000);   // no jump after the tab was in the background
     last = now;
+    spinRaf = requestAnimationFrame(step);
+    // Map hidden (collapsed, or the small-window notice): keep the turn, skip the redraw
+    if (!map.getContainer().clientWidth) return;
     const c = map.getCenter();
     // zoomed in, the turn slows with the zoom so the surface does not race past
     const speed = SPIN_DEG_PER_SEC * Math.min(1, 2 ** (globeFitZoom(c.lat) - map.getZoom()));
     map.jumpTo({ center: [((c.lng - speed * dt + 540) % 360) - 180, c.lat] }, { spin: true });
-    spinRaf = requestAnimationFrame(step);
   };
   spinRaf = requestAnimationFrame(step);
   syncSpinButton();
@@ -1313,16 +1458,20 @@ function setDistance(d) {
 function placeObjectRing(p) {
   if (solvedDistance === null) {
     showToast('Solve the distance first: mark the object on the photo and enter its known size.');
-    return;
+    return false;
   }
   resetMapPoints();
   mapPtA = p;
   objectRing = true;
   renderMarks();
-  const ring = ringCoords(p, solvedDistance);
+  // Fit the ring as if it sat at longitude 0, then centre on the real point: a ring across
+  // the antimeridian would otherwise span the whole world in min/max longitude.
+  const ring = ringCoords({ lat: p.lat, lng: 0 }, solvedDistance);
   const lngs = ring.map(c => c[0]), lats = ring.map(c => c[1]);
-  map.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: 30 });
+  const cam = map.cameraForBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: 30 });
+  if (cam) map.easeTo({ center: [p.lng, cam.center.lat ?? p.lat], zoom: cam.zoom, bearing: 0, essential: true });
   updateGuide();
+  return true;
 }
 
 // Keep the ring in sync when the solved distance changes (e.g. known size edited).
@@ -1378,7 +1527,8 @@ function clearMapPoints() {
   updateGuide();
 }
 
-function goToGPS() {
+// Clicking the GPS value in the EXIF card copies it
+function copyGPS() {
   if (!exifGPS) return;
   const text = `${exifGPS.lat.toFixed(5)}, ${exifGPS.lng.toFixed(5)}`;
   navigator.clipboard.writeText(text).then(
@@ -1387,53 +1537,35 @@ function goToGPS() {
   );
 }
 
-function parseSingleCoord(s) {
-  s = s.trim();
-  const leadM = s.match(/^([NSEW])\s*/i);
-  if (leadM) s = s.slice(leadM[0].length);
-  const leadDir = leadM ? leadM[1].toUpperCase() : '';
+// One coordinate: decimal or degrees/minutes/seconds, with the hemisphere letter before or
+// after it (or a minus sign). Groups: lead letter, d, m, s | d, m, s, trailing letter.
+const COORD_BODY = String.raw`(-?\d+(?:\.\d+)?)\s*(?:°|º|d(?![a-z]))?\s*(?:(\d+(?:\.\d+)?)\s*')?\s*(?:(\d+(?:\.\d+)?)\s*")?`;
+const COORD_RE   = new RegExp(String.raw`(?<![a-z])([NSEW])\s*${COORD_BODY}|${COORD_BODY}\s*([NSEW](?![a-z]))?`, 'gi');
 
-  // DMS: 52°32'43.8"N  or  52° 32' 43.8 N
-  const dms = s.match(/^(\d+)\s*[°d]\s*(\d+)\s*['’ʼ]\s*(\d+(?:[.,]\d+)?)\s*[""”]?\s*([NSEW]?)$/i);
-  if (dms) {
-    const dir = leadDir + dms[4].toUpperCase();
-    let v = parseInt(dms[1], 10) + parseInt(dms[2], 10) / 60 + parseFloat(dms[3].replace(',', '.')) / 3600;
-    return /[SW]/.test(dir) ? -v : v;
-  }
-  // DM: 52°32.567'N
-  const dm = s.match(/^(\d+)\s*[°d]\s*(\d+(?:[.,]\d+)?)\s*['’ʼ]?\s*([NSEW]?)$/i);
-  if (dm) {
-    const dir = leadDir + dm[3].toUpperCase();
-    let v = parseInt(dm[1], 10) + parseFloat(dm[2].replace(',', '.')) / 60;
-    return /[SW]/.test(dir) ? -v : v;
-  }
-  // Plain decimal with optional trailing direction
-  const trailM = s.match(/([NSEW])\s*$/i);
-  const dir = leadDir + (trailM ? trailM[1].toUpperCase() : '');
-  const v = parseFloat(s.replace(',', '.'));
-  if (!isFinite(v)) return NaN;
-  return /[SW]/.test(dir) ? -Math.abs(v) : v;
-}
-
+// "52.520, 13.405", "33.9S 151.2E", "N 52.5 E 13.4", 52°32'43.8"N 13°13'11.6"E, "52,52 13,405" …
+// Returns { lat, lng } or null. A hemisphere letter decides the axis, so "13.4E 52.5N" works too.
 function parseCoordInput(raw) {
-  raw = raw.trim();
-  // DMS path: extract two tokens that contain °
-  if (/°/.test(raw)) {
-    const tokens = raw.match(/[NSEW]?\s*\d+\s*°[^°]*/gi) || [];
-    if (tokens.length >= 2) {
-      const lat = parseSingleCoord(tokens[0]);
-      const lng = parseSingleCoord(tokens[1]);
-      if (isFinite(lat) && isFinite(lng)) return { lat, lng };
-    }
+  let s = raw.trim()
+    .replace(/[′’ʼ‘]/g, "'").replace(/[″”“]/g, '"').replace(/''/g, '"');
+  // Decimal commas ("52,52 13,405"), when something else separates the two numbers
+  if (/\d,\d/.test(s) && /[\s;]/.test(s)) s = s.replace(/(\d),(\d)/g, '$1.$2');
+
+  const coords = [];
+  for (const m of s.matchAll(COORD_RE)) {
+    const [d, min, sec, letter] = m[1] ? [m[2], m[3], m[4], m[1]] : [m[5], m[6], m[7], m[8]];
+    const mm = min ? parseFloat(min) : 0, ss = sec ? parseFloat(sec) : 0;
+    if (mm >= 60 || ss >= 60) return null;
+    const dir = (letter || '').toUpperCase();
+    let v = Math.abs(parseFloat(d)) + mm / 60 + ss / 3600;
+    if (d.startsWith('-') || dir === 'S' || dir === 'W') v = -v;
+    coords.push({ v, axis: dir === 'N' || dir === 'S' ? 'lat' : dir === 'E' || dir === 'W' ? 'lng' : null });
+    if (coords.length === 2) break;
   }
-  // Decimal fallback: split on whitespace/comma
-  const parts = raw.split(/[\s,]+/).filter(Boolean);
-  if (parts.length >= 2) {
-    const lat = parseFloat(parts[0]);
-    const lng = parseFloat(parts[1]);
-    if (isFinite(lat) && isFinite(lng)) return { lat, lng };
-  }
-  return null;
+  if (coords.length < 2) return null;
+  let [a, b] = coords;
+  if (a.axis && a.axis === b.axis) return null;            // two latitudes, or two longitudes
+  if (a.axis === 'lng' || b.axis === 'lat') [a, b] = [b, a]; // written longitude first
+  return { lat: a.v, lng: b.v };
 }
 
 document.getElementById('coord-input').addEventListener('keydown', function (e) {
@@ -1446,9 +1578,12 @@ document.getElementById('coord-input').addEventListener('keydown', function (e) 
     return;
   }
   stopSpin();
-  this.value = '';
   // Distance mode: the pasted point is the object, so the ring goes around it
-  if (solveMode === 'distance') { placeObjectRing({ lat, lng }); return; }
+  if (solveMode === 'distance') {
+    if (placeObjectRing({ lat, lng })) this.value = '';   // kept when there is no distance yet
+    return;
+  }
+  this.value = '';
   resetMapPoints();
   mapPtA = { lat, lng };
   renderMarks();
@@ -1470,6 +1605,8 @@ document.querySelectorAll('.tile-btn').forEach(btn => {
 /* ─── KEYBOARD ───────────────────────────────────────────────── */
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+  // Ctrl/Cmd+R and +N are the browser's (reload, new window): they must not wipe the work first
+  if (!e.key || e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.key.toUpperCase() !== 'ESCAPE' && document.getElementById('help-card').style.display !== 'none') return;
   switch (e.key.toUpperCase()) {
     case 'R': resetMarks(); break;

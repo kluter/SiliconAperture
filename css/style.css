@@ -1147,3 +1147,16 @@ kbd {
   #small-screen p { font-size: 15px; font-weight: 600; color: #e0e0e0; }
   #small-screen .small-screen-sub { max-width: 340px; font-size: 12px; font-weight: 400; color: #777; line-height: 1.6; }
 }
+
+/* A typed value that is not a positive number: ignored by the calculation, shown as such */
+input.invalid,
+.labeled-input input.invalid { color: #e63946; text-decoration: underline wavy rgba(230, 57, 70, 0.6); }
+
+/* Reduced motion: no looping animations (the globe's spin already stays off in script.js) */
+@media (prefers-reduced-motion: reduce) {
+  .drop-icon,
+  #camera-trigger.awaiting,
+  #pixel-span-input.awaiting,
+  #distance-input.awaiting,
+  #known-size-input.awaiting { animation: none; }
+}

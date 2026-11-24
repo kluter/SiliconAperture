@@ -26,7 +26,7 @@ The pinhole camera model relates image pixels to real-world distances through si
 <tr>
 <td colspan="2">
 
-<p align="center"><code>size = √( (D · tan(Δx / W · sw / f))² + (D · tan(Δy / H · sh / f))² )</code></p>
+<p align="center"><code>size = D · √( (Δx · p)² + (Δy · p)² ) / f</code></p>
 
 </td>
 </tr>
@@ -35,10 +35,9 @@ The pinhole camera model relates image pixels to real-world distances through si
 
 | Symbol | Meaning |
 |--------|---------|
-| `D` | distance from camera to object |
+| `D` | distance from camera to object, along the camera's axis |
 | `Δx, Δy` | pixel span of the object, per axis |
-| `W, H` | image width / height in pixels |
-| `sw, sh` | sensor width / height in mm |
+| `p` | size of one pixel on the sensor in mm (sensor size ÷ pixel count) |
 | `f` | focal length in mm |
 
 </td>
@@ -50,7 +49,9 @@ The pinhole camera model relates image pixels to real-world distances through si
 </tr>
 </table>
 
-Each axis is solved independently using its matching sensor dimension, then the two real-world components are combined with Pythagoras. This means the line you draw on the photo can be at any angle (horizontal, vertical, or diagonal), and the result is always the true Euclidean length, not its projection onto one axis.
+By similar triangles, a span `s` on the sensor, `f` behind the pinhole, is a span `D · s / f` at distance `D`. Each axis is converted with the pixel size, then the two components are combined with Pythagoras. This means the line you draw on the photo can be at any angle (horizontal, vertical, or diagonal), and the result is always the true Euclidean length, not its projection onto one axis.
+
+The pixel size follows the photo, not a fixed sensor orientation: the sensor's long side lies along the photo's long side, so portrait photos work, and a photo cropped to another aspect (16:9, 1:1) still fills the sensor along one side. When the EXIF holds both the focal length and the 35 mm equivalent, and they do not fit the camera database's main camera (a telephoto or ultrawide lens, or a digital zoom), the sensor size is derived from the EXIF instead: `sensor diagonal = f × 43.27 mm ÷ f₃₅`.
 
 Accurate results require the object to be **perpendicular to the camera axis**. If the surface is angled toward or away from the lens, the apparent extent seen by the sensor no longer maps linearly to the true physical size, and the measurement will be off.
 
@@ -66,7 +67,7 @@ The same model runs in reverse.
 
 Toggle **Solve for → Distance**, enter an object's *known* real-world size, and SiliconAperture returns how far the camera was from it:
 
-<p align="center"><code>D = size / √( tan(Δx / W · sw / f)² + tan(Δy / H · sh / f)² )</code></p>
+<p align="center"><code>D = size · f / √( (Δx · p)² + (Δy · p)² )</code></p>
 
 Then click that object on the map to draw a **distance ring**. Every point that far away, i.e. the set of possible camera positions. Cross that ring with any other clue (a known bearing, a road, the skyline) and the camera's location narrows quickly.
 
@@ -126,6 +127,7 @@ The formula assumes a standard pinhole camera. Real lenses introduce distortion,
 - **Sensor dimensions.** The database draws from manufacturer specs, DXOMark, and imaging-resource.com. Values marked approximate may differ from the production unit. For precision work, verify against the camera's service documentation.
 - **EXIF focal length.** This is the physical focal length at the time of capture. Zoom lenses report their actual position. Cropped or binned images may carry the full-sensor focal length against a resized pixel grid. Verify the image dimensions match the sensor's native resolution.
 - **Distance uncertainty.** The result scales linearly with `D`. A 5% distance error produces a 5% size error.
+- **Distance from the map.** The formula wants the distance along the camera's axis. A distance clicked on the map is along the ground, which is close to it when the object is near the middle of the photo and at about the camera's height. For an object near the edge of a wide-angle photo, or far above or below the camera, the map distance is too long.
 
 ---
 
@@ -145,26 +147,22 @@ python3 -m http.server
 
 Your photo never leaves your browser. It is drawn into a canvas and its EXIF is read in memory: no upload, no server. All EXIF text is written via `textContent`, so a file with crafted metadata cannot inject anything into the page.
 
-The only outbound requests are map tiles from public tile servers (Esri, OpenStreetMap) and two libraries loaded from CDN.
+Both libraries are bundled in `vendor/`, so the only outbound requests are map tiles from public tile servers (Esri, OpenStreetMap). A Content Security Policy in `index.html` allows scripts from the site itself only, and network requests to those tile servers only.
 
 ```javascript
 // Every network request SiliconAperture makes:
-// GET unpkg.com/leaflet@1.9.4/...         (map library, once)
-// GET cdn.jsdelivr.net/npm/exifr/...      (EXIF parser, once)
-// GET .../tile/{z}/{x}/{y}                (map tiles)
+// GET .../tile/{z}/{y}/{x}                (map tiles)
 // No image data, no coordinates, nothing else.
 ```
 
-**Note on map tiles:** tile requests encode the area you are viewing. A tile server can infer what location you are measuring. Use a VPN if that matters.
+**Note on map tiles:** tile requests encode the area you are viewing. A tile server can infer what location you are measuring. When a photo carries GPS in its EXIF, the map flies there by itself, so the tile server sees the area where the photo was taken. Use a VPN if that matters, or strip the GPS from the photo first.
 
 ### Dependencies
 
 | Library | Purpose | Loaded from |
 |---------|---------|-------------|
-| [Leaflet](https://leafletjs.com/) | Map rendering | CDN (unpkg) |
-| [exifr](https://github.com/MikeKovarik/exifr) | EXIF metadata parsing | CDN (jsDelivr) |
-
-To run fully offline, download both libraries locally and replace the CDN links in `index.html`.
+| [MapLibre GL JS](https://maplibre.org/) 6.19 | Map rendering (globe) | `vendor/maplibre-gl/` |
+| [exifr](https://github.com/MikeKovarik/exifr) 7.1.3 | EXIF metadata parsing | `vendor/exifr/` |
 
 This tool was built with AI assistance. The code is plain, unminified JavaScript - read it directly in `js/script.js`.
 
