@@ -628,10 +628,9 @@ function openPhotoInTab(file, name) {
   showTab(t);
 }
 
-// "+" and N: a new empty tab (or stay, when the shown one is empty already)
+// "+" and N: a new empty tab, always (as in TracePoint)
 function addTab() {
-  if (!tabs[activeTab].file) return;
-  tabs[activeTab].state = captureState();
+  tabs[activeTab].state = tabs[activeTab].file ? captureState() : null;
   tabs.push(emptyTab());
   activeTab = tabs.length - 1;
   showTab(tabs[activeTab]);
@@ -694,13 +693,13 @@ function renderTabs() {
     tab.setAttribute('role', 'tab');
     tab.setAttribute('aria-selected', String(i === activeTab));
     tab.tabIndex = i === activeTab ? 0 : -1;
-    tab.title = (t.name || 'No photo yet') + (t.file ? ' · double-click the name to rename' : '');
+    tab.title = (t.name || `Photo ${i + 1}: no photo yet`) + (t.file ? ' · double-click the name to rename' : '');
     const dot = document.createElement('span');
     const state = dotOf(t, i);
     dot.className = 'photo-dot' + (state ? ' ' + state : '');
     const name = document.createElement('span');
     name.className = 'photo-name';
-    name.textContent = t.name || 'New photo';
+    name.textContent = t.name || `Photo ${i + 1}`;
     tab.append(dot, name);
     tab.addEventListener('click', () => switchTab(i));
     tab.addEventListener('keydown', e => {
@@ -726,7 +725,7 @@ function renderTabs() {
   const add = document.createElement('button');
   add.type = 'button';
   add.className = 'photo-tab-add';
-  add.title = 'New photo (N)';
+  add.title = 'New photo';
   add.setAttribute('aria-label', 'New photo');
   add.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
   add.addEventListener('click', addTab);
@@ -755,13 +754,52 @@ fileInput.addEventListener('change', () => {
   fileInput.value = '';
 });
 
+// A mark under the pointer (within MARK_HIT screen px), B first since it is drawn on top
+const MARK_HIT = 12;
+function markAt(e) {
+  if (!img) return null;
+  const rect = canvas.getBoundingClientRect();
+  const p = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  for (const [key, m] of [['B', markB], ['A', markA]]) {
+    if (!m) continue;
+    const c = imgToCanvas(m);
+    if (Math.hypot(c.x - p.x, c.y - p.y) <= MARK_HIT) return key;
+  }
+  return null;
+}
+
+// Dragging a mark moves it (clamped to the photo); the span and result follow live.
+// Move and release are watched on the window, so the drag goes on past the canvas edge.
+let dragMark = null;
+function moveMarkTo(e) {
+  const rect = canvas.getBoundingClientRect();
+  const ip = canvasToImg(e.clientX - rect.left, e.clientY - rect.top);
+  ip.x = Math.min(img.naturalWidth,  Math.max(0, ip.x));
+  ip.y = Math.min(img.naturalHeight, Math.max(0, ip.y));
+  if (dragMark === 'A') markA = ip; else markB = ip;
+  if (markA && markB) computePixelSpan();
+  requestDraw();
+}
+window.addEventListener('mousemove', e => { if (dragMark) moveMarkTo(e); });
+window.addEventListener('mouseup', () => {
+  if (!dragMark) return;
+  dragMark = null;
+  canvas.style.cursor = '';
+  updateGuide();
+});
+
 canvas.addEventListener('mousedown', e => {
   if (e.button !== 0 && e.button !== 1) return;
   if (e.button === 1) e.preventDefault(); // suppress autoscroll cursor
+  if (e.button === 0) {
+    dragMark = markAt(e);
+    if (dragMark) { e.preventDefault(); canvas.style.cursor = 'grabbing'; return; }
+  }
   panStart = { x: e.clientX, y: e.clientY };
   hasDragged = false;
 });
 canvas.addEventListener('mousemove', e => {
+  if (!dragMark && !(e.buttons & 5)) canvas.style.cursor = markAt(e) ? 'grab' : '';
   if (!panStart || !(e.buttons & 5)) return; // 1=left, 4=middle
   const dx = e.clientX - panStart.x;
   const dy = e.clientY - panStart.y;
@@ -773,6 +811,7 @@ canvas.addEventListener('mousemove', e => {
   requestDraw();
 });
 canvas.addEventListener('mouseup', e => {
+  if (dragMark) return;   // the end of a mark drag, not a click (the window handler ends it)
   if (e.button === 0 && !hasDragged) handleCanvasClick(e);
   if (e.button === 0 || e.button === 1) panStart = null;
 });
@@ -848,7 +887,7 @@ function guideStatus() {
     return { idx: GUIDE_STEPS.length, hint: solvedRange ? 'The camera stood somewhere in this band' : 'The camera stood somewhere on this ring', cls: 'done' };
   }
   if (distance === null) return { idx: 3, hint: 'Enter the distance above, or click camera then object on the map' };
-  return { idx: GUIDE_STEPS.length, hint: 'R resets the marks · N opens another photo', cls: 'muted' };
+  return { idx: GUIDE_STEPS.length, hint: 'R resets the marks · N turns the map north and flat', cls: 'muted' };
 }
 
 function buildGuide() {
@@ -1271,7 +1310,7 @@ function compute() {
   // real_size = distance × k, so distance = real_size / k.
   // Unknown camera: k for a 24 mm and a 35 mm equivalent lens, so the answer is a range.
   // A 35 mm equivalent f₃₅ spans the photo's diagonal with the full-frame diagonal: k = span × 43.27 / (f₃₅ × diagonal px).
-  let kLo, kHi, spanTxt;
+  let kLo, kHi;
   if (unknownCam) {
     const diagPx = Math.hypot(img.naturalWidth, img.naturalHeight);
     kHi = pixelSpan * FF_DIAG / (UNKNOWN_EQ[0] * diagPx);   // wide lens: more metres per pixel
@@ -1279,20 +1318,15 @@ function compute() {
   } else {
     const pitch = pixelPitch();
     kLo = kHi = pixelSpan * pitch / focalLength;
-    spanTxt = `${Math.round(pixelSpan)} px × ${(pitch * 1000).toFixed(2)} µm`;
   }
 
-  let lo, hi, eqStr;
+  let lo, hi;
   if (solveMode === 'distance') {
     if (knownSize === null || !(kLo > 0)) { clearResult(); return; }
     lo = knownSize / kHi; hi = knownSize / kLo;
-    eqStr = unknownCam ? `${knownSize} m at ${UNKNOWN_EQ[0]}–${UNKNOWN_EQ[1]} mm equivalent (camera unknown)`
-                       : `${knownSize} m × ${focalLength} mm ÷ (${spanTxt})`;
   } else {
     if (distance === null) { clearResult(); return; }
     lo = distance * kLo; hi = distance * kHi;
-    eqStr = unknownCam ? `${distance} m at ${UNKNOWN_EQ[0]}–${UNKNOWN_EQ[1]} mm equivalent (camera unknown)`
-                       : `${distance} m × (${spanTxt}) ÷ ${focalLength} mm`;
   }
   const value = (lo + hi) / 2;
   if (!isFinite(hi) || !(lo > 0)) { clearResult(); return; }
@@ -1305,8 +1339,8 @@ function compute() {
   const num = v => km ? (v / 1000).toFixed(2) : v >= 100 ? v.toFixed(1) : v >= 10 ? v.toFixed(2) : v.toFixed(3);
   valEl.textContent  = resultRange ? `${num(lo)}–${num(hi)}` : num(value);
   unitEl.textContent = km ? 'km' : 'm';
-  document.getElementById('result-eq').textContent = eqStr;
-  document.getElementById('result-eq').title = eqStr;
+  // Under the result: only a note when the camera is unknown
+  document.getElementById('result-eq').textContent = resultRange ? `camera unknown: ${UNKNOWN_EQ[0]}–${UNKNOWN_EQ[1]} mm equivalent` : '';
   resultBar.classList.add('has-result');
   resultBar.classList.toggle('is-range', !!resultRange);
   renderTabs();
@@ -1358,6 +1392,8 @@ function updateDiagram() {
   part(['seg-pixels', 'diag-lbl-px'],     state(hasPixels, 'px'));
   part(['seg-distance', 'diag-lbl-d'],    state(hasD, 'd', !sizeMode));
   part(['seg-object', 'diag-lbl-object'], state(hasObject, 'object', sizeMode));
+  // Solved: the whole diagram is the measurement, so all of it turns red (not red and white mixed)
+  document.getElementById('diagram-svg').classList.toggle('solved', allSet);
   // The light path: lit once there is a result
   ['seg-pinhole', 'ray-tl', 'ray-bl', 'ray-tr', 'ray-br'].forEach(id => part([id], allSet ? 'result' : ''));
 
@@ -1477,8 +1513,12 @@ function resetPhotoState() {
   clearCameraSelection();
 }
 
-// N: a new photo, in a tab of its own (the photos open now stay in theirs)
-function newImage() { addTab(); }
+// N: the map back to north up and looking straight down (as N in TracePoint)
+function northMap() {
+  if (!map) return;
+  stopSpin();
+  map.easeTo({ bearing: 0, pitch: 0, duration: 500 });
+}
 
 document.getElementById('btn-reset-marks').addEventListener('click', resetMarks);
 
@@ -1542,14 +1582,12 @@ function initMap() {
     map.addLayer({ id: 'sa-ring-line', type: 'line', source: 'sa-marks', filter: kind('ring'),
       paint: { 'line-color': '#e63946', 'line-width': 2, 'line-opacity': 0.85, 'line-dasharray': [3.5, 2] } });
     map.addLayer({ id: 'sa-line', type: 'line', source: 'sa-marks', filter: kind('line'),
-      paint: { 'line-color': '#e63946', 'line-width': 2, 'line-opacity': 0.8, 'line-dasharray': [3.5, 2] } });
-    map.addLayer({ id: 'sa-pts', type: 'circle', source: 'sa-marks', filter: kind('pt'),
-      paint: { 'circle-radius': 6, 'circle-color': '#e63946', 'circle-stroke-width': 2, 'circle-stroke-color': '#1a0a0b' } });
-    setTileSet(currentTile);
+      paint: { 'line-color': '#e63946', 'line-width': 2, 'line-opacity': 0.8, 'line-dasharray': [3.5, 2] } });    setTileSet(currentTile);
     renderMarks();
   });
 
   map.on('click', e => {
+    if (e.originalEvent?.target?.closest?.('.map-pt')) return;   // a click on a point (or the end of its drag) places nothing
     const p = { lat: e.lngLat.lat, lng: e.lngLat.lng };
     if (isFinite(p.lat) && isFinite(p.lng)) handleMapClick(p);
   });
@@ -1761,7 +1799,6 @@ function renderMarks() {
   const src = map && map.getSource('sa-marks');
   if (!src) return;
   const features = [];
-  const pt = p => ({ type: 'Feature', properties: { kind: 'pt' }, geometry: { type: 'Point', coordinates: [p.lng, p.lat] } });
   if (objectRing && mapPtA && solvedDistance !== null) {
     // An unknown camera gives a band: the outer ring with the inner one as its hole
     const rings = solvedRange
@@ -1773,9 +1810,45 @@ function renderMarks() {
     features.push({ type: 'Feature', properties: { kind: 'line' },
       geometry: { type: 'LineString', coordinates: [[mapPtA.lng, mapPtA.lat], [mapPtB.lng, mapPtB.lat]] } });
   }
-  if (mapPtA) features.push(pt(mapPtA));
-  if (mapPtB) features.push(pt(mapPtB));
   src.setData({ type: 'FeatureCollection', features });
+  syncPointMarkers();
+}
+
+// The map points as draggable markers: A (the camera in size mode, the object in distance
+// mode) and B (the object). Above the photo's GPS marker, so a point set on it stays on top
+// and can be grabbed. Dragging updates the line, the distance or the ring as it moves.
+const pointMarkers = { A: null, B: null };
+let pointDragging = null;
+
+function syncPointMarkers() {
+  if (!map) return;
+  const want = { A: mapPtA, B: mapPtB };
+  for (const key of ['A', 'B']) {
+    const p = want[key];
+    let m = pointMarkers[key];
+    if (!p) { if (m) { m.remove(); pointMarkers[key] = null; } continue; }
+    if (!m) {
+      const el = document.createElement('div');
+      el.className = 'map-pt';
+      m = new maplibregl.Marker({ element: el, draggable: true }).setLngLat([p.lng, p.lat]).addTo(map);
+      m.on('dragstart', () => { pointDragging = key; });
+      m.on('drag', () => movePoint(key, m.getLngLat()));
+      m.on('dragend', () => { pointDragging = null; movePoint(key, m.getLngLat()); updateGuide(); });
+      pointMarkers[key] = m;
+    } else if (pointDragging !== key) {
+      m.setLngLat([p.lng, p.lat]);
+    }
+    const role = key === 'B' || solveMode === 'distance' ? 'object' : 'camera';
+    m.getElement().dataset.role = role;
+    m.getElement().title = `The ${role} · drag to move`;
+  }
+}
+
+function movePoint(key, ll) {
+  const p = { lat: ll.lat, lng: ll.lng };
+  if (key === 'A') mapPtA = p; else mapPtB = p;
+  if (solveMode === 'size' && mapPtA && mapPtB) setDistance(distM(mapPtA, mapPtB));
+  renderMarks();
 }
 
 // Clicking cycles: place the camera (A) → place the object (B) + measure → a third click starts over.
@@ -2102,9 +2175,11 @@ document.addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.code !== 'Escape' && document.getElementById('help-card').style.display !== 'none') return;
   // By key position (e.code), not by letter: R and N stay where they are on German or French layouts
+  // A key used here is claimed (preventDefault), else the browser also takes it: Firefox's
+  // "search when you start typing" would open its find bar with the letter in it
   switch (e.code) {
-    case 'KeyR': resetMarks(); break;
-    case 'KeyN': newImage();   break;
+    case 'KeyR': e.preventDefault(); resetMarks(); break;
+    case 'KeyN': e.preventDefault(); northMap();   break;
     case 'Escape':
       document.getElementById('help-card').style.display = 'none';
       hideMapMenu();
@@ -2337,20 +2412,6 @@ async function autosaveRestore() {
 // Leaving or hiding the page writes what is still pending
 document.addEventListener('visibilitychange', () => { if (document.hidden && autosaveTimer) autosaveWrite(); });
 window.addEventListener('pagehide', () => { if (autosaveTimer) autosaveWrite(); });
-
-/* ─── SHOW THE MATH ──────────────────────────────────────────── */
-// The default view is the answer alone; the worked formula under it is one click away (remembered).
-const MATH_KEY = 'sa-show-math';
-function setShowMath(on, save = true) {
-  document.getElementById('app').classList.toggle('show-math', on);
-  const b = document.getElementById('btn-math');
-  b.setAttribute('aria-pressed', String(on));
-  b.textContent = on ? 'Hide the math' : 'Show the math';
-  if (save) storageSet(MATH_KEY, on ? '1' : '0');
-}
-document.getElementById('btn-math').addEventListener('click', () =>
-  setShowMath(!document.getElementById('app').classList.contains('show-math')));
-setShowMath(storageGet(MATH_KEY) === '1', false);
 
 /* ─── RESIZE ─────────────────────────────────────────────────── */
 // Panels change size with the window and with the divider: follow both.

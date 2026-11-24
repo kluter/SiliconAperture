@@ -29,7 +29,7 @@ The right-click menu's *Open in …* entries are plain links: nothing is sent un
 | What | Where | Why |
 |---|---|---|
 | Your photos and what you measured on them, the map view and basemap | IndexedDB `siliconaperture` | Autosave: a refresh keeps the work. Closing a tab deletes its copy |
-| Photo/map split, hidden side, "Show the math" | `localStorage` (`sa-split`, `sa-hidden-side`, `sa-show-math`) | Layout preferences |
+| Photo/map split, hidden side | `localStorage` (`sa-split`, `sa-hidden-side`) | Layout preferences |
 
 Nothing is stored anywhere else. To remove everything, close all photo tabs, or clear the site's data in the browser settings.
 

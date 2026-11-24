@@ -10,7 +10,7 @@ Each tab is one photo with everything measured on it: marks, camera, the known v
 |---|---|
 | Click a tab | Switch photos (`←` / `→` when a tab has focus) |
 | Double-click a tab's name | Rename it (`Enter` keeps, `Esc` cancels) |
-| **+** or `N` | New empty tab |
+| **+** | New empty tab |
 | **×** on a tab | Close it, with its saved copy. Closing the last one leaves an empty tab |
 | Dot on a tab | Grey: empty · dark red: photo loaded · red: there is a result |
 
@@ -23,6 +23,7 @@ Work is saved in the browser as you go and comes back after a refresh (see [priv
 | Drop, `Ctrl+V` or click | Open a photo. With a photo already open, it opens in a new tab |
 | **Try the demo** | Open the demo photo with its EXIF (camera, focal length, GPS) |
 | Click | Place mark A, then B. The span fills in |
+| Drag a mark | Move it; span and result follow |
 | Drag, middle-drag | Pan |
 | Scroll | Zoom |
 | ↺ (top left) or `R` | Reset the marks |
@@ -45,17 +46,17 @@ HEIC photos cannot be decoded by most browsers: export them as JPEG (the EXIF st
 |---|---|
 | **Solve for: Size** | Distance in, size out |
 | **Solve for: Distance** | Known size in, distance out, and the ring on the map |
-| **Show the math** | The worked formula under the result (remembered) |
 
 ## Diagram
 
-The pinhole diagram above the map is the step guide: known values in grey with their numbers, the next missing one outlined in red, the unknown dashed with `?`, filling red with the result. Click a part to go to its input.
+The pinhole diagram above the map is the step guide: known values in grey with their numbers, the next missing one outlined in red, the unknown dashed with `?`. Once solved, the whole diagram turns red. Click a part to go to its input.
 
 ## Map
 
 | Input | Action |
 |---|---|
-| Click (size mode) | Camera, then object: their distance becomes `D`. A third click starts over |
+| Click (size mode) | Camera (dark point), then object (red point): their distance becomes `D`. A third click starts over |
+| Drag a point | Move it; the distance or the ring follows. Points sit above the photo's GPS marker |
 | Click (distance mode) | The object: draws the ring (or band) of camera positions |
 | Right-click | Copy coordinates · place the camera or the object here · open the spot in Google Maps, Bing Maps, OpenStreetMap or Google Earth |
 | Right-drag, `Ctrl`+drag | Rotate and tilt |
@@ -78,7 +79,7 @@ Drag the bar between photo and map to resize (remembered). Double-click resets t
 | Key | Action |
 |---|---|
 | `R` | Reset the marks |
-| `N` | New photo tab |
+| `N` | Turn the map north up and flat (no tilt) |
 | `Ctrl+V` | Paste a photo or coordinates |
 | `Esc` | Close the help, or the map menu |
 

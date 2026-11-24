@@ -1133,22 +1133,6 @@ input.invalid,
   *, *::before, *::after { transition: none !important; }
 }
 
-/* "Show the math": the worked formula under the result, off by default (remembered) */
-.math-toggle {
-  padding: 0 6px;
-  height: 16px;
-  font-size: 9px;
-  letter-spacing: 0.3px;
-  color: #666;
-  background: none;
-  border: 1px solid #2a2a2a;
-  border-radius: 3px;
-  cursor: pointer;
-}
-.math-toggle:hover { color: #ccc; border-color: #444; }
-.math-toggle[aria-pressed="true"] { color: #ddd; border-color: #555; background: #222; }
-#app:not(.show-math) #result-eq { visibility: hidden; }
-
 /* Right-click menu on the map (as in TracePoint and ShadowFinder) */
 .map-ctx-menu {
   position: absolute; z-index: 1000; display: none;
@@ -1188,3 +1172,20 @@ input.invalid,
 .help-related a { color: #ccc; text-decoration: none; }
 .help-related a:hover { text-decoration: underline; }
 .related-logo { width: 14px; height: 14px; border-radius: 3px; vertical-align: -3px; margin-right: 5px; }
+
+/* Solved: every known part joins the result in red (the solved value stays bold) */
+#diagram-svg.solved .seg.lit,
+#diagram-svg.solved .seg.px-mark.lit { stroke: #e63946; }
+#diagram-svg.solved .diag-lbl.lit    { fill: #e63946; }
+
+/* Map points (camera, object): draggable, above the photo's GPS marker */
+.gps-marker { z-index: 1; }
+.map-pt {
+  z-index: 2;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #e63946; border: 2px solid #fff;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+}
+.map-pt:active { cursor: grabbing; }
+.map-pt[data-role="camera"] { background: #111; border-color: #e63946; }
