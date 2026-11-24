@@ -37,7 +37,7 @@ In this order of preference:
 
 1. **EXIF focal length.** The lens actually used, at the zoom it was at. It wins over the database's value.
 2. **EXIF 35 mm equivalent.** It says how much sensor the photo covers with the lens used: `sensor diagonal = f × 43.27 mm ÷ f₃₅` (43.27 mm is the full-frame diagonal). The camera database holds each phone's **main** camera only. When the EXIF-derived sensor differs from the database entry by more than 6 %, the photo was taken with another lens (ultrawide, telephoto) or a digital zoom, and the EXIF sensor is used instead. A toast says so.
-3. **Camera database** (`js/camera-db.js`), matched from the EXIF make and model, or picked by hand.
+3. **Camera database** ([camera-database.md](camera-database.md)), matched from the EXIF make and model, or picked by hand.
 4. **Presets**: typical values for a phone's main, ultrawide and 3× telephoto camera, APS-C and full frame (with the lens focal length typed in).
 5. **Unknown camera**: see below.
 6. **Typed by hand** (Custom).

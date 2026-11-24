@@ -286,36 +286,26 @@
       <button id="btn-help-close" class="icon-btn" aria-label="Close help">✕</button>
     </div>
     <ol class="help-steps">
-      <li>Drop, paste or browse a photo (or try the demo).</li>
-      <li>Pick the camera: EXIF fills it in, or choose a preset or "Unknown".</li>
-      <li>Click both ends of the object on the photo.</li>
-      <li>Type the distance, or click camera then object on the map.</li>
-      <li>Read the size. <strong>Solve for → Distance</strong> works it backwards and draws a ring on the map.</li>
+      <li><b>Add a photo:</b> drop, paste or browse, or try the demo.</li>
+      <li><b>Pick the camera:</b> EXIF fills it in; else a model, a preset or Unknown.</li>
+      <li><b>Mark the object:</b> click both of its ends on the photo.</li>
+      <li><b>Give the distance:</b> type it, or click camera then object on the map.</li>
+      <li><b>Read the size.</b> <b>Solve for → Distance</b> works it backwards and draws a ring of camera positions.</li>
     </ol>
-    <details class="help-more">
-      <summary>How it works</summary>
-      <div class="help-formulas">
-        <div class="help-formula">
-          <div class="help-formula-label">Solve for size</div>
-          <code>size = D · √( (Δx·p)² + (Δy·p)² ) / f</code>
-        </div>
-        <div class="help-formula">
-          <div class="help-formula-label">Solve for distance</div>
-          <code>D = size · f / √( (Δx·p)² + (Δy·p)² )</code>
-        </div>
-      </div>
-      <table class="help-legend">
-        <tr><td>D</td><td>distance to object</td><td>f</td><td>focal length</td></tr>
-        <tr><td>Δx, Δy</td><td>pixel span per axis</td><td>p</td><td>pixel size on the sensor</td></tr>
-      </table>
-      <p class="help-formula-note">Accurate only when the object faces the camera: an angled surface is foreshortened. A distance from the map is along the ground, close to the needed distance along the camera's axis when the object is near the middle of the photo. Full method, limits and the unknown-camera range: <a href="https://github.com/kluter/SiliconAperture/blob/main/docs/method.md" target="_blank" rel="noopener noreferrer">docs/method.md</a> · every control: <a href="https://github.com/kluter/SiliconAperture/blob/main/docs/controls.md" target="_blank" rel="noopener noreferrer">docs/controls.md</a> · privacy: <a href="https://github.com/kluter/SiliconAperture/blob/main/docs/privacy.md" target="_blank" rel="noopener noreferrer">docs/privacy.md</a></p>
-    </details>
+    <div class="help-warning">
+      <span class="help-warning-icon" aria-hidden="true">⚠</span>
+      <span>Accurate only when the object <b>faces the camera</b>. An angled surface is foreshortened, and the result is off.</span>
+    </div>
     <div class="help-shortcuts">
       <kbd>R</kbd><span>Reset marks</span>
       <kbd>N</kbd><span>New photo tab</span>
       <kbd>Ctrl+V</kbd><span>Paste a photo or coordinates</span>
       <kbd>Esc</kbd><span>Close help</span>
     </div>
+    <p class="help-related">
+      How it works, every control, privacy: <a href="https://github.com/kluter/SiliconAperture/tree/main/docs" target="_blank" rel="noopener noreferrer"><b>docs</b></a>.<br>
+      Related: <a href="https://github.com/kluter/TracePoint" target="_blank" rel="noopener noreferrer"><img src="assets/logo_tracepoint.svg" alt="" class="related-logo"><b>TracePoint</b></a> (geolocate by lines of sight) and <a href="https://github.com/kluter/ShadowFinder-Web" target="_blank" rel="noopener noreferrer"><img src="assets/logo_shadowfinder.svg" alt="" class="related-logo"><b>ShadowFinder Web</b></a> (geolocate by a shadow's length).
+    </p>
   </div>
 </div>
 
