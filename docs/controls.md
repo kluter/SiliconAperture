@@ -26,7 +26,7 @@ Work is saved in the browser as you go and comes back after a refresh (see [priv
 | Drag a mark | Move it; span and result follow |
 | Drag, middle-drag | Pan |
 | Scroll | Zoom |
-| ↺ (top left) or `R` | Reset the marks |
+| ↺ (top right) or `R` | Reset the marks |
 | Step icons (right edge) | The four steps, the current one lit; click it to do it |
 
 HEIC photos cannot be decoded by most browsers: export them as JPEG (the EXIF stays).
