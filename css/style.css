@@ -15,7 +15,7 @@ button {
   font-family: inherit;
   font-size: 11px;
   background: #1e1e1e;
-  color: #ccc;
+  color: #d6d6d6;
   border: 1px solid #383838;
   border-radius: 4px;
   padding: 5px 10px;
@@ -38,8 +38,8 @@ input, select {
   transition: border-color 0.15s;
 }
 input:focus, select:focus { border-color: #777; }
-input[readonly] { color: #666; cursor: default; background: #111; }
-input::placeholder { color: #383838; }
+input[readonly] { color: #858585; cursor: default; background: #111; }
+input::placeholder { color: #4e4e4e; }
 input.source-exif   { color: #e63946; }
 input.source-db     { color: #c47f2a; }
 input.source-manual { color: #fff; }
@@ -53,7 +53,7 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
 /* Header across the full width; below it the workspace: photo | divider | map.
    --split is the photo panel's share of the width (set and remembered by script.js). */
 #app {
-  --split: 60%;   /* the photo half; the bar and the workspace both divide here */
+  --split: 60%;   /* the photo half of the workspace (the bar above keeps its own 60:40) */
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -110,14 +110,14 @@ select option, select optgroup { background: #1a1a1a; color: #e0e0e0; }
   padding: 0;
   font-size: 13px;
   line-height: 1;
-  color: #666;
+  color: #858585;
   background: #141414;
   border: 1px solid #2a2a2a;
   border-radius: 3px;
   cursor: pointer;
   z-index: 2;
 }
-.splitter-chevron:hover:not(:disabled) { color: #ccc; background: #1e1e1e; }
+.splitter-chevron:hover:not(:disabled) { color: #d6d6d6; background: #1e1e1e; }
 
 /* While dragging, keep the map and canvas from swallowing pointer events */
 body.splitter-dragging { cursor: col-resize; user-select: none; }
@@ -172,11 +172,11 @@ body.splitter-dragging #image-canvas { pointer-events: none; }
   border: 1px solid #262626;
   border-radius: 4px;
   font-size: 11px;
-  color: #888;
+  color: #a3a3a3;
   white-space: nowrap;
   cursor: pointer;
 }
-.photo-tab:hover { color: #ccc; border-color: #333; }
+.photo-tab:hover { color: #d6d6d6; border-color: #333; }
 .photo-tab.active { background: #1e1e1e; border-color: #555; color: #eee; cursor: default; }
 .photo-tab:focus-visible { outline: 1px solid #777; outline-offset: 1px; }
 .photo-name-edit {
@@ -190,13 +190,13 @@ body.splitter-dragging #image-canvas { pointer-events: none; }
 .photo-tab-close, .photo-tab-close:hover:not(:disabled) {
   width: 20px; height: 20px; padding: 0; flex-shrink: 0;
   background: none; border: none; border-radius: 3px;
-  font-size: 14px; line-height: 1; color: #777;
+  font-size: 14px; line-height: 1; color: #949494;
 }
 .photo-tab-close:hover:not(:disabled) { background: #3a1515; color: #ff5555; }
 /* "+" as in TracePoint: a square button with a drawn plus */
 .photo-tab-add {
   width: 28px; height: 28px; padding: 0; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; color: #999;
+  display: flex; align-items: center; justify-content: center; color: #b0b0b0;
 }
 .photo-tab-add svg { width: 11px; height: 11px; display: block; }
 
@@ -217,14 +217,14 @@ body.splitter-dragging #image-canvas { pointer-events: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #aaa;
+  color: #bdbdbd;
   background: #151515;
   border: 1px solid #2a2a2a;
   border-radius: 4px;
   box-shadow: 0 2px 6px #0006;
 }
 .canvas-btn:hover:not(:disabled) { background: #222; color: #e0e0e0; }
-.canvas-btn:disabled { color: #444; opacity: 1; }
+.canvas-btn:disabled { color: #5a5a5a; opacity: 1; }
 .canvas-btn svg { width: 17px; height: 17px; }
 #drop-overlay:not(.hidden) ~ .canvas-tools { display: none; }   /* nothing to reset before a photo */
 
@@ -239,10 +239,10 @@ body.splitter-dragging #image-canvas { pointer-events: none; }
   align-items: center;
   justify-content: center;
   font-size: 13px;
-  color: #666;
+  color: #858585;
   flex-shrink: 0;
 }
-.icon-btn:hover:not(:disabled) { background: #1e1e1e; color: #ccc; border-color: #383838; }
+.icon-btn:hover:not(:disabled) { background: #1e1e1e; color: #d6d6d6; border-color: #383838; }
 a.icon-btn { text-decoration: none; }
 
 /* ─── STEP GUIDE (as in TracePoint and ShadowFinder) ────────── */
@@ -278,7 +278,7 @@ a.icon-btn { text-decoration: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #555;
+  color: #6e6e6e;
 }
 .guide-step svg { width: 20px; height: 20px; margin-right: 8px; }
 .guide-step.done, .guide-step.done:hover:not(:disabled) { color: #8a3a40; }
@@ -309,7 +309,7 @@ a.icon-btn { text-decoration: none; }
 }
 .step-hint:empty { display: none; }
 .step-hint.done { color: #a0dbb8; }
-.step-hint.muted { color: #888; }
+.step-hint.muted { color: #a3a3a3; }
 
 /* ─── IMAGE CONTAINER ───────────────────────────────────────── */
 #image-container {
@@ -340,7 +340,7 @@ a.icon-btn { text-decoration: none; }
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 10px;
   background: #111;
-  color: #666; font-size: 14px; letter-spacing: 0.5px;
+  color: #858585; font-size: 14px; letter-spacing: 0.5px;
   pointer-events: none;
   border: 2px dashed transparent;
   transition: color 0.2s, border-color 0.2s;
@@ -350,12 +350,12 @@ a.icon-btn { text-decoration: none; }
 #btn-browse, #btn-demo {
   pointer-events: auto;
   height: auto;
-  background: #1a1a1a; color: #555; border: 1px solid #2e2e2e;
+  background: #1a1a1a; color: #6e6e6e; border: 1px solid #2e2e2e;
   padding: 5px 14px; border-radius: 4px; font-size: 11px; letter-spacing: 0;
 }
-#btn-browse:hover, #btn-demo:hover { background: #222; color: #aaa; border-color: #444; }
-#btn-demo { padding: 3px 10px; font-size: 10px; color: #444; border-color: #262626; background: #161616; }
-.drop-or { font-size: 11px; color: #555; letter-spacing: 0; }
+#btn-browse:hover, #btn-demo:hover { background: #222; color: #bdbdbd; border-color: #444; }
+#btn-demo { padding: 3px 10px; font-size: 10px; color: #5a5a5a; border-color: #262626; background: #161616; }
+.drop-or { font-size: 11px; color: #6e6e6e; letter-spacing: 0; }
 #file-input { display: none; }
 
 /* ─── EXIF CHIP + CARD ──────────────────────────────────────── */
@@ -370,7 +370,7 @@ a.icon-btn { text-decoration: none; }
   cursor: help;
 }
 #btn-exif.has-data .lamp { text-decoration: underline dotted; text-underline-offset: 3px; }
-#btn-exif.has-data .lamp:not(.active) { color: #888; border-color: #383838; }
+#btn-exif.has-data .lamp:not(.active) { color: #a3a3a3; border-color: #383838; }
 
 #exif-card {
   display: none;
@@ -397,24 +397,24 @@ a.icon-btn { text-decoration: none; }
 .exif-lbl {
   flex: 0 0 82px;
   font-size: 9px;
-  color: #888;
+  color: #a3a3a3;
   text-transform: uppercase;
   letter-spacing: 0.7px;
   user-select: none;
 }
 .exif-val {
   font-size: 11px;
-  color: #555;
+  color: #6e6e6e;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: color 0.2s;
 }
-.exif-val.has-data { color: #ccc; }
-.exif-sub { font-size: 9px; color: #555; white-space: nowrap; }
+.exif-val.has-data { color: #d6d6d6; }
+.exif-sub { font-size: 9px; color: #6e6e6e; white-space: nowrap; }
 #exif-gps-val.clickable {
-  color: #ccc;
+  color: #d6d6d6;
   cursor: pointer;
   text-decoration: underline;
   text-decoration-style: dotted;
@@ -469,7 +469,7 @@ a.icon-btn { text-decoration: none; }
 #diagram-svg .diag-hit               { stroke: transparent; stroke-width: 16; fill: none; }
 
 .diag-lbl {
-  fill: #6e6e6e;
+  fill: #8a8a8a;
   font-size: 13px;
   font-family: system-ui, sans-serif;
   transition: fill 0.4s ease;
@@ -481,9 +481,9 @@ a.icon-btn { text-decoration: none; }
 .diag-lbl.result  { fill: #e63946; font-weight: 600; }
 
 /* ─── INPUT BAR ─────────────────────────────────────────────── */
-/* One solid bar across the full width, split where the workspace is split (--split on #app):
-   over the photo camera · optics · measure (with the result); a strip continuing the divider;
-   over the map the diagram and the map controls.
+/* One solid bar across the full width, fixed: it does not follow the divider (dragging it or
+   hiding the photo moves only the photo and the map). Left camera · optics · measure (with the
+   result), a double line, right the diagram and the map controls.
    The diagram sets the height: change --diagram-h and the whole bar follows. */
 #input-bar {
   position: relative;
@@ -497,8 +497,8 @@ a.icon-btn { text-decoration: none; }
   border-bottom: 1px solid #2a2a2a;
   background: #0d0d0d;
 }
-/* Same flex values as #photo-panel / #pane-splitter / #map-panel, so the halves line up */
-.bar-photo { flex: 0 1 var(--split); min-width: 560px; display: flex; }   /* no overflow clip: the EXIF card hangs below */
+/* The divider's default share (60:40), whatever the divider does */
+.bar-photo { flex: 0 1 60%; min-width: 560px; display: flex; }   /* no overflow clip: the EXIF card hangs below */
 .bar-split { flex: 0 0 7px; background: #0d0d0d; border-left: 1px solid #2a2a2a; border-right: 1px solid #2a2a2a; }
 .bar-map   { flex: 1 1 0; min-width: 260px; display: flex; }
 
@@ -518,7 +518,7 @@ a.icon-btn { text-decoration: none; }
 .facts.map-facts { grid-template-columns: repeat(3, 1fr); }   /* zoom · bearing · tilt on one line */
 
 /* Optics: label / value pairs in two columns, three rows */
-.optics-db { font-size: 10px; color: #666; white-space: nowrap; }
+.optics-db { font-size: 10px; color: #858585; white-space: nowrap; }
 .optics-db.ok       { color: #5a8f57; }
 .optics-db.inferred { color: #c47f2a; }
 .facts {
@@ -539,7 +539,7 @@ a.icon-btn { text-decoration: none; }
 .fact dt {
   flex-shrink: 0;
   font-size: 9px;
-  color: #666;
+  color: #858585;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   user-select: none;
@@ -547,13 +547,13 @@ a.icon-btn { text-decoration: none; }
 .fact dd {
   min-width: 0;
   font-size: 11px;
-  color: #444;
+  color: #5a5a5a;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.fact dd.has-data { color: #ccc; }
+.fact dd.has-data { color: #d6d6d6; }
 
 /* Slot head: title on the left, its indicator or toggle on the right */
 .slot-head {
@@ -565,7 +565,7 @@ a.icon-btn { text-decoration: none; }
 }
 .slot-title {
   font-size: 10px;
-  color: #999;
+  color: #b0b0b0;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   font-weight: 700;
@@ -585,7 +585,7 @@ a.icon-btn { text-decoration: none; }
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: #4a4a4a;
+  color: #5e5e5e;
   background: #121212;
   border: 1px solid #242424;
   border-radius: 11px;
@@ -608,7 +608,7 @@ a.icon-btn { text-decoration: none; }
 
 .field-label {
   font-size: 10px;
-  color: #999;
+  color: #b0b0b0;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   font-weight: 600;
@@ -619,13 +619,13 @@ a.icon-btn { text-decoration: none; }
 }
 .field-source {
   font-size: 10px;
-  color: #777;
+  color: #949494;
   font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.field-source.muted         { color: #666; }
+.field-source.muted         { color: #858585; }
 .field-source.source-db     { color: #c47f2a; }
 .field-source.source-manual { color: #fff; }
 
@@ -660,7 +660,7 @@ a.icon-btn { text-decoration: none; }
   position: absolute;
   right: 8px;
   font-size: 9px;
-  color: #888;
+  color: #a3a3a3;
   font-weight: 600;
   letter-spacing: 0.4px;
   pointer-events: none;
@@ -673,7 +673,7 @@ a.icon-btn { text-decoration: none; }
   width: 100%;
   text-align: left;
   font-size: 12px;
-  color: #666;
+  color: #858585;
   background: #1a1a1a;
   border: 1px solid #383838;
   border-radius: 4px;
@@ -683,7 +683,7 @@ a.icon-btn { text-decoration: none; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-#camera-trigger:hover:not(:disabled) { background: #222; color: #ccc; border-color: #484848; }
+#camera-trigger:hover:not(:disabled) { background: #222; color: #d6d6d6; border-color: #484848; }
 #camera-trigger.has-selection { color: #c47f2a; border-color: color-mix(in srgb, #c47f2a 45%, #383838); }   /* a camera chosen: the DB lamp's amber */
 
 /* The camera button and its ×, which undoes the choice (shown once there is one) */
@@ -700,7 +700,7 @@ a.icon-btn { text-decoration: none; }
   padding: 0;
   font-size: 14px;
   line-height: 18px;
-  color: #777;
+  color: #949494;
   background: transparent;
   border: 1px solid transparent;
   border-radius: 3px;
@@ -742,7 +742,7 @@ a.icon-btn { text-decoration: none; }
   outline: none;
   z-index: 2;
 }
-#cam-filter::placeholder { color: #666; }
+#cam-filter::placeholder { color: #858585; }
 #cam-filter:focus { border-bottom-color: #555; }
 
 /* Section headers: a band of their own; the brand sections' stay pinned under the search */
@@ -767,7 +767,7 @@ a.icon-btn { text-decoration: none; }
 /* Typical cameras: a labelled row per kind, chips in it */
 .cam-quick { padding-bottom: 8px; background: #1b1b1b; border-bottom: 1px solid #2e2e2e; }
 .cam-quick-row { display: flex; align-items: baseline; gap: 8px; padding: 7px 12px 0; }
-.cam-quick-lbl { flex: 0 0 48px; font-size: 10px; color: #777; }
+.cam-quick-lbl { flex: 0 0 48px; font-size: 10px; color: #949494; }
 .cam-chips { display: flex; flex-wrap: wrap; gap: 5px; }
 .cam-chip {
   padding: 4px 9px;
@@ -781,8 +781,8 @@ a.icon-btn { text-decoration: none; }
 }
 .cam-chip:hover { color: #fff; background: #2b2b2b; border-color: #5a5a5a; }
 .cam-chip.selected { color: var(--pick); background: color-mix(in srgb, var(--pick) 12%, #232323); border-color: var(--pick); }
-.cam-chip-note { color: #707070; }
-.cam-chip:hover .cam-chip-note { color: #a8a8a8; }
+.cam-chip-note { color: #8c8c8c; }
+.cam-chip:hover .cam-chip-note { color: #bcbcbc; }
 .cam-chip.selected .cam-chip-note { color: color-mix(in srgb, var(--pick) 70%, #888); }
 
 .cam-brand { border-bottom: 1px solid #222; }
@@ -794,7 +794,7 @@ a.icon-btn { text-decoration: none; }
   justify-content: space-between;
   padding: 7px 12px;
   font-size: 11px;
-  color: #bbb;
+  color: #c9c9c9;
   cursor: pointer;
   user-select: none;
   border-left: 2px solid transparent;
@@ -808,14 +808,14 @@ a.icon-btn { text-decoration: none; }
   padding: 0 6px;
   font-size: 9px;
   line-height: 15px;
-  color: #888;
+  color: #a3a3a3;
   background: #252525;
   border-radius: 8px;
 }
-.cam-brand.open > .cam-brand-row .cam-count { color: #ccc; background: #333; }
+.cam-brand.open > .cam-brand-row .cam-count { color: #d6d6d6; background: #333; }
 
-.cam-arrow { font-size: 11px; color: #666; transition: transform 0.18s ease; flex-shrink: 0; }
-.cam-brand.open > .cam-brand-row .cam-arrow { transform: rotate(90deg); color: #bbb; }
+.cam-arrow { font-size: 11px; color: #858585; transition: transform 0.18s ease; flex-shrink: 0; }
+.cam-brand.open > .cam-brand-row .cam-arrow { transform: rotate(90deg); color: #c9c9c9; }
 
 .cam-models { display: none; background: #121212; border-left: 2px solid #333; }
 .cam-brand.open > .cam-models { display: block; }
@@ -823,7 +823,7 @@ a.icon-btn { text-decoration: none; }
 .cam-model {
   padding: 6px 14px 6px 22px;
   font-size: 11px;
-  color: #999;
+  color: #b0b0b0;
   cursor: pointer;
   user-select: none;
   display: flex;
@@ -843,7 +843,7 @@ a.icon-btn { text-decoration: none; }
 }
 .cam-conf--ok      { color: #5a8f57; }
 .cam-conf--inferred,
-.cam-conf--unknown  { color: #666; }
+.cam-conf--unknown  { color: #858585; }
 
 /* ─── RESULT ────────────────────────────────────────────────── */
 /* Third field of the measure slot: the value the other two give, on the same line as the
@@ -870,7 +870,7 @@ a.icon-btn { text-decoration: none; }
 #result-value {
   font-size: 22px;
   font-weight: 700;
-  color: #444;
+  color: #5a5a5a;
   letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums;
   transition: color 0.35s;
@@ -880,14 +880,14 @@ a.icon-btn { text-decoration: none; }
 
 .result-unit {
   font-size: 13px;
-  color: #444;
+  color: #5a5a5a;
   font-weight: 400;
   transition: color 0.35s;
 }
-#result-bar.has-result .result-unit { color: #aaa; }
+#result-bar.has-result .result-unit { color: #bdbdbd; }
 
 #result-eq { font-family: monospace; font-size: 9px; min-height: 13px; }
-#result-bar.has-result #result-eq { color: #888; }
+#result-bar.has-result #result-eq { color: #a3a3a3; }
 
 /* Solve for: last, after the result it decides, set off by a line */
 .measure-solve { padding-left: 12px; border-left: 1px solid #1e1e1e; }
@@ -904,7 +904,7 @@ a.icon-btn { text-decoration: none; }
 /* Map slot (right end of the bar): basemap in its head, coordinate paste below.
    The reset is on the map (top left), the hint at the bottom of the map. */
 #map-tile-btns { display: flex; gap: 4px; flex-shrink: 0; }
-.tile-btn:hover:not(:disabled) { background: #1e1e1e; color: #ccc; border-color: #383838; }
+.tile-btn:hover:not(:disabled) { background: #1e1e1e; color: #d6d6d6; border-color: #383838; }
 .tile-btn.active-tile, .tile-btn.active-tile:hover:not(:disabled) { border-color: #484848; color: #e0e0e0; background: #1e1e1e; }
 
 /* ─── SOLVE MODE TOGGLE (in the measure slot's head) ─────────── */
@@ -924,12 +924,12 @@ a.icon-btn { text-decoration: none; }
   letter-spacing: 0.4px;
   background: transparent;
   border: 1px solid #2a2a2a;
-  color: #888;
+  color: #a3a3a3;
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.solve-btn:hover { background: #1e1e1e; color: #ccc; border-color: #383838; }
+.solve-btn:hover { background: #1e1e1e; color: #d6d6d6; border-color: #383838; }
 .solve-btn.active-solve { border-color: #666; color: #eee; background: #262626; }
 .tile-btn { padding: 0 7px; }
 
@@ -949,12 +949,12 @@ a.icon-btn { text-decoration: none; }
   height: 24px;
   padding: 0 8px;
   font-size: 11px;
-  color: #aaa;
+  color: #bdbdbd;
   background: #121212;
   border-color: #242424;
 }
 #coord-input:focus { color: #e0e0e0; }
-#coord-input::placeholder { color: #555; }
+#coord-input::placeholder { color: #6e6e6e; }
 
 #map-container { flex: 1; min-height: 0; background: #1a1a1a; }
 
@@ -1023,10 +1023,10 @@ a.icon-btn { text-decoration: none; }
   flex-direction: column;
   gap: 8px;
   font-size: 14px;
-  color: #ccc;
+  color: #d6d6d6;
   line-height: 1.5;
 }
-.help-steps li::marker { color: #777; }
+.help-steps li::marker { color: #949494; }
 
 .help-shortcuts {
   display: flex;
@@ -1035,7 +1035,7 @@ a.icon-btn { text-decoration: none; }
   gap: 6px 16px;
   margin-top: 16px;
   font-size: 12px;
-  color: #777;
+  color: #949494;
   flex-wrap: wrap;
 }
 kbd {
@@ -1072,13 +1072,13 @@ kbd {
 .maplibregl-ctrl-top-right .maplibregl-ctrl { margin: 10px 10px 0 0; }
 .maplibregl-ctrl-top-left .maplibregl-ctrl  { margin: 10px 0 0 10px; }
 .maplibregl-ctrl-top-left .maplibregl-ctrl + .maplibregl-ctrl { margin-top: 6px; }
-.sa-map-btn { display: flex; align-items: center; justify-content: center; color: #aaa; }
+.sa-map-btn { display: flex; align-items: center; justify-content: center; color: #bdbdbd; }
 .sa-map-btn svg { width: 18px; height: 18px; }
 .sa-gps-btn svg { width: 16px; height: 16px; }
-.maplibregl-ctrl-group button.sa-map-btn:disabled { color: #444; cursor: default; opacity: 1; }
+.maplibregl-ctrl-group button.sa-map-btn:disabled { color: #5a5a5a; cursor: default; opacity: 1; }
 .maplibregl-ctrl-group button.sa-spin-btn.active { color: #e0e0e0; background-color: #262626; }
-.maplibregl-ctrl-attrib.maplibregl-compact { background: #151515cc; color: #888; }
-.maplibregl-ctrl-attrib a { color: #aaa; }
+.maplibregl-ctrl-attrib.maplibregl-compact { background: #151515cc; color: #a3a3a3; }
+.maplibregl-ctrl-attrib a { color: #bdbdbd; }
 
 /* GPS marker from the photo's EXIF */
 .gps-marker {
@@ -1154,7 +1154,7 @@ kbd {
   }
   #small-screen svg { width: 56px; height: 56px; margin-bottom: 8px; opacity: 0.9; }
   #small-screen p { font-size: 15px; font-weight: 600; color: #e0e0e0; }
-  #small-screen .small-screen-sub { max-width: 340px; font-size: 12px; font-weight: 400; color: #777; line-height: 1.6; }
+  #small-screen .small-screen-sub { max-width: 340px; font-size: 12px; font-weight: 400; color: #949494; line-height: 1.6; }
 }
 
 /* A typed value that is not a positive number: ignored by the calculation, shown as such */
@@ -1176,12 +1176,12 @@ input.invalid,
 }
 .map-ctx-head {
   padding: 8px 14px; font-family: monospace; font-size: 11px;
-  color: #ccc; background: #0d0d0d; border-bottom: 1px solid #2a2a2a;
+  color: #d6d6d6; background: #0d0d0d; border-bottom: 1px solid #2a2a2a;
   user-select: text;
 }
 .map-ctx-item {
   display: block; width: 100%; box-sizing: border-box; text-align: left;
-  padding: 8px 14px; color: #bbb; text-decoration: none;
+  padding: 8px 14px; color: #c9c9c9; text-decoration: none;
   background: none; border: none; border-radius: 0; cursor: pointer; font: inherit;
 }
 .map-ctx-item:hover, .map-ctx-item:focus-visible { background: #222; color: #fff; outline: none; }
@@ -1194,15 +1194,15 @@ input.invalid,
   display: flex; align-items: flex-start; gap: 9px;
   margin-top: 16px; padding: 10px 14px;
   background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px;
-  font-size: 12px; color: #aaa; line-height: 1.55;
+  font-size: 12px; color: #bdbdbd; line-height: 1.55;
 }
 .help-warning b { color: #ddd; font-weight: 600; }
-.help-warning-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; color: #999; }
+.help-warning-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; color: #b0b0b0; }
 .help-related {
   margin-top: 16px; padding-top: 12px; border-top: 1px solid #2a2a2a;
-  font-size: 11px; color: #888; line-height: 1.7;
+  font-size: 11px; color: #a3a3a3; line-height: 1.7;
 }
-.help-related a { color: #ccc; text-decoration: none; }
+.help-related a { color: #d6d6d6; text-decoration: none; }
 .help-related a:hover { text-decoration: underline; }
 .related-logo { width: 14px; height: 14px; border-radius: 3px; vertical-align: -3px; margin-right: 5px; }
 
@@ -1224,12 +1224,12 @@ input.invalid,
 .autosave-ctl {
   display: flex; align-items: center; gap: 8px;
   margin-right: 28px;   /* keeps the browser's saving apart from demo and links */
-  font-size: 11px; color: #888; user-select: none;
+  font-size: 11px; color: #a3a3a3; user-select: none;
 }
 .autosave-ctl label { cursor: pointer; }
 .autosave-ctl label:hover { color: #ddd; }
-.autosave-ctl.not-owner label { color: #555; }
-.btn-demo-top { height: 28px; padding: 0 12px; font-size: 11px; background: transparent; color: #888; border-color: #2a2a2a; }
+.autosave-ctl.not-owner label { color: #6e6e6e; }
+.btn-demo-top { height: 28px; padding: 0 12px; font-size: 11px; background: transparent; color: #a3a3a3; border-color: #2a2a2a; }
 .btn-demo-top:hover:not(:disabled) { background: #1e1e1e; color: #ddd; border-color: #383838; }
 .btn-clear-saved { font-size: 11px; padding: 0 10px; height: 24px; }
 .btn-clear-saved:not(:disabled):hover { color: #ff5555; border-color: #ff5555; }
@@ -1269,7 +1269,7 @@ input.invalid,
 .search-list:hover { opacity: 1; }
 .search-row {
   display: flex; align-items: center; gap: 8px;
-  padding: 6px 6px 6px 10px; font-size: 11px; color: #bbb;
+  padding: 6px 6px 6px 10px; font-size: 11px; color: #c9c9c9;
   cursor: pointer;
 }
 .search-row:hover { background: #222; color: #fff; }
@@ -1280,16 +1280,16 @@ input.invalid,
 }
 .search-coords { flex: 1; font-variant-numeric: tabular-nums; }
 .search-del, .search-del:hover:not(:disabled) {
-  background: none; border: none; color: #555; width: auto; height: auto;
+  background: none; border: none; color: #6e6e6e; width: auto; height: auto;
   padding: 0 4px; font-size: 13px; line-height: 1; cursor: pointer;
 }
 .search-del:hover:not(:disabled) { color: #ff5555; }
 .search-clear {
-  padding: 6px 10px; font-size: 10px; color: #666; text-align: right;
+  padding: 6px 10px; font-size: 10px; color: #858585; text-align: right;
   border-top: 1px solid #222; cursor: pointer;
 }
 .search-clear:hover { color: #fff; }
 /* "Open in…" and its submenu (as in TracePoint) */
 .map-ctx-more { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.map-ctx-more::after { content: "›"; color: #777; font-size: 14px; line-height: 1; }
+.map-ctx-more::after { content: "›"; color: #949494; font-size: 14px; line-height: 1; }
 .map-ctx-sub { min-width: 150px; z-index: 1001; }
