@@ -1213,15 +1213,18 @@ input.invalid,
 
 /* Map points (camera, object): draggable, above the photo's GPS marker */
 .gps-marker { z-index: 1; }
-.map-pt {
-  z-index: 2;
-  width: 14px; height: 14px; border-radius: 50%;
-  background: #e63946; border: 2px solid #fff;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
-  cursor: grab;
-}
+/* The camera: a dark badge with a white camera in a red rim. The object: a red crosshair
+   with a dark halo, open in the middle so the spot under it stays visible. */
+.map-pt { z-index: 2; cursor: grab; line-height: 0; }
 .map-pt:active { cursor: grabbing; }
-.map-pt[data-role="camera"] { background: #111; border-color: #e63946; }
+.map-pt svg { display: block; overflow: visible; }
+.map-pt[data-role="camera"] {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: #111; border: 2px solid #e63946;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
+}
+.map-pt[data-role="object"] { width: 26px; height: 26px; }
 
 /* Header, right: Autosave switch and Clear, a wide gap, then Try the Demo before GitHub and ? */
 .autosave-ctl {

@@ -1921,6 +1921,17 @@ function renderMarks() {
 // mode) and B (the object). Above the photo's GPS marker, so a point set on it stays on top
 // and can be grabbed. Dragging updates the line, the distance or the ring as it moves.
 const pointMarkers = { A: null, B: null };
+// Their symbols: a camera in a badge, a crosshair centred on the object's spot
+const POINT_ICONS = {
+  camera: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round">' +
+          '<path d="M2 8h5l2-3h6l2 3h5v12H2z"/><circle cx="12" cy="13.5" r="3.6"/></svg>',
+  object: '<svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke-linecap="round">' +
+          '<g stroke="#000" stroke-opacity="0.55" stroke-width="4.5"><circle cx="13" cy="13" r="7"/>' +
+          '<path d="M13 1.5v6M13 18.5v6M1.5 13h6M18.5 13h6"/></g>' +
+          '<g stroke="#e63946" stroke-width="2"><circle cx="13" cy="13" r="7"/>' +
+          '<path d="M13 1.5v6M13 18.5v6M1.5 13h6M18.5 13h6"/></g>' +
+          '<circle cx="13" cy="13" r="1.6" fill="#fff" stroke="#000" stroke-opacity="0.55"/></svg>'
+};
 let pointDragging = null;
 
 function syncPointMarkers() {
@@ -1942,8 +1953,9 @@ function syncPointMarkers() {
       m.setLngLat([p.lng, p.lat]);
     }
     const role = key === 'B' || solveMode === 'distance' ? 'object' : 'camera';
-    m.getElement().dataset.role = role;
-    m.getElement().title = `The ${role} · drag to move`;
+    const el = m.getElement();
+    if (el.dataset.role !== role) { el.dataset.role = role; el.innerHTML = POINT_ICONS[role]; }
+    el.title = `The ${role} · drag to move`;
   }
 }
 
