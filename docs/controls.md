@@ -45,10 +45,11 @@ HEIC photos cannot be decoded by most browsers: export them as JPEG (the EXIF st
 
 | Control | Action |
 |---|---|
-| Camera list | Search on top. Under it, **Typical cameras** for when the model is not known: *Phone* (main, ultrawide, 3×), *Camera* (APS-C, full frame: then type the lens focal length), *Other* (Unknown gives a range; **By hand** to type the values, which typing in those fields also does). Then every model by brand |
-| × on the camera button | Undoes the choice: the values it brought go, what the photo's EXIF says stays |
-| **Unknown camera** | The result becomes a range over 24–35 mm equivalent; the ring becomes a band |
-| Sensor W / H, focal length | Typed values switch the camera to Custom. Zero or negative values are ignored and underlined |
+| Camera list | Search on top. Under it, **Typical cameras** for when the model is not known: *Phone* (main, ultrawide, 3×), *Camera* (APS-C, full frame: then type the lens focal length), *Other* (Unknown gives a range; **By hand** to type the values, which typing a sensor size also does). Then every model by brand. `Esc` clears the search, then closes the list |
+| × on the camera button | Undoes the choice: the values it brought go, what the photo's EXIF says (focal length, and the sensor size from its 35 mm equivalent) comes back |
+| **Unknown camera** | The result becomes a range over 24–35 mm equivalent; the ring becomes a band. Typing a focal length leaves it for *By hand* |
+| Sensor W / H | Typed values switch the camera to *By hand*. Zero or negative values are ignored and underlined |
+| Focal length | Typed, it is the lens in use: the chosen camera stays (a body's lens, a phone's other camera) |
 | **EXIF** lamp | Hover or click for the photo's camera, focal length, size and GPS. Click the GPS value to copy it |
 
 ## Measure
@@ -57,6 +58,8 @@ HEIC photos cannot be decoded by most browsers: export them as JPEG (the EXIF st
 |---|---|
 | **Solve for: Size** | Distance in, size out |
 | **Solve for: Distance** | Known size in, distance out, and the ring on the map |
+
+Switching mode clears the map points and the distance they measured; a typed distance stays.
 
 ## Diagram
 
@@ -92,6 +95,6 @@ Drag the bar between photo and map to resize (remembered). Double-click resets t
 | `R` | Reset the marks |
 | `N` | Turn the map north up and flat (no tilt) |
 | `Ctrl+V` | Paste a photo or coordinates |
-| `Esc` | Close the help, or the map menu |
+| `Esc` | Close the help, the map menu or the camera list |
 
 `R` and `N` go by key position, so they stay put on German or French layouts.

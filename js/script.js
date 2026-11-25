@@ -108,6 +108,7 @@ let resultRange    = null;     // unknown camera: [low, high] of the result (m)
 let solvedRange    = null;     // distance mode with an unknown camera: [near, far] (m), the ring is a band
 let objectRing     = false;    // distance-mode map ring placed (drawn by renderMarks)
 let exifFocal    = null;   // focal length from the photo's EXIF (mm): wins over the database's
+let exifSensor   = null;   // {w, h} (mm) from the EXIF 35 mm equivalent, when the database camera did not fit: × brings it back
 let exifGPS      = null;
 let loadSeq      = 0;      // bumped per photo, so a late EXIF read of an earlier photo is dropped
 let autosaveDb = null, autosaveTimer = null, autosaveReady = false, autosaveWarned = false;   // AUTOSAVE below
@@ -318,17 +319,25 @@ function applyExifSensor(f, f35) {
   if (dbPitch !== null && Math.abs(dbPitch / (longMm / Math.max(W, H)) - 1) <= EXIF_SENSOR_TOLERANCE) return;
 
   const dbCam = camIdx !== null && camIdx !== CUSTOM_IDX ? CAMERA_DB[camIdx] : null;
-  sensorW = +longMm.toFixed(2);
-  sensorH = +shortMm.toFixed(2);
-  document.getElementById('sensor-w-input').value = sensorW;
-  document.getElementById('sensor-h-input').value = sensorH;
-  setInputSource('sensor-w-input', 'exif');
-  setInputSource('sensor-h-input', 'exif');
+  exifSensor = { w: +longMm.toFixed(2), h: +shortMm.toFixed(2) };
+  setExifSensorFields();
   if (dbCam) {
     clearCameraSelection();
     showToast(`This photo does not match the ${dbCam.label} main camera (another lens, or a crop). ` +
               'Sensor size taken from its 35 mm equivalent instead.', 'success');
   }
+}
+
+// The sensor size the EXIF gave, into the fields and the state
+function setExifSensorFields() {
+  sensorW = exifSensor.w;
+  sensorH = exifSensor.h;
+  ['sensor-w-input', 'sensor-h-input'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.value = i ? sensorH : sensorW;
+    el.classList.remove('invalid');
+    setInputSource(id, 'exif');
+  });
 }
 
 /* ─── CAMERA AUTOCOMPLETE FROM EXIF ─────────────────────────── */
@@ -529,7 +538,7 @@ function captureState() {
   return {
     markA, markB, solveMode, unknownCam, sensorW, sensorH, focalLength, distance, knownSize,
     camLabel: camIdx !== null ? CAMERA_DB[camIdx].label : null,
-    exifFocal, exifGPS, exifCells, exifEq: $('exif-focal-eq').textContent, inputs,
+    exifFocal, exifSensor, exifGPS, exifCells, exifEq: $('exif-focal-eq').textContent, inputs,
     mapPtA, mapPtB, objectRing, distanceFromMap,
     view: img && viewW ? { scale, offsetX, offsetY, viewW, viewH } : null,
     hasResult: resultValue !== null
@@ -549,6 +558,7 @@ function applyState(s) {
   distance = s.distance ?? null; knownSize = s.knownSize ?? null;
   distanceFromMap = !!s.distanceFromMap;
   exifFocal = s.exifFocal ?? null;
+  exifSensor = s.exifSensor?.w > 0 && s.exifSensor?.h > 0 ? s.exifSensor : null;
   INPUT_IDS.forEach(id => {
     const saved = s.inputs?.[id];
     $(id).value = saved?.v ?? '';
@@ -994,6 +1004,7 @@ function clearCamera() {
     if (!document.getElementById(id).classList.contains('source-exif')) clearField(id);
   });
   if (!document.getElementById('sensor-w-input').classList.contains('source-exif')) { sensorW = null; sensorH = null; }
+  if (exifSensor) setExifSensorFields();   // the size the photo's EXIF gave comes back
   const f = document.getElementById('focal-length-input');
   if (exifFocal !== null) {
     focalLength = exifFocal;
@@ -1119,7 +1130,10 @@ function populateCameraDropdown() {
 
   filterInput.addEventListener('input', () => applyFilter(filterInput.value));
   filterInput.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { filterInput.value = ''; applyFilter(''); }
+    if (e.key !== 'Escape') return;
+    // Esc clears the search; with nothing typed, it closes the list
+    if (filterInput.value) { filterInput.value = ''; applyFilter(''); }
+    else { closeCameraPanel(); trigger.focus(); }
   });
   filterInput.addEventListener('click', e => e.stopPropagation());
 
@@ -1302,6 +1316,8 @@ document.getElementById('sensor-h-input').addEventListener('input', function () 
 document.getElementById('focal-length-input').addEventListener('input', function () {
   focalLength = positiveValue(this);
   setInputSource('focal-length-input', focalLength ? 'manual' : '');
+  // Unknown ignores the lens: a typed one counts, so the camera becomes "by hand" (the guide then asks for the sensor)
+  if (unknownCam && focalLength) jumpToCustom();
   compute();
 });
 document.getElementById('distance-input').addEventListener('input', function () {
@@ -1315,8 +1331,14 @@ document.getElementById('known-size-input').addEventListener('input', function (
 });
 
 /* ─── SOLVE MODE (size ⇄ distance) ───────────────────────────── */
+// Switching mode takes the map points away, and with them the distance they gave (a typed one stays)
 function applyMode() {
   updateModeUI();
+  if (distanceFromMap) {
+    distance = null;
+    distanceFromMap = false;
+    document.getElementById('distance-input').value = '';
+  }
   resetMapPoints();
   compute();
   scheduleAutosave();
@@ -1333,7 +1355,11 @@ function updateModeUI() {
   document.getElementById('result-label').textContent       = distMode ? 'Distance to object' : 'Real-world size';
 }
 document.querySelectorAll('.solve-btn').forEach(btn => {
-  btn.addEventListener('click', () => { solveMode = btn.dataset.mode; applyMode(); });
+  btn.addEventListener('click', () => {
+    if (btn.dataset.mode === solveMode) return;   // already in it: the map points stay
+    solveMode = btn.dataset.mode;
+    applyMode();
+  });
 });
 applyMode();
 
@@ -1585,7 +1611,7 @@ function resetMarks() {
 // points. Shared by "new photo" and by loading a photo over another one. The caller recomputes.
 function resetPhotoState() {
   clearMarks();
-  exifFocal = null; exifGPS = null;
+  exifFocal = null; exifSensor = null; exifGPS = null;
   syncGpsButton();
   focalLength = null; sensorW = null; sensorH = null; distance = null; distanceFromMap = false;
   knownSize = null; solvedDistance = null;
@@ -1921,16 +1947,17 @@ function renderMarks() {
 // mode) and B (the object). Above the photo's GPS marker, so a point set on it stays on top
 // and can be grabbed. Dragging updates the line, the distance or the ring as it moves.
 const pointMarkers = { A: null, B: null };
-// Their symbols: a camera in a badge, a crosshair centred on the object's spot
+// Their symbols: the same badge (dark, red rim), with a white camera or a white crosshair.
+// Badge, rim and symbol are one drawing around one centre (13, 13): they cannot drift apart.
+const pointBadge = glyph => '<svg width="26" height="26" viewBox="0 0 26 26">' +
+  '<circle cx="13" cy="13" r="12.5" fill="#000" fill-opacity="0.5"/>' +
+  '<circle cx="13" cy="13" r="10.5" fill="#111" stroke="#e63946" stroke-width="2"/>' + glyph + '</svg>';
 const POINT_ICONS = {
-  camera: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round">' +
-          '<path d="M2 8h5l2-3h6l2 3h5v12H2z"/><circle cx="12" cy="13.5" r="3.6"/></svg>',
-  object: '<svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke-linecap="round">' +
-          '<g stroke="#000" stroke-opacity="0.55" stroke-width="4.5"><circle cx="13" cy="13" r="7"/>' +
-          '<path d="M13 1.5v6M13 18.5v6M1.5 13h6M18.5 13h6"/></g>' +
-          '<g stroke="#e63946" stroke-width="2"><circle cx="13" cy="13" r="7"/>' +
-          '<path d="M13 1.5v6M13 18.5v6M1.5 13h6M18.5 13h6"/></g>' +
-          '<circle cx="13" cy="13" r="1.6" fill="#fff" stroke="#000" stroke-opacity="0.55"/></svg>'
+  camera: pointBadge('<g transform="translate(7 7) scale(0.5)" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round">' +
+                     '<path d="M2 8h5l2-3h6l2 3h5v11H2z"/><circle cx="12" cy="13.5" r="3.6"/></g>'),
+  object: pointBadge('<g fill="none" stroke="#fff" stroke-width="1.3" stroke-linecap="round">' +
+                     '<circle cx="13" cy="13" r="4.2"/><path d="M13 6.5v3.2M13 16.3v3.2M6.5 13h3.2M16.3 13h3.2"/></g>' +
+                     '<circle cx="13" cy="13" r="1.1" fill="#fff"/>')
 };
 let pointDragging = null;
 
@@ -2427,6 +2454,7 @@ document.addEventListener('keydown', e => {
     case 'Escape':
       document.getElementById('help-card').style.display = 'none';
       hideMapMenu();
+      closeCameraPanel();
       break;
   }
 });
