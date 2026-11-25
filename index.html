@@ -76,7 +76,10 @@
           <span id="src-custom" class="lamp lamp-custom" title="Typed by hand">Custom</span>
         </div>
       </div>
-      <button id="camera-trigger" type="button">— select camera / phone —</button>
+      <div class="camera-pick">
+        <button id="camera-trigger" type="button">— select camera / phone —</button>
+        <button id="camera-clear" type="button" title="Clear the camera choice" aria-label="Clear the camera choice">×</button>
+      </div>
       <div class="input-row">
         <div class="labeled-input">
           <input type="number" id="sensor-w-input" placeholder="0.00" min="0.1" step="0.01" autocomplete="off" aria-label="Sensor width in mm">

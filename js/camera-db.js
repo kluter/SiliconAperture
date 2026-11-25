@@ -1078,5 +1078,5 @@ const CAMERA_DB = [
   { brand:"Phase One",  label:"IQ4 100MP (645 medium format)", sensor_w:53.4, sensor_h:40.0, focal_length:null, focal_length_eq:null },
 
   // ── CUSTOM ───────────────────────────────────────────────────────────────
-  { brand:"—", label:"Custom sensor dimensions …", sensor_w:null, sensor_h:null, focal_length:null, focal_length_eq:null },
+  { brand:"—", label:"Custom: entered by hand", sensor_w:null, sensor_h:null, focal_length:null, focal_length_eq:null },
 ];

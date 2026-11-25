@@ -45,7 +45,8 @@ HEIC photos cannot be decoded by most browsers: export them as JPEG (the EXIF st
 
 | Control | Action |
 |---|---|
-| Camera list | **Presets** first (phone main, ultrawide, telephoto, APS-C, full frame, Unknown), then **Specific model…** by brand. Type to filter |
+| Camera list | Search on top. Under it, **Typical cameras** for when the model is not known: *Phone* (main, ultrawide, 3×), *Camera* (APS-C, full frame: then type the lens focal length), *Other* (Unknown gives a range; **By hand** to type the values, which typing in those fields also does). Then every model by brand |
+| × on the camera button | Undoes the choice: the values it brought go, what the photo's EXIF says stays |
 | **Unknown camera** | The result becomes a range over 24–35 mm equivalent; the ring becomes a band |
 | Sensor W / H, focal length | Typed values switch the camera to Custom. Zero or negative values are ignored and underlined |
 | **EXIF** lamp | Hover or click for the photo's camera, focal length, size and GPS. Click the GPS value to copy it |

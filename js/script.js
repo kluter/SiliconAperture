@@ -119,14 +119,23 @@ const CUSTOM_IDX = CAMERA_DB.findIndex(c => c.brand === '—');
 // Presets, shown first in the camera list: typical values when the exact model is not known.
 // Phone sensors are typical current 4:3 ones; focal_length = eq × sensor diagonal / 43.27, as in camera-db.js.
 // "Unknown" has no values: the result is a range over 24–35 mm equivalent (unknownCam).
+// label: on the camera button once chosen. group, chip, chipNote: the quick pick in the camera
+// list, one labelled row per group (the "Other" row also offers entering the values by hand).
 const PRESETS = [
-  { label: 'Phone · main camera (24 mm eq)',      sensor_w: 8.2,  sensor_h: 6.15, focal_length: 5.69, focal_length_eq: 24 },
-  { label: 'Phone · ultrawide (13 mm eq)',        sensor_w: 5.6,  sensor_h: 4.2,  focal_length: 2.10, focal_length_eq: 13 },
-  { label: 'Phone · telephoto 3× (77 mm eq)',     sensor_w: 4.0,  sensor_h: 3.0,  focal_length: 8.90, focal_length_eq: 77 },
-  { label: 'APS-C camera (enter the lens focal length)',      sensor_w: 23.5, sensor_h: 15.6, focal_length: null },
-  { label: 'Full-frame camera (enter the lens focal length)', sensor_w: 36.0, sensor_h: 24.0, focal_length: null },
-  { label: 'Unknown camera (range for 24–35 mm eq)', sensor_w: null, sensor_h: null, focal_length: null, unknown: true },
+  { label: 'Phone · main camera (24 mm eq)',  group: 'Phone',  chip: 'Main',       chipNote: '24 mm', sensor_w: 8.2,  sensor_h: 6.15, focal_length: 5.69, focal_length_eq: 24 },
+  { label: 'Phone · ultrawide (13 mm eq)',    group: 'Phone',  chip: 'Ultrawide',  chipNote: '13 mm', sensor_w: 5.6,  sensor_h: 4.2,  focal_length: 2.10, focal_length_eq: 13 },
+  { label: 'Phone · telephoto 3× (77 mm eq)', group: 'Phone',  chip: 'Tele 3×',    chipNote: '77 mm', sensor_w: 4.0,  sensor_h: 3.0,  focal_length: 8.90, focal_length_eq: 77 },
+  { label: 'APS-C camera',                    group: 'Camera', chip: 'APS-C',      chipNote: '+ lens', sensor_w: 23.5, sensor_h: 15.6, focal_length: null },
+  { label: 'Full-frame camera',               group: 'Camera', chip: 'Full frame', chipNote: '+ lens', sensor_w: 36.0, sensor_h: 24.0, focal_length: null },
+  { label: 'Unknown camera (24–35 mm eq)',    group: 'Other',  chip: 'Unknown',    chipNote: '24–35 mm range', sensor_w: null, sensor_h: null, focal_length: null, unknown: true },
 ].map(p => ({ brand: 'Preset', confidence: 'preset', ...p }));
+// Saved work from before the labels were shortened still finds its preset
+const OLD_PRESET_LABELS = {
+  'APS-C camera (enter the lens focal length)': 'APS-C camera',
+  'Full-frame camera (enter the lens focal length)': 'Full-frame camera',
+  'Unknown camera (range for 24–35 mm eq)': 'Unknown camera (24–35 mm eq)',
+  'Custom sensor dimensions …': 'Custom: entered by hand',
+};
 const PRESET_START = CAMERA_DB.length;
 CAMERA_DB.push(...PRESETS);
 const UNKNOWN_IDX = CAMERA_DB.findIndex(c => c.unknown);
@@ -548,7 +557,8 @@ function applyState(s) {
   });
   updateSensorSourceBadges();
 
-  const idx = s.camLabel ? CAMERA_DB.findIndex(c => c.label === s.camLabel) : -1;
+  const camLabel = OLD_PRESET_LABELS[s.camLabel] || s.camLabel;
+  const idx = camLabel ? CAMERA_DB.findIndex(c => c.label === camLabel) : -1;
   if (idx >= 0) setCameraLabel(idx); else clearCameraSelection();
   unknownCam = !!s.unknownCam;
 
@@ -894,6 +904,8 @@ const GUIDE_STEPS = [
 
 function guideStatus() {
   if (!img) return { idx: 0, hint: '' };   // the drop overlay already says it
+  if (!unknownCam && sensorW !== null && focalLength === null)   // a body without its lens (APS-C, full frame…)
+    return { idx: 1, hint: 'Enter the lens focal length above', await: 'focal-length-input' };
   if (!unknownCam && (sensorW === null || focalLength === null))
     return { idx: 1, hint: 'Pick the camera above, or enter sensor width and focal length' };
   if (pixelSpan === null)
@@ -927,13 +939,17 @@ function buildGuide() {
 function guideAction(i) {
   if (i !== guideStatus().idx) return;
   if (i === 0) fileInput.click();
-  else if (i === 1) document.getElementById('camera-trigger').click();
+  else if (i === 1) {
+    const awaitId = guideStatus().await;
+    if (awaitId) document.getElementById(awaitId).focus();
+    else document.getElementById('camera-trigger').click();
+  }
   else if (i === 3 && solveMode === 'size') document.getElementById('distance-input').focus();
   else if (i === 3 && knownSize === null) document.getElementById('known-size-input').focus();
 }
 
 function updateGuide() {
-  const { idx, hint, cls } = guideStatus();
+  const { idx, hint, cls, await: awaitField } = guideStatus();
   document.querySelectorAll('#guide .guide-step').forEach((b, i) => {
     b.classList.toggle('done', i < idx);
     b.classList.toggle('current', i === idx);
@@ -948,10 +964,11 @@ function updateGuide() {
 
   // Mark the input the current step waits for.
   let awaitId = null;
-  if      (idx === 1) awaitId = 'camera-trigger';
+  if      (awaitField) awaitId = awaitField;
+  else if (idx === 1) awaitId = 'camera-trigger';
   else if (idx === 3 && solveMode === 'size') awaitId = 'distance-input';
   else if (idx === 3 && knownSize === null)   awaitId = 'known-size-input';
-  ['camera-trigger', 'pixel-span-input', 'distance-input', 'known-size-input'].forEach(id =>
+  ['camera-trigger', 'focal-length-input', 'pixel-span-input', 'distance-input', 'known-size-input'].forEach(id =>
     document.getElementById(id).classList.toggle('awaiting', id === awaitId));
 
   updateMapHint();
@@ -959,6 +976,37 @@ function updateGuide() {
 buildGuide();
 
 /* ─── CUSTOM CAMERA DROPDOWN ─────────────────────────────────── */
+// × on the camera button: undoes the choice. The values it brought go (sensor size, the
+// database's focal length, or what was typed for "By hand"); what the photo's EXIF says stays,
+// and so does a lens focal length typed for a camera body.
+function clearCamera() {
+  const byHand = camIdx === CUSTOM_IDX;
+  clearCameraSelection();
+  const clearField = id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.classList.remove('invalid');
+    setInputSource(id, '');
+  };
+  ['sensor-w-input', 'sensor-h-input'].forEach(id => {
+    if (!document.getElementById(id).classList.contains('source-exif')) clearField(id);
+  });
+  if (!document.getElementById('sensor-w-input').classList.contains('source-exif')) { sensorW = null; sensorH = null; }
+  const f = document.getElementById('focal-length-input');
+  if (exifFocal !== null) {
+    focalLength = exifFocal;
+    f.value = exifFocal.toFixed(2);
+    f.classList.remove('invalid');
+    setInputSource('focal-length-input', 'exif');
+  } else if (f.classList.contains('source-db') || (byHand && f.classList.contains('source-manual'))) {
+    clearField('focal-length-input');
+    focalLength = null;
+  }
+  compute();
+  scheduleAutosave();
+}
+document.getElementById('camera-clear').addEventListener('click', e => { e.stopPropagation(); closeCameraPanel(); clearCamera(); });
+
 function closeCameraPanel() {
   const panel = document.getElementById('camera-panel');
   if (panel) panel.classList.remove('open');
@@ -1034,8 +1082,9 @@ function populateCameraDropdown() {
   const filterInput = document.createElement('input');
   filterInput.type = 'text';
   filterInput.id = 'cam-filter';
-  filterInput.placeholder = 'Filter cameras…';
-  filterInput.setAttribute('aria-label', 'Filter cameras');
+  const modelCount = CAMERA_DB.filter(c => c.brand !== '—' && c.brand !== 'Preset').length;
+  filterInput.placeholder = `Search ${Math.floor(modelCount / 10) * 10}+ cameras and phones`;
+  filterInput.setAttribute('aria-label', 'Search cameras and phones');
   filterInput.autocomplete = 'off';
   filterInput.spellcheck = false;
   panel.appendChild(filterInput);
@@ -1053,9 +1102,9 @@ function populateCameraDropdown() {
       if (q && visible) brandEl.classList.add('open');
       else if (!q) brandEl.classList.remove('open');
     });
-    // While filtering, only matching models show: the presets step aside
-    panel.querySelectorAll('.cam-preset, .cam-presets-hdr').forEach(el => { el.style.display = q ? 'none' : ''; });
-    panel.querySelectorAll('.cam-category-hdr:not(.cam-presets-hdr)').forEach(hdr => {
+    // While searching, only matching models show: the quick picks step aside
+    quick.style.display = q ? 'none' : '';
+    panel.querySelectorAll('.cam-category-hdr').forEach(hdr => {
       let next = hdr.nextElementSibling;
       let anyVisible = false;
       while (next && !next.classList.contains('cam-category-hdr')) {
@@ -1072,34 +1121,54 @@ function populateCameraDropdown() {
   });
   filterInput.addEventListener('click', e => e.stopPropagation());
 
-  // Presets first: most photos come from a phone's main camera, and the camera is often unknown
-  const presetHdr = document.createElement('div');
-  presetHdr.className = 'cam-category-hdr cam-presets-hdr';
-  presetHdr.textContent = 'Presets';
-  panel.appendChild(presetHdr);
+  // Typical cameras under the search, for when the exact model is not known: one labelled row
+  // each for a phone's lenses, a camera body (its lens focal length is typed), and the rest:
+  // Unknown (a range) and entering the values by hand.
+  const quick = document.createElement('div');
+  quick.className = 'cam-quick';
+  const quickHdr = document.createElement('div');
+  quickHdr.className = 'cam-section-hdr';
+  quickHdr.textContent = 'Typical cameras';
+  quick.appendChild(quickHdr);
+  const makeChip = (idx, text, note, title) => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'cam-chip';
+    chip.dataset.idx = idx;
+    chip.title = title;
+    chip.textContent = text;
+    if (note) {
+      const n = document.createElement('span');
+      n.className = 'cam-chip-note';
+      n.textContent = note;
+      chip.append(' ', n);
+    }
+    chip.addEventListener('click', () => { closeCameraPanel(); selectCamera(idx); });
+    return chip;
+  };
+  const rows = {};
   CAMERA_DB.forEach((cam, i) => {
     if (cam.brand !== 'Preset') return;
-    const el = document.createElement('div');
-    el.className = 'cam-custom cam-preset';
-    el.textContent = cam.label;
-    el.dataset.idx = i;
-    el.addEventListener('click', () => { selectCamera(i); closeCameraPanel(); });
-    panel.appendChild(el);
+    if (!rows[cam.group]) {
+      const row = document.createElement('div');
+      row.className = 'cam-quick-row';
+      const lbl = document.createElement('span');
+      lbl.className = 'cam-quick-lbl';
+      lbl.textContent = cam.group;
+      const chips = document.createElement('div');
+      chips.className = 'cam-chips';
+      row.append(lbl, chips);
+      quick.appendChild(row);
+      rows[cam.group] = chips;
+    }
+    rows[cam.group].appendChild(makeChip(i, cam.chip, cam.chipNote,
+      cam.label + (cam.focal_length === null && !cam.unknown ? ': then type the lens focal length' : '')));
   });
-  const specificHdr = document.createElement('div');
-  specificHdr.className = 'cam-category-hdr cam-presets-hdr';
-  specificHdr.textContent = 'Specific model…';
-  panel.appendChild(specificHdr);
-
-  // Custom entry at the top of the specific models
-  if (CUSTOM_IDX >= 0) {
-    const el = document.createElement('div');
-    el.className = 'cam-custom';
-    el.textContent = CAMERA_DB[CUSTOM_IDX].label;
-    el.dataset.idx = CUSTOM_IDX;
-    el.addEventListener('click', () => { selectCamera(CUSTOM_IDX); closeCameraPanel(); });
-    panel.appendChild(el);
+  // Not a model: the values typed by hand (typing in the sensor or focal field does the same)
+  if (CUSTOM_IDX >= 0 && rows.Other) {
+    rows.Other.appendChild(makeChip(CUSTOM_IDX, '✎ By hand', '', 'Type the sensor size and focal length yourself'));
   }
+  panel.appendChild(quick);
 
   // Group by brand (DB order = newest first within each brand)
   const byBrand = {};
@@ -1111,7 +1180,7 @@ function populateCameraDropdown() {
 
   const CATEGORIES = {
     'Smartphones': ['Apple', 'Asus', 'Google', 'Honor', 'HTC', 'Huawei', 'LG', 'Meizu', 'Motorola', 'Nokia', 'Nothing', 'nubia', 'OnePlus', 'Oppo', 'Realme', 'Samsung', 'Sharp', 'vivo', 'Xiaomi'],
-    'Cameras':     ['Blackmagic', 'Canon', 'DJI', 'Fujifilm', 'GoPro', 'Hasselblad', 'Leica', 'Nikon', 'OM System', 'Panasonic', 'Pentax', 'Phase One', 'Ricoh', 'Sigma', 'Sony'],
+    'Cameras and drones': ['Blackmagic', 'Canon', 'DJI', 'Fujifilm', 'GoPro', 'Hasselblad', 'Leica', 'Nikon', 'OM System', 'Panasonic', 'Pentax', 'Phase One', 'Ricoh', 'Sigma', 'Sony'],
   };
 
   Object.entries(CATEGORIES).forEach(([catName, brands]) => {
@@ -1131,17 +1200,21 @@ function populateCameraDropdown() {
       brandRow.className = 'cam-brand-row';
       const nameSpan = document.createElement('span');
       nameSpan.textContent = brand;
+      const countSpan = document.createElement('span');
+      countSpan.className = 'cam-count';
+      countSpan.textContent = entries.length;
       const arrowSpan = document.createElement('span');
       arrowSpan.className = 'cam-arrow';
       arrowSpan.textContent = '›';
-      brandRow.appendChild(nameSpan);
-      brandRow.appendChild(arrowSpan);
+      brandRow.append(nameSpan, countSpan, arrowSpan);
       brandRow.addEventListener('click', () => {
         const wasOpen = brandEl.classList.contains('open');
         brandEl.classList.toggle('open');
         if (!wasOpen) {
           requestAnimationFrame(() => {
-            panel.scrollTop = brandEl.offsetTop - filterInput.offsetHeight;
+            // below the search and the pinned section header
+            const hdrH = panel.querySelector('.cam-category-hdr')?.offsetHeight || 0;
+            panel.scrollTop = brandEl.offsetTop - filterInput.offsetHeight - hdrH;
           });
         }
       });
@@ -1183,13 +1256,16 @@ function populateCameraDropdown() {
     if (panel.classList.contains('open')) {
       closeCameraPanel();
     } else {
-      // The trigger is narrow in the input strip; give the list room and keep it on screen.
+      // The trigger is narrow in the input strip; give the list room, as tall as the window
+      // allows (up to 560 px), and keep it on screen.
       const r = trigger.getBoundingClientRect();
-      const w = Math.max(r.width, 320);
+      const w = Math.max(r.width, 400);
       panel.style.top   = (r.bottom + 3) + 'px';
       panel.style.left  = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
       panel.style.width = w + 'px';
+      panel.style.maxHeight = Math.max(200, Math.min(560, window.innerHeight - r.bottom - 12)) + 'px';
       panel.classList.add('open');
+      panel.style.setProperty('--filter-h', filterInput.offsetHeight + 'px');   // section headers stick under it
       panel.scrollTop = 0;
       filterInput.value = '';
       applyFilter('');
