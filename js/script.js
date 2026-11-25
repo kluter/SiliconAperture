@@ -99,6 +99,7 @@ let sensorH      = null;
 let focalLength  = null;
 let pixelSpan = null;   // marked span on the photo, in image pixels
 let distance     = null;
+let distanceFromMap = false;   // distance was measured between the map points (not typed)
 let solveMode      = 'size';   // 'size' | 'distance'
 let knownSize      = null;     // distance-mode input: real-world size of the marked span (m)
 let solvedDistance = null;     // distance-mode output (m), for the map ring
@@ -116,12 +117,12 @@ let autosaveOn = (() => { try { return localStorage.getItem('sa-autosave') !== '
 const CUSTOM_IDX = CAMERA_DB.findIndex(c => c.brand === '—');
 
 // Presets, shown first in the camera list: typical values when the exact model is not known.
-// Phone sensors are typical current 4:3 ones; focal_length = eq × sensor_w / 36, as in camera-db.js.
+// Phone sensors are typical current 4:3 ones; focal_length = eq × sensor diagonal / 43.27, as in camera-db.js.
 // "Unknown" has no values: the result is a range over 24–35 mm equivalent (unknownCam).
 const PRESETS = [
-  { label: 'Phone · main camera (24 mm eq)',      sensor_w: 8.2,  sensor_h: 6.15, focal_length: 5.47, focal_length_eq: 24 },
-  { label: 'Phone · ultrawide (13 mm eq)',        sensor_w: 5.6,  sensor_h: 4.2,  focal_length: 2.02, focal_length_eq: 13 },
-  { label: 'Phone · telephoto 3× (77 mm eq)',     sensor_w: 4.0,  sensor_h: 3.0,  focal_length: 8.56, focal_length_eq: 77 },
+  { label: 'Phone · main camera (24 mm eq)',      sensor_w: 8.2,  sensor_h: 6.15, focal_length: 5.69, focal_length_eq: 24 },
+  { label: 'Phone · ultrawide (13 mm eq)',        sensor_w: 5.6,  sensor_h: 4.2,  focal_length: 2.10, focal_length_eq: 13 },
+  { label: 'Phone · telephoto 3× (77 mm eq)',     sensor_w: 4.0,  sensor_h: 3.0,  focal_length: 8.90, focal_length_eq: 77 },
   { label: 'APS-C camera (enter the lens focal length)',      sensor_w: 23.5, sensor_h: 15.6, focal_length: null },
   { label: 'Full-frame camera (enter the lens focal length)', sensor_w: 36.0, sensor_h: 24.0, focal_length: null },
   { label: 'Unknown camera (range for 24–35 mm eq)', sensor_w: null, sensor_h: null, focal_length: null, unknown: true },
@@ -209,8 +210,9 @@ function pixelPitch() {
 }
 
 /* ─── EXIF ───────────────────────────────────────────────────── */
-async function readExif(file, seq) {
-  if (typeof exifr === 'undefined') return;
+async function readExif(tab, seq) {
+  if (typeof exifr === 'undefined') { tab.exifDone = true; return; }
+  const file = tab.file;
 
   // Run both parses concurrently; gps() is a dedicated path that
   // avoids the pick/GPS IFD conflict that breaks combined parsing.
@@ -224,7 +226,8 @@ async function readExif(file, seq) {
     exifr.gps(file)
   ]);
 
-  if (seq !== loadSeq) return;   // a newer photo (or N) came first: this EXIF is not for it
+  if (seq !== loadSeq) return;   // another tab came first: this one reads it again when shown
+  tab.exifDone = true;
 
   const t = tags.status === 'fulfilled' ? tags.value : null;
   const g = gps.status  === 'fulfilled' ? gps.value  : null;
@@ -265,7 +268,6 @@ async function readExif(file, seq) {
   }
 
   compute();
-  updateDiagram();
 }
 
 // The photo's GPS: in the EXIF card (click copies), as a marker, and the GPS button.
@@ -416,11 +418,16 @@ function drawCanvas() {
   if (markB) drawMark(imgToCanvas(markB), 'B');
 }
 
-// Pan and zoom draw at most once per frame, however many events arrive
-let drawRaf = 0;
+// Pan, zoom and mark drags draw at most once per frame, however many events arrive.
+// spanDirty: a dragged mark moved, so the span and result are worked out again first.
+let drawRaf = 0, spanDirty = false;
 function requestDraw() {
   if (drawRaf) return;
-  drawRaf = requestAnimationFrame(() => { drawRaf = 0; drawCanvas(); });
+  drawRaf = requestAnimationFrame(() => {
+    drawRaf = 0;
+    if (spanDirty) { spanDirty = false; computePixelSpan(); }
+    drawCanvas();
+  });
 }
 
 function drawMark(pt, label) {
@@ -482,9 +489,19 @@ let photoName = null;   // the shown tab's name
 let tabs = [];
 let activeTab = 0;
 let tabSeq = 0;
+// The tab whose measurements are in the globals now. null while a tab's photo is still
+// decoding: that tab keeps its snapshot until it is shown, so switching away meanwhile loses nothing.
+let liveTab = null;
 const newTabId = () => `t${Date.now().toString(36)}${(tabSeq++).toString(36)}`;
-const emptyTab = () => ({ id: newTabId(), name: null, file: null, img: null, state: null });
+// exifDone: the photo's EXIF was read (a tab left before that reads it when shown again)
+const emptyTab = () => ({ id: newTabId(), name: null, file: null, img: null, state: null, exifDone: false });
 tabs.push(emptyTab());
+liveTab = tabs[0];
+
+// The shown tab's measurements into its snapshot, before another tab takes the globals
+function stashLiveTab() {
+  if (liveTab) liveTab.state = liveTab.file ? captureState() : null;
+}
 
 const INPUT_IDS = ['sensor-w-input', 'sensor-h-input', 'focal-length-input', 'distance-input', 'known-size-input'];
 const EXIF_IDS  = ['exif-camera-val', 'exif-focal-val', 'exif-size-val', 'exif-gps-val'];
@@ -504,7 +521,7 @@ function captureState() {
     markA, markB, solveMode, unknownCam, sensorW, sensorH, focalLength, distance, knownSize,
     camLabel: camIdx !== null ? CAMERA_DB[camIdx].label : null,
     exifFocal, exifGPS, exifCells, exifEq: $('exif-focal-eq').textContent, inputs,
-    mapPtA, mapPtB, objectRing,
+    mapPtA, mapPtB, objectRing, distanceFromMap,
     view: img && viewW ? { scale, offsetX, offsetY, viewW, viewH } : null,
     hasResult: resultValue !== null
   };
@@ -521,6 +538,7 @@ function applyState(s) {
 
   sensorW = s.sensorW ?? null; sensorH = s.sensorH ?? null; focalLength = s.focalLength ?? null;
   distance = s.distance ?? null; knownSize = s.knownSize ?? null;
+  distanceFromMap = !!s.distanceFromMap;
   exifFocal = s.exifFocal ?? null;
   INPUT_IDS.forEach(id => {
     const saved = s.inputs?.[id];
@@ -572,10 +590,12 @@ function setCameraLabel(idx) {
 // A photo shown for the first time has its EXIF read.
 async function showTab(t) {
   const seq = ++loadSeq;
+  liveTab = null;
   resetPhotoState();
   img = null;
   photoName = t.name;
   if (!t.file) {
+    liveTab = t;
     overlay.classList.remove('hidden');
     drawCanvas();
     compute();
@@ -589,14 +609,19 @@ async function showTab(t) {
     closeTab(tabs.indexOf(t), true);
     return;
   }
+  // Only the shown photo stays decoded: a 50 MP photo is ~200 MB of pixels. Another tab's
+  // photo is decoded again from its file when that tab is shown.
+  tabs.forEach(o => { if (o !== t) o.img = null; });
   t.img = im;
   img = im;
   overlay.classList.add('hidden');
   stopSpin();
   resizeCanvas();
   if (t.state) applyState(t.state);
-  else { fitImage(); compute(); readExif(t.file, seq); }
+  else { fitImage(); compute(); }
+  if (!t.exifDone) readExif(t, seq);
   t.state = null;   // the shown tab's state is the live one
+  liveTab = t;
   drawCanvas();
   renderTabs();
   scheduleAutosave();
@@ -604,7 +629,7 @@ async function showTab(t) {
 
 function switchTab(i) {
   if (i === activeTab || !tabs[i]) return;
-  if (tabs[activeTab]) tabs[activeTab].state = captureState();
+  stashLiveTab();
   activeTab = i;
   showTab(tabs[i]);
 }
@@ -613,19 +638,19 @@ function switchTab(i) {
 function openPhotoInTab(file, name) {
   let t = tabs[activeTab];
   if (t.file) {
-    t.state = captureState();
+    stashLiveTab();
     t = emptyTab();
     tabs.push(t);
     activeTab = tabs.length - 1;
   }
-  t.file = file; t.name = name; t.img = null; t.state = null;
+  t.file = file; t.name = name; t.img = null; t.state = null; t.exifDone = false;
   autosavePutImage(t);
   showTab(t);
 }
 
 // "+" and N: a new empty tab, always (as in TracePoint)
 function addTab() {
-  tabs[activeTab].state = tabs[activeTab].file ? captureState() : null;
+  stashLiveTab();
   tabs.push(emptyTab());
   activeTab = tabs.length - 1;
   showTab(tabs[activeTab]);
@@ -770,12 +795,13 @@ function moveMarkTo(e) {
   ip.x = Math.min(img.naturalWidth,  Math.max(0, ip.x));
   ip.y = Math.min(img.naturalHeight, Math.max(0, ip.y));
   if (dragMark === 'A') markA = ip; else markB = ip;
-  if (markA && markB) computePixelSpan();
+  if (markA && markB) spanDirty = true;   // the result follows once per frame, with the drawing
   requestDraw();
 }
 window.addEventListener('mousemove', e => { if (dragMark) moveMarkTo(e); });
 window.addEventListener('mouseup', () => {
   if (!dragMark) return;
+  if (spanDirty) { spanDirty = false; computePixelSpan(); }   // the last position, without waiting for the frame
   dragMark = null;
   canvas.style.cursor = '';
   updateGuide();
@@ -850,7 +876,6 @@ function computePixelSpan() {
   document.getElementById('span-source').textContent = 'from canvas';
   document.getElementById('btn-reset-marks').disabled = false;
   compute();
-  updateDiagram();
 }
 
 /* ─── STEP GUIDE ─────────────────────────────────────────────── */
@@ -995,7 +1020,6 @@ function selectCamera(idx) {
   }
 
   compute();
-  updateDiagram();
 }
 
 function populateCameraDropdown() {
@@ -1189,26 +1213,27 @@ document.getElementById('sensor-w-input').addEventListener('input', function () 
   sensorW = positiveValue(this);
   setInputSource('sensor-w-input', sensorW ? 'manual' : '');
   jumpToCustom();
-  compute(); updateDiagram();
+  compute();
 });
 document.getElementById('sensor-h-input').addEventListener('input', function () {
   sensorH = positiveValue(this);
   setInputSource('sensor-h-input', sensorH ? 'manual' : '');
   jumpToCustom();
-  compute(); updateDiagram();
+  compute();
 });
 document.getElementById('focal-length-input').addEventListener('input', function () {
   focalLength = positiveValue(this);
   setInputSource('focal-length-input', focalLength ? 'manual' : '');
-  compute(); updateDiagram();
+  compute();
 });
 document.getElementById('distance-input').addEventListener('input', function () {
   distance = positiveValue(this);
-  compute(); updateDiagram();
+  distanceFromMap = false;   // typed: Clear map points leaves it
+  compute();
 });
 document.getElementById('known-size-input').addEventListener('input', function () {
   knownSize = positiveValue(this);
-  compute(); updateDiagram();
+  compute();
 });
 
 /* ─── SOLVE MODE (size ⇄ distance) ───────────────────────────── */
@@ -1216,7 +1241,6 @@ function applyMode() {
   updateModeUI();
   resetMapPoints();
   compute();
-  updateDiagram();
   scheduleAutosave();
 }
 // The toggle and the fields that follow the mode (also used when a tab is shown again)
@@ -1236,9 +1260,10 @@ document.querySelectorAll('.solve-btn').forEach(btn => {
 applyMode();
 
 /* ─── OPTICS ─────────────────────────────────────────────────── */
-// What the camera values mean, in the bar's optics slot. Uses the same small-angle model as
-// compute(): one pixel spans (sensor / f) / image width radians.
-// Crop factor is width-based (36 mm / sensor width), as camera-db.js derives focal lengths.
+// What the camera values mean, in the bar's optics slot, with the same pinhole model as compute().
+// Crop factor and 35 mm equivalent go by the diagonal (43.27 mm / sensor diagonal), as EXIF
+// and camera-db.js do. Without a sensor height (and no photo), a 3:2 sensor, where the width
+// and the diagonal give the same.
 
 function setFact(id, text) {
   const el = document.getElementById(id);
@@ -1268,8 +1293,9 @@ function updateOptics() {
     : pitch !== null ? `${fov(img.naturalWidth * pitch)} × ${fov(img.naturalHeight * pitch)}`
     : fov(sensorW) + (sh !== null ? ` × ${fov(sh)}` : ''));
   setFact('fact-sensor', sensorW !== null ? `${sensorW} × ${sh !== null ? +sh.toFixed(2) : '?'} mm` : null);
-  setFact('fact-crop', sensorW !== null ? `${(36 / sensorW).toFixed(2)}×` : null);
-  setFact('fact-eq', haveLens ? `${Math.round(focalLength * 36 / sensorW)} mm` : null);
+  const sensorDiag = sensorW !== null ? Math.hypot(sensorW, sh ?? sensorW * 2 / 3) : null;
+  setFact('fact-crop', sensorDiag !== null ? `${(FF_DIAG / sensorDiag).toFixed(2)}×` : null);
+  setFact('fact-eq', haveLens ? `${Math.round(focalLength * FF_DIAG / sensorDiag)} mm` : null);
   if (unknownCam) setFact('fact-eq', `${UNKNOWN_EQ[0]}–${UNKNOWN_EQ[1]} mm?`);
   setFact('fact-photo', img
     ? `${img.naturalWidth} × ${img.naturalHeight}`
@@ -1350,6 +1376,7 @@ function clearResult() {
   document.getElementById('result-unit').textContent   = 'm';
   document.getElementById('result-eq').textContent     = '';
   document.getElementById('result-bar').classList.remove('has-result');
+  if (objectRing) renderMarks();   // no distance any more: the ring goes (it comes back with the next result)
   renderTabs();
   updateOptics();
   updateGuide();
@@ -1473,8 +1500,7 @@ function clearMarks() {
 function resetMarks() {
   clearMarks();
   drawCanvas();
-  compute();        // also updates the guide, tabs and optics
-  updateDiagram();
+  compute();        // also updates the guide, diagram, tabs and optics
 }
 
 // Everything that belongs to one photo: marks, EXIF, camera, the known value and the map
@@ -1483,7 +1509,7 @@ function resetPhotoState() {
   clearMarks();
   exifFocal = null; exifGPS = null;
   syncGpsButton();
-  focalLength = null; sensorW = null; sensorH = null; distance = null;
+  focalLength = null; sensorW = null; sensorH = null; distance = null; distanceFromMap = false;
   knownSize = null; solvedDistance = null;
   if (gpsMarker) { gpsMarker.remove(); gpsMarker = null; }
   resetMapPoints();
@@ -1863,9 +1889,9 @@ function setMapPoint(which, p) {
 
 function setDistance(d) {
   distance = d;
+  distanceFromMap = true;
   document.getElementById('distance-input').value = d.toFixed(1);
   compute();
-  updateDiagram();
 }
 
 // Distance mode: one click places the object; the ring of radius = solved distance
@@ -1938,13 +1964,12 @@ function updateMapHint() {
 // The map's reset button (top left on the map): clears the points and the distance they gave
 function clearMapPoints() {
   resetMapPoints();
-  if (solveMode === 'size') {
+  if (solveMode === 'size' && distanceFromMap) {   // the distance the points gave; a typed one stays
     distance = null;
+    distanceFromMap = false;
     document.getElementById('distance-input').value = '';
   }
   compute();
-  updateDiagram();
-  updateGuide();
 }
 
 // Clicking the GPS value in the EXIF card copies it
@@ -2470,8 +2495,8 @@ function autosaveWrite() {
   const data = {
     v: 1,
     active: activeTab,
-    tabs: tabs.map((t, i) => ({ id: t.id, name: t.name, hasFile: !!t.file,
-                                state: i === activeTab ? (t.file ? captureState() : null) : t.state })),
+    tabs: tabs.map(t => ({ id: t.id, name: t.name, hasFile: !!t.file, exif: !!t.exifDone,
+                           state: t === liveTab ? (t.file ? captureState() : null) : t.state })),
     map: c ? { center: [c.lng, c.lat], zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch() } : null,
     basemap: currentTile
   };
@@ -2507,13 +2532,22 @@ async function autosaveRestore() {
       for (const td of data.tabs) {
         if (!td || typeof td.id !== 'string' || !td.hasFile) continue;
         const file = await autosaveTx('readonly', store => store.get('img:' + td.id));
-        if (file instanceof Blob) restored.push({ id: td.id, name: td.name ?? null, file, img: null, state: td.state || null });
+        // exif: older saves did not say; their tabs had it read before they were saved
+        if (file instanceof Blob) restored.push({ id: td.id, name: td.name ?? null, file, img: null,
+                                                  state: td.state || null, exifDone: td.exif !== false });
       }
-      if (restored.length) {
+      if (restored.length) await mapReady;   // (the map can take seconds: a photo may be opened meanwhile)
+      if (restored.length && tabs.some(t => t.file)) {
+        // A photo opened while the saved work was read: it stays shown, the saved tabs go before it
+        const shown = tabs[activeTab];
+        tabs = [...restored, ...tabs.filter(t => t.file)];
+        activeTab = tabs.indexOf(shown);
+        if (activeTab < 0) { activeTab = tabs.length - 1; await showTab(tabs[activeTab]); }
+        else renderTabs();
+      } else if (restored.length) {
         const activeId = data.tabs[data.active]?.id;
         tabs = restored;
         activeTab = Math.max(0, tabs.findIndex(t => t.id === activeId));
-        await mapReady;
         stopSpin();
         if (data.map) map.jumpTo({ center: data.map.center, zoom: data.map.zoom, bearing: data.map.bearing, pitch: data.map.pitch });
         if (TILE_SETS[data.basemap]) setBasemap(data.basemap);

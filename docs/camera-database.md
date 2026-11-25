@@ -9,7 +9,7 @@
 | `focal_length_eq` | 35 mm equivalent, display only |
 | `confidence` | how well the entry is sourced (below) |
 
-Phone focal lengths follow `focal_length = focal_length_eq × sensor_w ÷ 36`.
+Phone focal lengths follow `focal_length = focal_length_eq × sensor diagonal ÷ 43.27` (43.27 mm is the full-frame diagonal). That is the rule the EXIF tag `FocalLengthIn35mmFormat` follows, so a database entry and a photo of that phone agree. Entries whose focal length was read from EXIF keep that value.
 
 ## Confidence markers
 
@@ -19,7 +19,7 @@ Phone focal lengths follow `focal_length = focal_length_eq × sensor_w ÷ 36`.
 | `[~]` | **unconfirmed** | Sensor family or optical format is known but not directly verified against a spec page. |
 | `[?]` | **missing data** | No source data; values are estimates. |
 
-**How a sensor size is found:** a `[✓]` value is *calculated* from hard data, using either pixel math (`width = pixels across × pixel pitch`) or EXIF (`width = 36 × focal ÷ 35 mm-equivalent focal`). A `[?]` value is *estimated* from the marketing format alone (e.g. "1/2.55-inch"), which isn't a true measurement, so it's only a ballpark.
+**How a sensor size is found:** a `[✓]` value is *calculated* from hard data, using either pixel math (`width = pixels across × pixel pitch`) or EXIF (`diagonal = 43.27 × focal ÷ 35 mm-equivalent focal`; some older entries were worked out by width, `36 × focal ÷ equivalent`, which reads a 4:3 sensor about 4 % small). A `[?]` value is *estimated* from the marketing format alone (e.g. "1/2.55-inch"), which isn't a true measurement, so it's only a ballpark.
 
 Some entries carry no marker: interchangeable-lens bodies and high-end fixed-lens cameras and drones (DJI, Sony RX, GoPro…), whose specs are published by the manufacturer.
 
