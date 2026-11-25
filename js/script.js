@@ -625,7 +625,9 @@ async function showTab(t) {
   t.img = im;
   img = im;
   overlay.classList.add('hidden');
-  stopSpin();
+  // The globe keeps turning under a new photo until its EXIF GPS flies there (or the map is
+  // touched); a tab shown again that has something on the map stops it now.
+  if (t.state?.exifGPS || t.state?.mapPtA || t.state?.mapPtB) stopSpin();
   resizeCanvas();
   if (t.state) applyState(t.state);
   else { fitImage(); compute(); }
@@ -1805,11 +1807,12 @@ async function setTileSet(id) {
 }
 
 /* ─── SPIN ─── */
-// The globe turns slowly eastward while the app is open and untouched (no photo, no map
-// points). The first click, key, scroll, paste or drop anywhere stops it; so does any map
-// move that is not the spin itself. The button top left starts it again. Never with reduced motion.
+// The globe turns slowly eastward until the map is touched (a click, drag or scroll on it, or
+// any map move that is not the spin itself) or a photo's EXIF GPS flies it there. Work on the
+// photo, the inputs or the tabs leaves it turning. The button top left starts it again.
+// It starts by itself only with no photo and no map points. Never with reduced motion.
 const SPIN_DEG_PER_SEC = 3;   // one turn in two minutes
-const SPIN_STOP_EVENTS = ['pointerdown', 'keydown', 'wheel', 'paste', 'drop'];
+const SPIN_STOP_EVENTS = ['pointerdown', 'wheel'];   // on the map only
 let spinRaf = 0, spinBtn = null;
 
 const isSpinning = () => !!spinRaf;
@@ -1836,20 +1839,24 @@ function runSpin() {
     map.jumpTo({ center: [((c.lng - speed * dt + 540) % 360) - 180, c.lat] }, { spin: true });
   };
   spinRaf = requestAnimationFrame(step);
+  watchMapTouch();
   syncSpinButton();
 }
 function stopSpin() {
   cancelAnimationFrame(spinRaf);
   spinRaf = 0;
-  SPIN_STOP_EVENTS.forEach(t => document.removeEventListener(t, onIdleInput, true));
+  SPIN_STOP_EVENTS.forEach(t => map?.getContainer().removeEventListener(t, onIdleInput, true));
   syncSpinButton();
+}
+// Touching the map stops the turn, from the spin button too (it starts its own)
+function watchMapTouch() {
+  SPIN_STOP_EVENTS.forEach(t => map.getContainer().addEventListener(t, onIdleInput, { capture: true, passive: true }));
 }
 async function startIdleSpin() {
   const still = () => img === null && mapPtA === null && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!still()) return;
   await mapReady;
   if (!still() || isSpinning()) return;
-  SPIN_STOP_EVENTS.forEach(t => document.addEventListener(t, onIdleInput, { capture: true, passive: true }));
   runSpin();
 }
 
