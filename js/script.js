@@ -2300,8 +2300,7 @@ document.addEventListener('paste', e => {
   const image = [...(e.clipboardData?.files || [])].find(f => f.type.startsWith('image/'));
   if (image) {
     e.preventDefault();
-    loadImage(image, 'Pasted photo');
-    showToast('A pasted image has no EXIF: pick the camera, or a preset, above.', 'success');
+    loadImage(image, 'Pasted photo');   // no EXIF: the step hint asks for the camera
     return;
   }
   const text = e.clipboardData && e.clipboardData.getData('text');
