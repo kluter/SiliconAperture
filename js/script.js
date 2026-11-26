@@ -915,7 +915,7 @@ const GUIDE_STEPS = [
 ];
 
 function guideStatus() {
-  if (!img) return { idx: 0, hint: '' };   // the drop overlay already says it
+  if (!img) return { idx: 0, hint: 'Drop or paste a photo, or browse · no photo at hand? try the demo' };
   if (!unknownCam && sensorW !== null && focalLength === null)   // a body without its lens (APS-C, full frame…)
     return { idx: 1, hint: 'Enter the lens focal length above', await: 'focal-length-input' };
   if (!unknownCam && (sensorW === null || focalLength === null))
